@@ -1,10 +1,12 @@
 import { writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { dirname, join } from "path";
 
 const BASE_URL = process.env.OG_BASE_URL ?? "http://localhost:3001";
 const OUT_DIR = "preview-og";
+const OG_DEFAULT_PNG = join(process.cwd(), "public/assets/og-image.png");
 
 const routes = [
+  { path: "/og-brand", name: "og-brand" },
   { path: "/", name: "usd" },
   { path: "/usd-ccl", name: "usd-ccl" },
   { path: "/usdc", name: "usdc" },
@@ -60,6 +62,10 @@ async function run(): Promise<void> {
       const { buffer, ogUrl } = await fetchOgImage(route);
       const out = join(OUT_DIR, `${route.name}.png`);
       writeFileSync(out, buffer);
+      if (route.path === "/og-brand") {
+        mkdirSync(dirname(OG_DEFAULT_PNG), { recursive: true });
+        writeFileSync(OG_DEFAULT_PNG, buffer);
+      }
       return { out, ogUrl };
     }),
   );
@@ -88,7 +94,13 @@ async function run(): Promise<void> {
     }
   }
   const ok = results.filter((r) => r.status === "fulfilled").length;
-  console.log(`\n${ok}/${routes.length} saved to ${OUT_DIR}/\n`);
+  console.log(`\n${ok}/${routes.length} saved to ${OUT_DIR}/`);
+  const brandOk = results.some(
+    (r, i) => r.status === "fulfilled" && routes[i]?.path === "/og-brand",
+  );
+  if (brandOk) {
+    console.log(`  default OG → ${OG_DEFAULT_PNG}\n`);
+  }
 }
 
 async function main() {

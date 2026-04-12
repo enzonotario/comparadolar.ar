@@ -3,14 +3,16 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "nuxt build",
+    "build": "pnpm run build:docs && nuxt build",
+    "build:docs": "pnpm --filter @comparadolar/docs run docs:build",
     "dev": "nuxt dev",
-    "generate": "nuxt generate",
+    "generate": "pnpm run build:docs && nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint --ext .js,.ts,.vue .",
     "lint:fix": "eslint --fix --ext .js,.ts,.vue .",
-    "preview:og": "tsx scripts/preview-og.ts"
+    "preview:og": "tsx scripts/preview-og.ts",
+    "docs:dev": "pnpm --filter @comparadolar/docs run docs:dev"
   },
   "dependencies": {
     "@nuxt/eslint": "1.9.0",

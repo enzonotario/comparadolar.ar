@@ -6,6 +6,9 @@
 .cache
 dist
 
+# VitePress API docs
+public/docs
+
 # Node dependencies
 node_modules
 

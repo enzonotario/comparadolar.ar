@@ -1,0 +1,21 @@
+{
+  "name": "@comparadolar/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev .",
+    "docs:build": "vitepress build .",
+    "docs:preview": "vitepress preview .",
+    "start": "vitepress dev .",
+    "openapi:sync": "node scripts/sync-openapi-examples.mjs"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "axios": "^1.13.2",
+    "cheerio": "^1.2.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "vitepress": "latest",
+    "vitepress-openapi": "latest"
+  }
+}
