@@ -1,0 +1,26 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo gris claro -->
+  <rect width="200" height="200" fill="#F0F0F0" />
+  
+  <!-- Patrón de cuadrícula sutil -->
+  <path d="M0 0h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  <path d="M0 20h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  <path d="M0 40h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  <path d="M0 60h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  <path d="M0 80h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  <path d="M0 100h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  <path d="M0 120h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  <path d="M0 140h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  <path d="M0 160h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  <path d="M0 180h10v10H0zm20 0h10v10H20zm20 0h10v10H40zm20 0h10v10H60zm20 0h10v10H80zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10zm20 0h10v10h-10z" fill="#E0E0E0" />
+  
+  <!-- Icono de imagen -->
+  <g transform="translate(60, 60)">
+    <rect x="0" y="0" width="80" height="80" rx="8" fill="#D0D0D0" />
+    <path d="M20 35 L35 55 L50 40 L65 60 L15 60" stroke="#A0A0A0" stroke-width="3" fill="none" />
+    <circle cx="30" cy="25" r="5" fill="#A0A0A0" />
+  </g>
+  
+  <!-- Texto "Placeholder" -->
+  <text x="100" y="160" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#808080">Placeholder</text>
+</svg>

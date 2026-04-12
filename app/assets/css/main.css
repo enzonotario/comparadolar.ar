@@ -1,0 +1,49 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Custom styles for the application */
+.grid-pattern {
+  background-image: url('/grid-pattern.svg');
+  background-repeat: repeat;
+  opacity: 0.03;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, #4f46e5, #8b5cf6, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .gradient-text {
+  background: linear-gradient(to right, #818cf8, #c4b5fd, #6ee7b7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+}
+
+.gradient-orb-indigo {
+  background-color: rgba(199, 210, 254, 0.3);
+}
+
+.dark .gradient-orb-indigo {
+  background-color: rgba(99, 102, 241, 0.2);
+}
+
+.gradient-orb-emerald {
+  background-color: rgba(167, 243, 208, 0.3);
+}
+
+.dark .gradient-orb-emerald {
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
+:root {
+  --ui-header-height: --spacing(9);
+}
