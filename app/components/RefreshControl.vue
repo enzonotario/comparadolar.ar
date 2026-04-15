@@ -14,22 +14,22 @@ const props = withDefaults(defineProps<Props>(), {
 const isMobile = ref(false);
 const isAnimating = ref(false);
 
-onMounted(() => {
-  if (import.meta.client) {
-    const defer =
-      window.requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1));
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth < 768;
+};
 
-    defer(() => {
-      isMobile.value = window.innerWidth < 768;
-      window.addEventListener(
-        "resize",
-        () => {
-          isMobile.value = window.innerWidth < 768;
-        },
-        { passive: true },
-      );
-    });
-  }
+onMounted(() => {
+  const defer =
+    window.requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1));
+
+  defer(() => {
+    updateIsMobile();
+    window.addEventListener("resize", updateIsMobile, { passive: true });
+  });
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", updateIsMobile);
 });
 
 const formattedTime = computed(() => {

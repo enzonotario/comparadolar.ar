@@ -275,7 +275,8 @@ const chartOption = computed(() => {
       right: 140,
       bottom: "10%",
       top: 20,
-      containLabel: true,
+      outerBoundsMode: "same",
+      outerBoundsContain: "axisLabel",
     },
     xAxis: {
       type: "time",

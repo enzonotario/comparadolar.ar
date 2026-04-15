@@ -13,6 +13,12 @@ const loading = ref(true);
 const error = ref(false);
 
 const isDesktop = ref(false);
+let interval: ReturnType<typeof setInterval> | undefined;
+let mediaQuery: MediaQueryList | undefined;
+
+const handleDesktopChange = (e: MediaQueryListEvent) => {
+  isDesktop.value = e.matches;
+};
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("es-AR", {
@@ -64,38 +70,32 @@ const checkIsDesktop = () => {
 };
 
 onMounted(() => {
-  if (import.meta.client) {
-    const defer =
-      window.requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1));
+  const defer =
+    window.requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1));
 
-    defer(() => {
-      checkIsDesktop();
+  defer(() => {
+    checkIsDesktop();
 
-      const mediaQuery = window.matchMedia("(min-width: 768px)");
-      const handleChange = (e: MediaQueryListEvent) => {
-        isDesktop.value = e.matches;
-      };
-      mediaQuery.addEventListener("change", handleChange);
+    mediaQuery = window.matchMedia("(min-width: 768px)");
+    mediaQuery.addEventListener("change", handleDesktopChange);
+  });
 
-      onUnmounted(() => {
-        mediaQuery.removeEventListener("change", handleChange);
-      });
-    });
+  defer(() => {
+    fetchData();
+  });
 
-    defer(() => {
+  interval = setInterval(
+    () => {
       fetchData();
-    });
+    },
+    5 * 60 * 1000,
+  );
+});
 
-    const interval = setInterval(
-      () => {
-        fetchData();
-      },
-      5 * 60 * 1000,
-    );
-
-    onUnmounted(() => {
-      clearInterval(interval);
-    });
+onUnmounted(() => {
+  mediaQuery?.removeEventListener("change", handleDesktopChange);
+  if (interval) {
+    clearInterval(interval);
   }
 });
 </script>

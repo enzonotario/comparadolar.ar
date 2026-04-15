@@ -12,39 +12,33 @@ const isUsdCclProvider = (item: any): boolean => {
 };
 
 export function useDataFetching<T>(url: string) {
-  const lastUpdate = ref(new Date());
-
-  const { data, error, status, refresh } = useAsyncData<T>(
-    url,
-    async () => {
-      let result = await $fetch<T>(url);
-
-      if (Array.isArray(result)) {
-        result = result.filter(
-          (item: any) => !isBlacklistedProvider(item),
-        ) as T;
-
-        result.forEach((item: any) => {
-          if (item.prettyName && !item.displayName) {
-            item.displayName = item.prettyName;
-          }
-
-          if (isUsdCclProvider(item)) {
-            item.isUsdCcl = true;
-          }
-        });
-      }
-
-      lastUpdate.value = new Date();
-      return result;
-    },
-    {
-      server: false,
-      lazy: true,
-    },
+  const lastUpdateIso = useState<string>(`lastUpdate:${url}`, () =>
+    new Date().toISOString(),
   );
 
+  const { data, error, status, refresh } = useAsyncData<T>(url, async () => {
+    let result = await $fetch<T>(url);
+
+    if (Array.isArray(result)) {
+      result = result.filter((item: any) => !isBlacklistedProvider(item)) as T;
+
+      result.forEach((item: any) => {
+        if (item.prettyName && !item.displayName) {
+          item.displayName = item.prettyName;
+        }
+
+        if (isUsdCclProvider(item)) {
+          item.isUsdCcl = true;
+        }
+      });
+    }
+
+    lastUpdateIso.value = new Date().toISOString();
+    return result;
+  });
+
   const isLoading = computed(() => status.value === "pending");
+  const lastUpdate = computed(() => new Date(lastUpdateIso.value));
 
   return {
     data: computed(() => data.value || ([] as unknown as T)),
@@ -53,7 +47,7 @@ export function useDataFetching<T>(url: string) {
     lastUpdate: readonly(lastUpdate),
     refresh: async () => {
       await refresh();
-      lastUpdate.value = new Date();
+      lastUpdateIso.value = new Date().toISOString();
     },
   };
 }

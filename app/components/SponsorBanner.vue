@@ -69,6 +69,25 @@ const isMobile = ref(false);
 const isDarkMode = ref(false);
 const imageError = ref(false);
 const currentPlaylistIndex = ref(0);
+let timeoutId: ReturnType<typeof setTimeout> | undefined;
+let darkModeQuery: MediaQueryList | undefined;
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768;
+};
+
+const handleDarkModeChange = (e: MediaQueryListEvent) => {
+  isDarkMode.value = e.matches;
+};
+
+const scheduleNext = () => {
+  const entry = playlist[currentPlaylistIndex.value];
+  timeoutId = setTimeout(() => {
+    currentPlaylistIndex.value =
+      (currentPlaylistIndex.value + 1) % playlist.length;
+    scheduleNext();
+  }, entry.duration);
+};
 
 const currentBanner = computed(() => {
   if (imageError.value) return null;
@@ -96,47 +115,29 @@ const bannerImageUrl = computed(() => {
 });
 
 onMounted(() => {
-  if (import.meta.client) {
-    const defer =
-      window.requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1));
+  const defer =
+    window.requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1));
 
-    defer(() => {
-      const checkMobile = () => {
-        isMobile.value = window.innerWidth < 768;
-      };
-      checkMobile();
+  defer(() => {
+    checkMobile();
 
-      window.addEventListener("resize", checkMobile, { passive: true });
+    window.addEventListener("resize", checkMobile, { passive: true });
 
-      const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      isDarkMode.value = darkModeQuery.matches;
+    darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    isDarkMode.value = darkModeQuery.matches;
+    darkModeQuery.addEventListener("change", handleDarkModeChange);
 
-      const handleDarkModeChange = (e: MediaQueryListEvent) => {
-        isDarkMode.value = e.matches;
-      };
-      darkModeQuery.addEventListener("change", handleDarkModeChange);
+    if (props.bannerId === undefined) {
+      scheduleNext();
+    }
+  });
+});
 
-      let timeoutId: ReturnType<typeof setTimeout>;
-
-      const scheduleNext = () => {
-        const entry = playlist[currentPlaylistIndex.value];
-        timeoutId = setTimeout(() => {
-          currentPlaylistIndex.value =
-            (currentPlaylistIndex.value + 1) % playlist.length;
-          scheduleNext();
-        }, entry.duration);
-      };
-
-      if (props.bannerId === undefined) {
-        scheduleNext();
-      }
-
-      onUnmounted(() => {
-        window.removeEventListener("resize", checkMobile);
-        darkModeQuery.removeEventListener("change", handleDarkModeChange);
-        clearTimeout(timeoutId);
-      });
-    });
+onUnmounted(() => {
+  window.removeEventListener("resize", checkMobile);
+  darkModeQuery?.removeEventListener("change", handleDarkModeChange);
+  if (timeoutId) {
+    clearTimeout(timeoutId);
   }
 });
 

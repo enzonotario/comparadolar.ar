@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { resolveComponent } from "vue";
 import type { ExchangeRate } from "@/lib/types";
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const NuxtLink = resolveComponent("NuxtLink");
 
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement;
@@ -23,12 +25,19 @@ const providers = computed(() => {
 });
 
 const hasMultipleProviders = computed(() => providers.value.length > 1);
+const singleProviderPath = computed(() => {
+  const provider = providers.value[0];
+
+  if (hasMultipleProviders.value || !provider?.url) return null;
+
+  return `/${props.currency}/${provider.slug}`;
+});
 </script>
 
 <template>
   <UCard
     :class="[
-      !hasMultipleProviders && providers[0]?.url
+      singleProviderPath
         ? 'hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex-1'
         : '',
     ]"
@@ -37,12 +46,9 @@ const hasMultipleProviders = computed(() => providers.value.length > 1);
     }"
   >
     <!--    <NuxtLink :to="`/${currency}/${data?.slug}`" class="block">-->
-    <NuxtLink
-      :to="
-        !hasMultipleProviders && providers[0]?.url
-          ? `/${currency}/${providers[0]?.slug}`
-          : ''
-      "
+    <component
+      :is="singleProviderPath ? NuxtLink : 'div'"
+      v-bind="singleProviderPath ? { to: singleProviderPath } : {}"
       :class="[!hasMultipleProviders ? 'p-4 sm:p-6' : '']"
       class="block h-full"
     >
@@ -146,6 +152,6 @@ const hasMultipleProviders = computed(() => providers.value.length > 1);
           <USkeleton class="h-5 w-24" />
         </div>
       </div>
-    </NuxtLink>
+    </component>
   </UCard>
 </template>

@@ -15,20 +15,18 @@ const { navigationItems } = useNavigationItems();
     }"
   >
     <template #title>
-      <NuxtLink to="/" class="flex items-center space-x-2">
-        <img
-          :src="getFaviconUrl()"
-          alt="ComparaDólar"
-          class="w-7 h-7 rounded-full"
-          loading="eager"
-          fetchpriority="high"
-        />
-        <span
-          class="text-lg sm:text-xl font-bold text-zinc-900 dark:text-white block md:hidden lg:block"
-        >
-          ComparaDolar.ar
-        </span>
-      </NuxtLink>
+      <img
+        :src="getFaviconUrl()"
+        alt="ComparaDólar"
+        class="w-7 h-7 rounded-full"
+        loading="eager"
+        fetchpriority="high"
+      />
+      <span
+        class="text-lg sm:text-xl font-bold text-zinc-900 dark:text-white block md:hidden lg:block"
+      >
+        ComparaDolar.ar
+      </span>
     </template>
 
     <template #default>

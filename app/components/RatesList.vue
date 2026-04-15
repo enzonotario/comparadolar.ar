@@ -32,7 +32,20 @@ const activeTab = ref<"buy" | "sell">("buy");
 const { showOnly24x7 } = use24x7Filter();
 const sorting: Ref<Array<{ id: string; desc: boolean }>> = ref([]);
 
-const isMobile = useMediaQuery("(max-width: 767px)");
+const isMobile = ref(false);
+
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth < 768;
+};
+
+onMounted(() => {
+  updateIsMobile();
+  window.addEventListener("resize", updateIsMobile, { passive: true });
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", updateIsMobile);
+});
 
 watch(
   () => activeTab.value,

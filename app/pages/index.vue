@@ -49,6 +49,7 @@ defineOgImage("ComparaDolar", {
     <div class="sticky bottom-4 z-10 flex justify-center pointer-events-none">
       <div>
         <USwitch
+          id="only-24x7-switch"
           v-model="showOnly24x7"
           label="Solo proveedores 24/7"
           size="sm"
