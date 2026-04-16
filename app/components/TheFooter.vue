@@ -41,17 +41,17 @@ const friendlyPages = [
 
 <template>
   <div>
-    <NuxtImg
-      src="/assets/logo.png"
-      alt="Logo de ComparaDolar.ar"
-      width="160"
-      height="160"
-      class="mx-auto"
-    />
-    <UFooter class="border-t border-zinc-200 dark:border-zinc-700">
+    <USeparator type="dashed" class="h-px mt-6" />
+
+    <UFooter
+      :ui="{
+        top: '!py-6',
+        container: '!p-0',
+      }"
+    >
       <template #top>
-        <UContainer class="!py-0">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+        <UContainer class="w-full max-w-3xl mx-auto space-y-12 !py-0">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8">
             <div class="flex flex-col items-start gap-2">
               <h3 class="text-xl font-bold">Apoyá el proyecto</h3>
               <p class="text-sm text-muted">
@@ -100,21 +100,53 @@ const friendlyPages = [
                 </NuxtLink>
               </div>
             </div>
+          </div>
 
-            <div class="space-y-4">
-              <h3 class="text-xl font-bold">Páginas amigas</h3>
-              <div class="flex flex-wrap gap-4">
-                <a
-                  v-for="page in friendlyPages"
-                  :key="page.label"
-                  :href="page.to"
-                  class="block text-sm text-zinc-600 dark:text-white/60 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {{ page.label }}
-                </a>
-              </div>
+          <div class="flex flex-col items-start gap-2">
+            <h3 class="text-xl font-bold">Open Source</h3>
+            <p class="text-sm text-muted">
+              Este proyecto es de código abierto. La API pública también está
+              documentada para integraciones.
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <UButton
+                href="https://github.com/enzonotario/comparadolar.ar"
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="outline"
+                color="neutral"
+                class="space-x-2"
+              >
+                <UIcon name="i-lucide-github" class="size-4" />
+                GitHub
+              </UButton>
+              <UButton
+                href="https://comparadolar.ar/docs/"
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="outline"
+                color="neutral"
+                class="space-x-2"
+              >
+                <UIcon name="i-heroicons-document-text" class="size-4" />
+                API Docs
+              </UButton>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h3 class="text-xl font-bold">Páginas amigas</h3>
+            <div class="flex flex-wrap gap-4">
+              <a
+                v-for="page in friendlyPages"
+                :key="page.label"
+                :href="page.to"
+                class="block text-sm text-zinc-600 dark:text-white/60 hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ page.label }}
+              </a>
             </div>
           </div>
         </UContainer>
