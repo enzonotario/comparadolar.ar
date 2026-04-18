@@ -126,8 +126,6 @@ useSeo({
         />
       </section>
 
-      <CurrencySelector />
-
       <section>
         <ProviderInfoSection
           :entity="entity"
