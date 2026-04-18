@@ -50,6 +50,7 @@ const handleImageError = (event: Event) => {
           <h3 class="text-sm font-medium text-gray-900 dark:text-white">
             {{ rate.prettyName || rate.name }}
           </h3>
+          <RateVariationBadge :value="rate.pct_variation" />
           <UBadge v-if="rate.is24x7" color="success" size="xs"> 24/7 </UBadge>
           <UBadge
             v-if="rate.isUsdCcl && currency !== 'usd-ccl'"

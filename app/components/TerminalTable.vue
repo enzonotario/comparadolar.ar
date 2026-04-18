@@ -573,6 +573,7 @@ defineExpose({
             <span :class="terminalColors.cellText">
               {{ row.original.prettyName || row.original.name }}
             </span>
+            <RateVariationBadge :value="row.original.pct_variation" />
             <UIcon
               v-if="!row.original.is24x7 && !marketHours"
               name="i-heroicons-moon"

@@ -8,7 +8,7 @@ export interface ExchangeRate {
   is24x7?: boolean;
   url?: string;
   prettyName?: string;
-  pct_variation?: number;
+  pct_variation?: number | null;
   slowChange?: boolean;
   isBank?: boolean;
   isUsdCcl?: boolean;
