@@ -47,7 +47,8 @@ export const currenciesConfig: Record<CurrencyType, CurrencyConfig> = {
       from: "#10b981", // emerald-500
       to: "#059669", // emerald-600
     },
-    description: "Encontrá el mejor precio para operar dólar en Argentina",
+    description:
+      "Compará dólar en Argentina al instante: compra, venta, spread y ranking entre proveedores. ComparaDólar reúne bancos y casas de cambio para la mejor cotización.",
     keywords: [
       "dolar",
       "cotizaciones",
@@ -67,7 +68,8 @@ export const currenciesConfig: Record<CurrencyType, CurrencyConfig> = {
       from: "#3b82f6",
       to: "#2563eb",
     },
-    description: "Encontrá el mejor precio para operar dólar CCL en Argentina",
+    description:
+      "Dólar CCL en vivo: cotizaciones de brokers y apps con compra, venta y spread. ComparaDólar compara contado con liquidación para operar mejor en Argentina.",
     keywords: [
       "dolar ccl",
       "ccl",
@@ -88,7 +90,8 @@ export const currenciesConfig: Record<CurrencyType, CurrencyConfig> = {
       from: "#06b6d4", // cyan-500
       to: "#0891b2", // cyan-600
     },
-    description: "Encontrá el mejor precio para operar USDC en Argentina",
+    description:
+      "USDC en pesos: exchanges y apps con cotización al instante y spread claro. ComparaDólar reúne tasas para operar stablecoin al mejor precio en Argentina.",
     keywords: [
       "usdc",
       "cotizaciones",
@@ -109,7 +112,8 @@ export const currenciesConfig: Record<CurrencyType, CurrencyConfig> = {
       from: "#14b8a6", // teal-500
       to: "#0d9488", // teal-600
     },
-    description: "Encontrá el mejor precio para operar USDT en Argentina",
+    description:
+      "USDT en pesos: precios compra/venta en vivo entre proveedores y spread visible. ComparaDólar ayuda a elegir dónde operar tether con datos claros.",
     keywords: [
       "usdt",
       "cotizaciones",
@@ -130,7 +134,8 @@ export const currenciesConfig: Record<CurrencyType, CurrencyConfig> = {
       from: "#f59e0b", // amber-500
       to: "#d97706", // amber-600
     },
-    description: "Encontrá el mejor precio para operar Bitcoin en Argentina",
+    description:
+      "Bitcoin en pesos: cotizaciones de exchanges y apps locales al instante. ComparaDólar muestra compra, venta y spread para comparar antes de operar.",
     keywords: [
       "bitcoin",
       "btc",
@@ -152,7 +157,8 @@ export const currenciesConfig: Record<CurrencyType, CurrencyConfig> = {
       from: "#8b5cf6", // violet-500
       to: "#7c3aed", // violet-600
     },
-    description: "Encontrá el mejor precio para operar Ethereum en Argentina",
+    description:
+      "Ethereum en pesos: precios en vivo y diferencia compra/venta entre apps. ComparaDólar ofrece una vista clara del mercado local antes de operar ETH.",
     keywords: [
       "ethereum",
       "eth",

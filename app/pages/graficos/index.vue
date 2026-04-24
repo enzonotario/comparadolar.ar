@@ -16,8 +16,13 @@ definePageMeta({
 });
 
 useSeo({
-  title: `Gráficos ${currency.value.toUpperCase()} - Compará Dólar`,
-  description: `Gráficos y análisis de tasas de cambio ${currency.value.toUpperCase()} en tiempo real`,
+  title: computed(
+    () => `Gráficos ${currency.value.toUpperCase()} - Compará Dólar`,
+  ),
+  description: computed(
+    () =>
+      `Gráficos de ${currency.value.toUpperCase()} en ComparaDólar: histórico, comparación de proveedores y tendencias. Analizá el tipo de cambio en Argentina con datos en tiempo real.`,
+  ),
 });
 
 const { data: ogRates } = await useAsyncData("og-graficos-usd-rates", () =>

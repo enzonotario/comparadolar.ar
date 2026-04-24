@@ -82,10 +82,11 @@ const seoTitle = computed(() => {
 
 const seoDescription = computed(() => {
   const provider = currentProvider.value;
+  const sym = currency.toUpperCase();
   if (provider) {
-    return `Consulta la cotización actual e histórica de ${currency.toUpperCase()} en ${provider.prettyName}.`;
+    return `Cotización ${sym} en ${provider.prettyName}: precio al instante e histórico en ComparaDólar. Compará spread y tasas con el resto del mercado en Argentina.`;
   }
-  return `Consulta la cotización de ${currency.toUpperCase()}`;
+  return `Cotización ${sym} en ComparaDólar: precios al instante, histórico y comparación con el mercado para decidir con claridad en Argentina.`;
 });
 
 useSeo({

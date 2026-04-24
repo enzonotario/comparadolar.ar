@@ -1,5 +1,5 @@
 import type { CurrencyType } from "@/lib/types";
-import { getCurrencyConfig } from "@/lib/currencies-config";
+import { currenciesConfig, getCurrencyConfig } from "@/lib/currencies-config";
 
 interface SeoOptions {
   currency?: CurrencyType;
@@ -35,7 +35,7 @@ export function useSeo(options: SeoOptions = {}) {
     options.description ||
     (currencyConfig
       ? currencyConfig.description
-      : "Encontrá el mejor precio para operar dólar en Argentina");
+      : currenciesConfig.usd.description);
 
   const keywords = options.tags
     ? options.tags

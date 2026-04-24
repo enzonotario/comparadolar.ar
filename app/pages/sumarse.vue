@@ -2,7 +2,7 @@
 useSeo({
   title: "Integrar tu servicio - ComparaDolar.ar",
   description:
-    "Integrá tu servicio de cotizaciones de dólar en ComparaDolar.ar. Listado gratuito para proveedores de cotizaciones.",
+    "Integrá tu API de cotizaciones en ComparaDolar.ar sin costo: requisitos técnicos y visibilidad entre quienes comparan dólar y cripto en Argentina.",
 });
 
 useStructuredData({

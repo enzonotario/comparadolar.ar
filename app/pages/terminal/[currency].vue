@@ -36,8 +36,13 @@ definePageMeta({
 });
 
 useSeo({
-  title: `Terminal ${currency.value.toUpperCase()} - Compará Dólar`,
-  description: `Monitor de tasas de cambio ${currency.value.toUpperCase()} en tiempo real con interfaz de terminal`,
+  title: computed(
+    () => `Terminal ${currency.value.toUpperCase()} - Compará Dólar`,
+  ),
+  description: computed(
+    () =>
+      `Terminal ${currency.value.toUpperCase()} en ComparaDólar: cotizaciones en vivo, tabla compacta y exportación CSV. Compará compra, venta y spread entre proveedores sin distracciones.`,
+  ),
 });
 
 const currencyConfig = getCurrencyConfig(currency.value as CurrencyType);
