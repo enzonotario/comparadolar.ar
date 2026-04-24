@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   API_BASE_URL,
+  SITE_CONFIG,
   type CurrencyType,
   type ExchangeRate,
 } from "~/lib/types";
@@ -75,9 +76,9 @@ const currentProvider = computed(() => {
 const seoTitle = computed(() => {
   const provider = currentProvider.value;
   if (provider) {
-    return `Cotización de ${currency.toUpperCase()} en ${provider.prettyName}`;
+    return `Cotización de ${currency.toUpperCase()} en ${provider.prettyName} | ${SITE_CONFIG.name}`;
   }
-  return `Cotización de ${currency.toUpperCase()} - Compará Dólar`;
+  return `Cotización de ${currency.toUpperCase()} | ${SITE_CONFIG.name}`;
 });
 
 const seoDescription = computed(() => {

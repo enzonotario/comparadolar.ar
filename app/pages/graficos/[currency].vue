@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CurrencyType, ExchangeRate } from "~/lib/types";
+import { SITE_CONFIG, type CurrencyType } from "~/lib/types";
 import ComparativeChart from "~/components/ComparativeChart.vue";
 import ProviderSelector from "~/components/ProviderSelector.vue";
 import { isValidCurrency, getCurrencyConfig } from "~/lib/currencies-config";
@@ -27,7 +27,7 @@ definePageMeta({
 
 useSeo({
   title: computed(
-    () => `Gráficos ${currency.value.toUpperCase()} - Compará Dólar`,
+    () => `Gráficos ${currency.value.toUpperCase()} | ${SITE_CONFIG.name}`,
   ),
   description: computed(
     () =>

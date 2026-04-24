@@ -1,4 +1,4 @@
-import type { CurrencyType } from "@/lib/types";
+import { SITE_CONFIG, type CurrencyType } from "@/lib/types";
 import { currenciesConfig, getCurrencyConfig } from "@/lib/currencies-config";
 
 interface SeoOptions {
@@ -28,8 +28,8 @@ export function useSeo(options: SeoOptions = {}) {
   const title =
     options.title ||
     (currencyConfig
-      ? `Comparar ${currencyConfig.fullName} - Compará Dólar`
-      : "ComparaDólar | Cotizaciones Dólar en tiempo real");
+      ? `Comparar ${currencyConfig.fullName} | ${SITE_CONFIG.name}`
+      : `${SITE_CONFIG.name} | Cotizaciones en tiempo real`);
 
   const description =
     options.description ||

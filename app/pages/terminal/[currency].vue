@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CurrencyType } from "@/lib/types";
+import { SITE_CONFIG, type CurrencyType } from "@/lib/types";
 import { isValidCurrency, getCurrencyConfig } from "@/lib/currencies-config";
 import { useTerminalColors } from "@/composables/useTerminalColors";
 import {
@@ -37,7 +37,7 @@ definePageMeta({
 
 useSeo({
   title: computed(
-    () => `Terminal ${currency.value.toUpperCase()} - Compará Dólar`,
+    () => `Terminal ${currency.value.toUpperCase()} | ${SITE_CONFIG.name}`,
   ),
   description: computed(
     () =>

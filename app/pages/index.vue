@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ExchangeRate } from "~/lib/types";
+import { SITE_CONFIG, type ExchangeRate } from "~/lib/types";
 import {
   top3BuyUsd,
   top3SellUsd,
@@ -12,6 +12,7 @@ const currency = "usd";
 
 useSeo({
   currency,
+  title: `${SITE_CONFIG.name} | Cotizaciones del dólar en tiempo real`,
 });
 
 useStructuredData({
