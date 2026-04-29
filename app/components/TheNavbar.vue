@@ -4,6 +4,14 @@ import { getFaviconUrl } from "@/lib/favicon-config";
 const route = useRoute();
 const isSumarsePage = computed(() => route.path === "/sumarse");
 const { navigationItems } = useNavigationItems();
+
+const nuxtApp = useNuxtApp();
+const appConfig = useAppConfig();
+
+/** Mismo hook que `UDashboardSearch` / `provideDashboardContext` — el header no recibe `inject` del dashboard. */
+function toggleProviderSearch() {
+  nuxtApp.hooks.callHook("dashboard:search:toggle");
+}
 </script>
 
 <template>
@@ -36,12 +44,35 @@ const { navigationItems } = useNavigationItems();
       </template>
 
       <template #right>
-        <UDashboardSearchButton
-          v-if="!isSumarsePage"
-          class="hidden sm:inline-flex h-7"
-          label="Buscar proveedor"
-        />
-        <UColorModeButton />
+        <div class="flex shrink-0 items-center gap-1.5">
+          <template v-if="!isSumarsePage">
+            <UTooltip text="Buscar proveedor" :content="{ side: 'bottom' }">
+              <UButton
+                class="inline-flex h-7 sm:hidden"
+                color="neutral"
+                variant="ghost"
+                square
+                :icon="appConfig.ui.icons.search"
+                aria-label="Buscar proveedor"
+                @click="toggleProviderSearch"
+              />
+            </UTooltip>
+            <UButton
+              class="hidden h-7 sm:inline-flex"
+              color="neutral"
+              variant="outline"
+              :icon="appConfig.ui.icons.search"
+              label="Buscar proveedor"
+              @click="toggleProviderSearch"
+            >
+              <template #trailing>
+                <UKbd value="meta" variant="subtle" />
+                <UKbd value="k" variant="subtle" />
+              </template>
+            </UButton>
+          </template>
+          <UColorModeButton />
+        </div>
       </template>
 
       <template #body>
