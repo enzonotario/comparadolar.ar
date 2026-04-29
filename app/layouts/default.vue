@@ -22,17 +22,21 @@ const isSumarsePage = computed(() => route.path === "/sumarse");
 
 <template>
   <UApp>
-    <LayoutBackground :color-scheme="colorScheme" />
-    <TheNavbar />
-    <LazyDolarMarquee v-if="!isSumarsePage" />
-    <NuxtRouteAnnouncer />
+    <UDashboardGroup class="flex min-h-dvh flex-col">
+      <LayoutBackground :color-scheme="colorScheme" />
+      <TheNavbar />
+      <LazyDolarMarquee v-if="!isSumarsePage" />
+      <NuxtRouteAnnouncer />
 
-    <UMain role="main">
-      <div class="relative max-w-7xl mx-auto px-4 py-8 space-y-8">
-        <slot />
-      </div>
+      <GlobalProviderSearch />
 
-      <TheFooter />
-    </UMain>
+      <UMain role="main" class="flex-1">
+        <div class="relative max-w-7xl mx-auto px-4 py-8 space-y-8">
+          <slot />
+        </div>
+
+        <TheFooter />
+      </UMain>
+    </UDashboardGroup>
   </UApp>
 </template>

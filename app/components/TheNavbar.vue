@@ -34,6 +34,11 @@ const { navigationItems } = useNavigationItems();
     </template>
 
     <template #right>
+      <UDashboardSearchButton
+        v-if="!isSumarsePage"
+        class="hidden sm:inline-flex h-7"
+        label="Buscar proveedor"
+      />
       <UColorModeButton />
     </template>
 

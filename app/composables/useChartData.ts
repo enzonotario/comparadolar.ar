@@ -4,9 +4,9 @@ import {
   type ProviderInfo,
 } from "~/lib/types";
 import {
-  USD_CCL_PROVIDERS,
-  isBlacklistedProvider,
-} from "~/lib/currencies-config";
+  filterProvidersCatalogForCurrency,
+  useProvidersCatalogForCurrency,
+} from "~/composables/useProvidersCatalog";
 import type { ValueType } from "~/composables/useProviderHistory";
 import { useRouteQuery } from "@vueuse/router";
 import { useChartState } from "~/composables/useChartState";
@@ -91,48 +91,18 @@ export function useChartData(
   const apiCurrency = computed(() =>
     currencyValue.value === "usd-ccl" ? "usd" : currencyValue.value,
   );
-  const providersUrl = computed(
-    () => `${API_BASE_URL}/${apiCurrency.value}/providers`,
-  );
-
-  const { data: providersDataRaw } = useFetch<ProviderInfo[]>(providersUrl, {
-    server: false,
-    lazy: true,
-    transform: (data: ProviderInfo[]) => {
-      if (Array.isArray(data)) {
-        data.forEach((item: any) => {
-          if (item.prettyName && !item.displayName) {
-            item.displayName = item.prettyName;
-          }
-        });
-      }
-      return data;
+  const { data: providersDataRaw } = useProvidersCatalogForCurrency(
+    currencyValue,
+    {
+      server: false,
+      lazy: true,
     },
-  });
+  );
 
   const providersData = computed(() => {
     const data = providersDataRaw.value;
     if (!Array.isArray(data)) return [];
-
-    const filtered = data.filter(
-      (provider: any) => !isBlacklistedProvider(provider),
-    );
-
-    const isUsdCclProvider = (provider: any) => {
-      const slug = provider.slug?.toLowerCase() || "";
-      const name = provider.name?.toLowerCase() || "";
-      return USD_CCL_PROVIDERS.some((p) => slug === p || name === p);
-    };
-
-    if (currencyValue.value === "usd-ccl") {
-      return filtered.filter(isUsdCclProvider);
-    }
-
-    if (currencyValue.value === "usd") {
-      return filtered.filter((provider: any) => !isUsdCclProvider(provider));
-    }
-
-    return filtered;
+    return filterProvidersCatalogForCurrency(data, currencyValue.value);
   });
 
   const providerOptions = computed(() => {

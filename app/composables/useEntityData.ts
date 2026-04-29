@@ -1,8 +1,8 @@
+import type { CurrencyType, ProviderInfo } from "@/lib/types";
 import {
-  API_BASE_URL,
-  type CurrencyType,
-  type ProviderInfo,
-} from "@/lib/types";
+  toProvidersCatalogApi,
+  useProvidersCatalog,
+} from "@/composables/useProvidersCatalog";
 
 interface EntityDataResult {
   data: ComputedRef<ProviderInfo[] | null>;
@@ -17,17 +17,23 @@ export function useEntityData(
   currency: CurrencyType,
   entityParam: string,
 ): EntityDataResult {
-  const apiCurrency = currency === "usd-ccl" ? "usd" : currency;
-  const { data, isLoading, error, refresh } = useDataFetching<ProviderInfo[]>(
-    `${API_BASE_URL}/${apiCurrency}/providers`,
-  );
+  const apiCurrency = toProvidersCatalogApi(currency);
+  const {
+    data,
+    status,
+    error,
+    refresh: refreshCatalog,
+  } = useProvidersCatalog(apiCurrency, {
+    lazy: false,
+    server: true,
+  });
 
   return {
-    data,
-    isLoading,
-    error,
+    data: computed(() => data.value ?? null),
+    isLoading: computed(() => status.value === "pending"),
+    error: computed(() => error.value ?? null),
     currency,
     entityName: entityParam,
-    refresh,
+    refresh: refreshCatalog,
   };
 }
