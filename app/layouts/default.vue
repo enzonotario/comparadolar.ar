@@ -22,7 +22,7 @@ const isSumarsePage = computed(() => route.path === "/sumarse");
 
 <template>
   <UApp>
-    <UDashboardGroup class="flex min-h-dvh flex-col">
+    <AppDashboardShell>
       <LayoutBackground :color-scheme="colorScheme" />
       <TheNavbar />
       <LazyDolarMarquee v-if="!isSumarsePage" />
@@ -37,6 +37,6 @@ const isSumarsePage = computed(() => route.path === "/sumarse");
 
         <TheFooter />
       </UMain>
-    </UDashboardGroup>
+    </AppDashboardShell>
   </UApp>
 </template>

@@ -11,7 +11,7 @@ const colorScheme = computed(() => {
 
 <template>
   <UApp>
-    <UDashboardGroup class="flex min-h-dvh flex-col">
+    <AppDashboardShell>
       <LayoutBackground :color-scheme="colorScheme" />
       <TheNavbar />
       <NuxtRouteAnnouncer />
@@ -40,6 +40,6 @@ const colorScheme = computed(() => {
 
         <TheFooter />
       </UMain>
-    </UDashboardGroup>
+    </AppDashboardShell>
   </UApp>
 </template>
