@@ -19,15 +19,34 @@ function catalogAsyncKey(api: ProvidersCatalogApi): string {
   return `providers-catalog:${api}`;
 }
 
+/** La API suele mandar `logo`; en el front tipamos `logoUrl` (p. ej. paleta de búsqueda). */
+function normalizeCatalogProvider(
+  raw: ProviderInfo & { logo?: string },
+): ProviderInfo {
+  const slug = raw.slug ?? "";
+  const logoUrl = raw.logoUrl || raw.logo || "";
+  return {
+    slug,
+    name: raw.name || slug,
+    logoUrl,
+    is24x7: raw.is24x7 ?? true,
+    url: raw.url ?? "",
+    prettyName: raw.prettyName || raw.name || slug,
+    isBank: Boolean(raw.isBank),
+  };
+}
+
 export async function fetchNormalizedProviders(
   api: ProvidersCatalogApi,
 ): Promise<ProviderInfo[]> {
   const url = `${API_BASE_URL}/${api}/providers`;
-  let result = await $fetch<ProviderInfo[]>(url);
+  let result = await $fetch<(ProviderInfo & { logo?: string })[]>(url);
 
   if (!Array.isArray(result)) return [];
 
-  result = result.filter((item) => !isBlacklistedProvider(item));
+  result = result
+    .map(normalizeCatalogProvider)
+    .filter((item) => !isBlacklistedProvider(item));
 
   result.forEach((item: ProviderInfo & { displayName?: string }) => {
     if (item.prettyName && !item.displayName) {

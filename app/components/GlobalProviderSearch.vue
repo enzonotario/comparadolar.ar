@@ -14,6 +14,11 @@ const showPalette = computed(() => route.path !== "/sumarse");
 
 const catalogs = useProvidersCatalogRegistry();
 
+/** Tokens extra para Fuse (marca anterior, etc.). Clave = slug en minúsculas. */
+const PROVIDER_SEARCH_ALIASES: Record<string, string> = {
+  arq: "DolarApp",
+};
+
 const open = ref(false);
 const bootstrapping = ref(false);
 
@@ -53,14 +58,18 @@ const paletteGroups = computed(() => {
     groups.push({
       id: `providers-${c}`,
       label: `${cfg.fullName} (${cfg.label})`,
-      items: filtered.map((p) => ({
-        id: `${c}-${p.slug}`,
-        label: p.prettyName || p.name,
-        suffix: cfg.label,
-        description: p.slug,
-        to: getProviderEntityPath(c, p.slug),
-        avatar: p.logoUrl ? { src: p.logoUrl } : undefined,
-      })),
+      items: filtered.map((p) => {
+        const slugKey = (p.slug || "").toLowerCase();
+        const alias = PROVIDER_SEARCH_ALIASES[slugKey];
+        return {
+          id: `${c}-${p.slug}`,
+          label: p.prettyName || p.name,
+          suffix: cfg.label,
+          description: [p.slug, alias].filter(Boolean).join(" / "),
+          to: getProviderEntityPath(c, p.slug),
+          avatar: p.logoUrl ? { src: p.logoUrl } : undefined,
+        };
+      }),
     });
   }
 
