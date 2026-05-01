@@ -17,6 +17,7 @@ const catalogs = useProvidersCatalogRegistry();
 /** Tokens extra para Fuse (marca anterior, etc.). Clave = slug en minúsculas. */
 const PROVIDER_SEARCH_ALIASES: Record<string, string> = {
   arq: "DolarApp",
+  nexo: "Buenbit",
 };
 
 const open = ref(false);
