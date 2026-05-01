@@ -176,9 +176,9 @@
                 "summary": "brubank",
                 "value": "brubank"
               },
-              "buenbit": {
-                "summary": "buenbit",
-                "value": "buenbit"
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
               },
               "cocos": {
                 "summary": "cocos",
@@ -375,9 +375,9 @@
                 "summary": "binance",
                 "value": "binance"
               },
-              "buenbit": {
-                "summary": "buenbit",
-                "value": "buenbit"
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
               },
               "cocoscrypto": {
                 "summary": "cocoscrypto",
@@ -576,9 +576,9 @@
                 "summary": "binance",
                 "value": "binance"
               },
-              "buenbit": {
-                "summary": "buenbit",
-                "value": "buenbit"
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
               },
               "cocoscrypto": {
                 "summary": "cocoscrypto",
@@ -727,10 +727,10 @@
                         "is24x7": true
                       },
                       {
-                        "slug": "buenbit",
-                        "logo": "https://api.argentinadatos.com/static/logos/buenbit.png",
+                        "slug": "nexo",
+                        "logo": "https://api.argentinadatos.com/static/logos/nexo.png",
                         "prettyName": "Buenbit",
-                        "url": "https://buenbit.com/?ref=comparadolar",
+                        "url": "https://nexo.com/?ref=comparadolar",
                         "is24x7": true
                       }
                     ]
@@ -769,9 +769,9 @@
                 "summary": "binance",
                 "value": "binance"
               },
-              "buenbit": {
-                "summary": "buenbit",
-                "value": "buenbit"
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
               },
               "cocoscrypto": {
                 "summary": "cocoscrypto",
@@ -920,10 +920,10 @@
                         "is24x7": true
                       },
                       {
-                        "slug": "buenbit",
-                        "logo": "https://api.argentinadatos.com/static/logos/buenbit.png",
+                        "slug": "nexo",
+                        "logo": "https://api.argentinadatos.com/static/logos/nexo.png",
                         "prettyName": "Buenbit",
-                        "url": "https://buenbit.com/?ref=comparadolar",
+                        "url": "https://nexo.com/?ref=comparadolar",
                         "is24x7": true
                       }
                     ]
@@ -962,9 +962,9 @@
                 "summary": "binance",
                 "value": "binance"
               },
-              "buenbit": {
-                "summary": "buenbit",
-                "value": "buenbit"
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
               },
               "cocoscrypto": {
                 "summary": "cocoscrypto",
