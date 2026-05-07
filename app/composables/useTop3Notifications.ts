@@ -21,9 +21,14 @@ interface NormalizedRate {
   bid: number;
 }
 
+interface Top3Entry {
+  slug: string;
+  value: number;
+}
+
 interface CurrencyTop3 {
-  buy: string[];
-  sell: string[];
+  buy: Top3Entry[];
+  sell: Top3Entry[];
 }
 
 const DEFAULT_PREFERENCES: Top3NotificationPreferences = {
@@ -71,16 +76,22 @@ function top3For(rates: NormalizedRate[]): CurrencyTop3 {
     buy: [...validRates]
       .sort((a, b) => a.ask - b.ask)
       .slice(0, 3)
-      .map((rate) => rate.slug),
+      .map((rate) => ({ slug: rate.slug, value: rate.ask })),
     sell: [...validRates]
       .sort((a, b) => b.bid - a.bid)
       .slice(0, 3)
-      .map((rate) => rate.slug),
+      .map((rate) => ({ slug: rate.slug, value: rate.bid })),
   };
 }
 
+function top3Slugs(entries: Array<string | Top3Entry>) {
+  return entries.map((entry) =>
+    typeof entry === "string" ? entry : entry.slug,
+  );
+}
+
 function signature(top3: CurrencyTop3) {
-  return `buy:${top3.buy.join(",")}|sell:${top3.sell.join(",")}`;
+  return `buy:${top3Slugs(top3.buy).join(",")}|sell:${top3Slugs(top3.sell).join(",")}`;
 }
 
 function isUsdCclRate(rate: NormalizedRate) {
@@ -94,8 +105,10 @@ function describeChange(
   next: CurrencyTop3,
   notifyOn: Top3NotificationMode,
 ) {
-  const changedBuy = previous.buy.join(",") !== next.buy.join(",");
-  const changedSell = previous.sell.join(",") !== next.sell.join(",");
+  const changedBuy =
+    top3Slugs(previous.buy).join(",") !== top3Slugs(next.buy).join(",");
+  const changedSell =
+    top3Slugs(previous.sell).join(",") !== top3Slugs(next.sell).join(",");
 
   if (notifyOn === "buy" && !changedBuy) return null;
   if (notifyOn === "sell" && !changedSell) return null;
@@ -142,9 +155,22 @@ function saveLastTop3(value: Record<string, CurrencyTop3>) {
   localStorage.setItem(LAST_TOP3_KEY, JSON.stringify(value));
 }
 
+function formatQuote(value: number) {
+  return value.toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 function formatTop3Rows(top3: CurrencyTop3) {
-  const buyRows = top3.buy.map((slug, index) => `${index + 1}. ${slug}`);
-  const sellRows = top3.sell.map((slug, index) => `${index + 1}. ${slug}`);
+  const buyRows = top3.buy.map(
+    (entry, index) =>
+      `${index + 1}. ${entry.slug}: $${formatQuote(entry.value)}`,
+  );
+  const sellRows = top3.sell.map(
+    (entry, index) =>
+      `${index + 1}. ${entry.slug}: $${formatQuote(entry.value)}`,
+  );
 
   return [`Compra:`, ...buyRows, `Venta:`, ...sellRows].join("\n");
 }
