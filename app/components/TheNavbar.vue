@@ -25,18 +25,24 @@ function toggleProviderSearch() {
       }"
     >
       <template #title>
-        <img
-          :src="getFaviconUrl()"
-          alt="ComparaDólar"
-          class="w-7 h-7 rounded-full"
-          loading="eager"
-          fetchpriority="high"
-        />
-        <span
-          class="text-lg sm:text-xl font-bold text-zinc-900 dark:text-white block md:hidden lg:block"
-        >
-          ComparaDolar.ar
-        </span>
+        <div class="flex flex-row gap-1">
+          <img
+            :src="getFaviconUrl()"
+            alt="ComparaDólar"
+            class="w-7 h-7 rounded-full"
+            loading="eager"
+            fetchpriority="high"
+          />
+          <span
+            class="text-lg sm:text-xl font-bold text-zinc-900 dark:text-white block md:hidden lg:block"
+          >
+            ComparaDolar.ar
+          </span>
+
+          <ClientOnly>
+            <AutoRefreshIndicator v-if="!isSumarsePage" />
+          </ClientOnly>
+        </div>
       </template>
 
       <template #default>

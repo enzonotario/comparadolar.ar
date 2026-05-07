@@ -11,6 +11,8 @@ const props = withDefaults(defineProps<Props>(), {
   isRetrying: false,
 });
 
+const { resetCountdown } = useAutoRefresh();
+
 const isMobile = ref(false);
 const isAnimating = ref(false);
 
@@ -45,6 +47,7 @@ const handleRefresh = async () => {
 
   try {
     await props.onRefresh();
+    resetCountdown();
   } catch (error) {
     console.error("Error al actualizar:", error);
   } finally {

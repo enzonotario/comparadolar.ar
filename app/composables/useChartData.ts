@@ -220,9 +220,10 @@ export function useChartData(
   const providerHistories = ref<ProviderHistory[]>([]);
   const isLoading = ref(false);
   const error = ref<Error | null>(null);
+  const { registerAutoRefreshHandler } = useAutoRefresh();
 
   const loadHistories = async () => {
-    if (providerOptions.value.length === 0) return;
+    if (providerOptions.value.length === 0 || isLoading.value) return;
 
     isLoading.value = true;
     error.value = null;
@@ -255,6 +256,19 @@ export function useChartData(
       isLoading.value = false;
     }
   };
+
+  let unregisterAutoRefreshHandler: (() => void) | undefined;
+
+  onMounted(() => {
+    unregisterAutoRefreshHandler = registerAutoRefreshHandler(
+      "chart-history",
+      loadHistories,
+    );
+  });
+
+  onUnmounted(() => {
+    unregisterAutoRefreshHandler?.();
+  });
 
   // Cargar historiales cuando estén disponibles los providers
   watch(
