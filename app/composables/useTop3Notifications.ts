@@ -228,8 +228,13 @@ export function useTop3Notifications() {
     return top3For(rates);
   };
 
-  const checkNow = async ({ notify = true } = {}) => {
-    if (!preferences.value.enabled || permission.value !== "granted") return;
+  const checkNow = async (
+    options: { notify?: boolean; ignoreEnabled?: boolean } = {},
+  ) => {
+    const { notify = true, ignoreEnabled = false } = options;
+
+    if (!ignoreEnabled && !preferences.value.enabled) return;
+    if (notify && permission.value !== "granted") return;
     if (isChecking.value) return;
 
     isChecking.value = true;

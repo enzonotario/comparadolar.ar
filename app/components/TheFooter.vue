@@ -57,18 +57,20 @@ const friendlyPages = [
               <p class="text-sm text-muted">
                 Ayudame a mantener y mejorar este proyecto con una donación.
               </p>
-              <UButton
-                to="https://cafecito.app/enzonotario"
-                external
-                target="_blank"
-                rel="noopener noreferrer"
-                color="neutral"
-                variant="outline"
-                size="lg"
-              >
-                <UIcon name="i-heroicons-heart" />
-                Invitame un café
-              </UButton>
+              <div class="flex flex-wrap gap-2">
+                <UButton
+                  to="https://cafecito.app/enzonotario"
+                  external
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  color="neutral"
+                  variant="outline"
+                  size="lg"
+                >
+                  <UIcon name="i-heroicons-heart" />
+                  Invitame un café
+                </UButton>
+              </div>
             </div>
 
             <div class="space-y-4">
@@ -100,6 +102,17 @@ const friendlyPages = [
                 </NuxtLink>
               </div>
             </div>
+          </div>
+
+          <div
+            class="flex flex-col items-start gap-2 rounded-xl border border-zinc-200/80 p-4 dark:border-zinc-800"
+          >
+            <h3 class="text-xl font-bold">Instalá ComparaDólar</h3>
+            <p class="text-sm text-muted">
+              Usá la app como PWA para acceder más rápido y recibir alertas del
+              Top 3 configuradas.
+            </p>
+            <PwaFooterButton />
           </div>
 
           <div class="flex flex-col items-start gap-2">

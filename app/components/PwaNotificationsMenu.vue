@@ -2,8 +2,13 @@
 import { currencies } from "~/lib/currencies-config";
 import type { Top3NotificationMode } from "~/composables/useTop3Notifications";
 
-const { canInstall, isInstalled, serviceWorkerReady, install } =
-  usePwaInstall();
+const {
+  canInstall,
+  isInstalled,
+  serviceWorkerReady,
+  serviceWorkerSupported,
+  install,
+} = usePwaInstall();
 const {
   preferences,
   permission,
@@ -55,6 +60,17 @@ const handleModeChange = (event: Event) => {
   const value = (event.target as HTMLSelectElement)
     .value as Top3NotificationMode;
   void setNotifyOn(value);
+};
+
+const handleTestClick = async () => {
+  if (permission.value === "default") {
+    await requestPermission();
+  }
+
+  await checkNow({
+    ignoreEnabled: true,
+    notify: preferences.value.enabled && permission.value === "granted",
+  });
 };
 </script>
 
@@ -197,15 +213,24 @@ const handleModeChange = (event: Event) => {
 
           <div class="flex items-center justify-between gap-2 pt-1">
             <span class="text-xs text-zinc-500 dark:text-zinc-400">
-              SW: {{ serviceWorkerReady ? "listo" : "registrando…" }}
+              SW:
+              {{
+                serviceWorkerSupported
+                  ? serviceWorkerReady
+                    ? "listo"
+                    : "registrando…"
+                  : "no soportado"
+              }}
             </span>
             <UButton
               size="xs"
               color="neutral"
               variant="outline"
               :loading="isChecking"
-              :disabled="!preferences.enabled || permission !== 'granted'"
-              @click.stop="checkNow()"
+              :disabled="
+                enabledCurrencies.size === 0 || permission === 'denied'
+              "
+              @click.stop="handleTestClick"
             >
               Probar ahora
             </UButton>

@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "comparadolar-pwa-v1";
+const CACHE_NAME = "comparadolar-pwa-v2";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
@@ -242,8 +242,27 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
 
+  if (["localhost", "127.0.0.1", "0.0.0.0"].includes(url.hostname)) {
+    return;
+  }
+
   if (request.mode === "navigate") {
     event.respondWith(fetch(request).catch(() => caches.match("/")));
+    return;
+  }
+
+  if (url.pathname.startsWith("/_nuxt/")) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request)),
+    );
     return;
   }
 
