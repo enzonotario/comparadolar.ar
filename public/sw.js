@@ -149,13 +149,20 @@ async function fetchTop3(currency) {
   return top3For(filtered);
 }
 
-async function notifyTop3Change(currency, message) {
+function formatTop3Rows(top3) {
+  const buyRows = top3.buy.map((slug, index) => `${index + 1}. ${slug}`);
+  const sellRows = top3.sell.map((slug, index) => `${index + 1}. ${slug}`);
+
+  return [`Compra:`, ...buyRows, `Venta:`, ...sellRows].join("\n");
+}
+
+async function notifyTop3Change(currency, message, top3) {
   if (Notification.permission !== "granted") return;
 
   const constants = await getMarketConstants();
   const label = constants.currencyLabels?.[currency] || currency.toUpperCase();
-  await self.registration.showNotification(`Cambió el Top 3 de ${label}`, {
-    body: `En ComparaDólar ${message}. Tocá para ver el ranking actualizado.`,
+  await self.registration.showNotification(`Top 3 ${label} actualizado`, {
+    body: `${label}: ${message}.\n${formatTop3Rows(top3)}`,
     icon: "/assets/icons/icon-192.png",
     badge: "/assets/favicon.png",
     tag: `top3-${currency}`,
@@ -187,7 +194,8 @@ async function checkTop3Changes({ notify = true } = {}) {
           nextTop3,
           preferences.notifyOn || "both",
         );
-        if (notify && message) await notifyTop3Change(currency, message);
+        if (notify && message)
+          await notifyTop3Change(currency, message, nextTop3);
       } catch (error) {
         console.error("Error checking top 3 changes", currency, error);
       }

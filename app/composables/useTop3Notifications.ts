@@ -142,13 +142,24 @@ function saveLastTop3(value: Record<string, CurrencyTop3>) {
   localStorage.setItem(LAST_TOP3_KEY, JSON.stringify(value));
 }
 
-async function showTop3Notification(currency: CurrencyType, message: string) {
+function formatTop3Rows(top3: CurrencyTop3) {
+  const buyRows = top3.buy.map((slug, index) => `${index + 1}. ${slug}`);
+  const sellRows = top3.sell.map((slug, index) => `${index + 1}. ${slug}`);
+
+  return [`Compra:`, ...buyRows, `Venta:`, ...sellRows].join("\n");
+}
+
+async function showTop3Notification(
+  currency: CurrencyType,
+  message: string,
+  top3: CurrencyTop3,
+) {
   const label =
     currencies.find((item) => item.value === currency)?.label ??
     currency.toUpperCase();
   const url = currency === "usd" ? "/" : `/${currency}`;
   const options: NotificationOptions = {
-    body: `En ComparaDólar ${message}. Tocá para ver el ranking actualizado.`,
+    body: `${label}: ${message}.\n${formatTop3Rows(top3)}`,
     icon: "/assets/icons/icon-192.png",
     badge: "/assets/favicon.png",
     tag: `top3-${currency}`,
@@ -158,11 +169,11 @@ async function showTop3Notification(currency: CurrencyType, message: string) {
 
   if ("serviceWorker" in navigator) {
     const registration = await navigator.serviceWorker.ready;
-    await registration.showNotification(`Cambió el Top 3 de ${label}`, options);
+    await registration.showNotification(`Top 3 ${label} actualizado`, options);
     return;
   }
 
-  new Notification(`Cambió el Top 3 de ${label}`, options);
+  new Notification(`Top 3 ${label} actualizado`, options);
 }
 
 async function showTestNotification() {
@@ -299,7 +310,8 @@ export function useTop3Notifications() {
             preferences.value.notifyOn,
           );
 
-          if (notify && message) await showTop3Notification(currency, message);
+          if (notify && message)
+            await showTop3Notification(currency, message, nextTop3);
           return { changed: Boolean(message) };
         }),
       );
