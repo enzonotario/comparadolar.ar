@@ -1,10 +1,11 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "comparadolar-pwa-v2";
+const CACHE_NAME = "comparadolar-pwa-v4";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
   "/market-constants.json",
+  "/app-version.json",
   "/assets/icons/icon-192.png",
   "/assets/icons/icon-512.png",
   "/assets/favicon.png",
@@ -216,10 +217,7 @@ function scheduleTop3Checks() {
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting()),
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)),
   );
 });
 
@@ -289,6 +287,11 @@ self.addEventListener("fetch", (event) => {
 
 self.addEventListener("message", (event) => {
   const message = event.data || {};
+
+  if (message.type === "COMPARADOLAR_SKIP_WAITING") {
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
 
   if (message.type === "COMPARADOLAR_UPDATE_TOP3_PREFERENCES") {
     preferences = { ...DEFAULT_PREFERENCES, ...(message.preferences || {}) };

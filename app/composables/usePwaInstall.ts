@@ -6,6 +6,7 @@ interface BeforeInstallPromptEvent extends Event {
 declare global {
   interface Window {
     __comparadolarInstallPrompt?: BeforeInstallPromptEvent;
+    __comparadolarApplyUpdate?: () => Promise<void>;
   }
 }
 
@@ -17,6 +18,15 @@ export function usePwaInstall() {
   );
   const isInstalled = useState("pwa:is-installed", () => false);
   const serviceWorkerReady = useState("pwa:service-worker-ready", () => false);
+  const updateAvailable = useState("pwa:update-available", () => false);
+  const currentVersion = useState<string | null>(
+    "pwa:current-version",
+    () => null,
+  );
+  const latestVersion = useState<string | null>(
+    "pwa:latest-version",
+    () => null,
+  );
   const serviceWorkerSupported = computed(
     () => import.meta.client && "serviceWorker" in navigator,
   );
@@ -60,11 +70,34 @@ export function usePwaInstall() {
     return true;
   };
 
+  const applyUpdate = async () => {
+    if (!import.meta.client) return;
+
+    if (window.__comparadolarApplyUpdate) {
+      await window.__comparadolarApplyUpdate();
+      return;
+    }
+
+    window.location.reload();
+  };
+
+  const checkForUpdate = async () => {
+    if (!import.meta.client) return;
+
+    const registration = await navigator.serviceWorker?.getRegistration();
+    await registration?.update();
+  };
+
   return {
     canInstall: readonly(canInstall),
     isInstalled: readonly(isInstalled),
     serviceWorkerReady: readonly(serviceWorkerReady),
     serviceWorkerSupported,
+    updateAvailable: readonly(updateAvailable),
+    currentVersion: readonly(currentVersion),
+    latestVersion: readonly(latestVersion),
     install,
+    applyUpdate,
+    checkForUpdate,
   };
 }

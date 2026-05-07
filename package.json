@@ -3,16 +3,17 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "pnpm run build:docs && nuxt build",
+    "build": "pnpm run pwa:version && pnpm run build:docs && nuxt build",
     "build:docs": "pnpm --filter @comparadolar/docs run docs:build",
     "dev": "nuxt dev",
-    "generate": "pnpm run build:docs && nuxt generate",
+    "generate": "pnpm run pwa:version && pnpm run build:docs && nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint --ext .js,.ts,.vue .",
     "lint:fix": "eslint --fix --ext .js,.ts,.vue .",
     "preview:og": "tsx scripts/preview-og.ts",
-    "docs:dev": "pnpm --filter @comparadolar/docs run docs:dev"
+    "docs:dev": "pnpm --filter @comparadolar/docs run docs:dev",
+    "pwa:version": "node scripts/write-pwa-version.mjs"
   },
   "dependencies": {
     "@nuxt/eslint": "1.9.0",

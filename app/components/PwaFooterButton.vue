@@ -4,17 +4,23 @@ const {
   isInstalled,
   serviceWorkerReady,
   serviceWorkerSupported,
+  updateAvailable,
+  latestVersion,
   install,
+  applyUpdate,
+  checkForUpdate,
 } = usePwaInstall();
 
 const showInstructions = ref(false);
 
 const buttonLabel = computed(() => {
+  if (updateAvailable.value) return "Actualizar app";
   if (isInstalled.value) return "Desinstalar app";
   return canInstall.value ? "Instalar app" : "Cómo instalar app";
 });
 
 const buttonIcon = computed(() => {
+  if (updateAvailable.value) return "i-lucide-refresh-cw";
   if (isInstalled.value) return "i-lucide-trash-2";
   return canInstall.value ? "i-lucide-download" : "i-lucide-info";
 });
@@ -41,6 +47,11 @@ const instructions = computed(() => {
 });
 
 const handleClick = async () => {
+  if (updateAvailable.value) {
+    await applyUpdate();
+    return;
+  }
+
   if (!isInstalled.value) {
     const prompted = await install();
     if (prompted) return;
@@ -82,6 +93,26 @@ const handleClick = async () => {
           {{ instruction }}
         </li>
       </ol>
+
+      <div
+        v-if="updateAvailable"
+        class="rounded-md border border-teal-200 bg-teal-50 p-2 text-xs text-teal-800 dark:border-teal-900 dark:bg-teal-950/40 dark:text-teal-200"
+      >
+        Hay una nueva versión disponible{{
+          latestVersion ? ` (${latestVersion})` : ""
+        }}.
+      </div>
+
+      <UButton
+        v-if="!updateAvailable"
+        size="xs"
+        color="neutral"
+        variant="soft"
+        icon="i-lucide-refresh-cw"
+        @click.stop.prevent="checkForUpdate"
+      >
+        Buscar actualización
+      </UButton>
 
       <div
         class="rounded-md bg-zinc-50 p-2 text-xs text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400"

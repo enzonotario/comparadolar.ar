@@ -7,7 +7,9 @@ const {
   isInstalled,
   serviceWorkerReady,
   serviceWorkerSupported,
+  updateAvailable,
   install,
+  applyUpdate,
 } = usePwaInstall();
 const {
   preferences,
@@ -143,7 +145,17 @@ const handleTestClick = async () => {
               </p>
             </div>
             <UButton
-              v-if="canInstall"
+              v-if="updateAvailable"
+              size="xs"
+              color="primary"
+              variant="soft"
+              icon="i-lucide-refresh-cw"
+              @click.stop="applyUpdate"
+            >
+              Actualizar
+            </UButton>
+            <UButton
+              v-else-if="canInstall"
               size="xs"
               color="primary"
               variant="soft"
@@ -161,7 +173,14 @@ const handleTestClick = async () => {
             </UBadge>
           </div>
           <p
-            v-if="!canInstall && !isInstalled"
+            v-if="updateAvailable"
+            class="text-xs text-teal-700 dark:text-teal-300"
+          >
+            Hay una nueva versión disponible. Actualizá para tomar el último
+            deploy.
+          </p>
+          <p
+            v-else-if="!canInstall && !isInstalled"
             class="text-xs text-zinc-500 dark:text-zinc-400"
           >
             Si tu navegador lo permite, usá “Agregar a pantalla de inicio”.
