@@ -1,5 +1,6 @@
 import type { CurrencyType } from "~/lib/types";
-import { currencies, USD_CCL_PROVIDERS } from "~/lib/currencies-config";
+import { currencies } from "~/lib/currencies-config";
+import { isUsdCclProvider, toApiCurrency } from "~/lib/market-constants";
 import { API_BASE_URL } from "~/lib/types";
 
 const STORAGE_KEY = "comparadolar:top3-notifications";
@@ -75,9 +76,7 @@ function signature(top3: CurrencyTop3) {
 function isUsdCclRate(rate: NormalizedRate) {
   const slug = rate.slug.toLowerCase();
   const name = rate.name.toLowerCase();
-  return USD_CCL_PROVIDERS.some(
-    (provider) => slug === provider || name === provider,
-  );
+  return isUsdCclProvider({ slug, name });
 }
 
 function describeChange(
@@ -216,7 +215,7 @@ export function useTop3Notifications() {
   const fetchCurrencyTop3 = async (
     currency: CurrencyType,
   ): Promise<CurrencyTop3> => {
-    const apiCurrency = currency === "usd-ccl" ? "usd" : currency;
+    const apiCurrency = toApiCurrency(currency);
     const payload = await $fetch<unknown>(`${API_BASE_URL}/${apiCurrency}`);
     let rates = asRateList(payload);
 

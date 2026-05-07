@@ -3,6 +3,7 @@ import { SITE_CONFIG, type CurrencyType } from "~/lib/types";
 import ComparativeChart from "~/components/ComparativeChart.vue";
 import ProviderSelector from "~/components/ProviderSelector.vue";
 import { isValidCurrency, getCurrencyConfig } from "~/lib/currencies-config";
+import { isCryptoCurrency, toApiCurrency } from "~/lib/market-constants";
 import {
   top3SlugsForBuyUsd,
   top3SlugsForBuyUsdCcl,
@@ -36,8 +37,8 @@ useSeo({
 });
 
 const currencyConfig = getCurrencyConfig(currency.value as CurrencyType);
-const isCrypto = ["usdc", "usdt", "btc", "eth"].includes(currency.value);
-const apiCurrency = currency.value === "usd-ccl" ? "usd" : currency.value;
+const isCrypto = isCryptoCurrency(currency.value);
+const apiCurrency = toApiCurrency(currency.value);
 
 const { data: ogRates } = await useAsyncData(
   `og-graficos-${currency.value}-rates`,
@@ -59,7 +60,9 @@ const { data: ogHistories } = await useAsyncData(
   async () => {
     return Promise.all(
       top3.map(async ({ slug, name }) => {
-        const data = await $fetch<Array<{ bid: number; ask: number; timestamp: string }>>(
+        const data = await $fetch<
+          Array<{ bid: number; ask: number; timestamp: string }>
+        >(
           `https://api.comparadolar.ar/${apiCurrency}/providers/${slug}/history`,
         );
         return { name, data };
@@ -68,7 +71,12 @@ const { data: ogHistories } = await useAsyncData(
   },
 );
 
-const { lines, yTicks } = buildOgChartLines(ogHistories.value ?? [], since3Days, 960, 200);
+const { lines, yTicks } = buildOgChartLines(
+  ogHistories.value ?? [],
+  since3Days,
+  960,
+  200,
+);
 
 defineOgImage("Graficos", {
   title: `${currencyConfig?.fullName ?? currency.value.toUpperCase()}`,

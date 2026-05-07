@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CurrencyType } from "~/lib/types";
 import { validCurrencies, currenciesConfig } from "~/lib/currencies-config";
+import { toApiCurrency } from "~/lib/market-constants";
 import {
   ensureProvidersCatalogsLoaded,
   filterProvidersCatalogForCurrency,
@@ -47,7 +48,7 @@ const paletteGroups = computed(() => {
 
   for (const currency of validCurrencies) {
     const c = currency as CurrencyType;
-    const api = c === "usd-ccl" ? "usd" : c;
+    const api = toApiCurrency(c);
     const raw = catalogs[api].data.value;
     if (!raw?.length) continue;
 

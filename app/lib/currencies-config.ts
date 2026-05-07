@@ -1,23 +1,17 @@
 import type { CurrencyType } from "./types";
+import {
+  BLACKLISTED_PROVIDERS,
+  USD_CCL_PROVIDERS,
+  isBlacklistedProviderSlug,
+} from "./market-constants";
 
-export const USD_CCL_PROVIDERS = [
-  "astropay",
-  "global66",
-  "wallbit",
-  "plus-crypto",
-];
-
-export const BLACKLISTED_PROVIDERS = ["brubank"];
+export { BLACKLISTED_PROVIDERS, USD_CCL_PROVIDERS };
 
 export function isBlacklistedProvider(item: {
   slug?: string;
   name?: string;
 }): boolean {
-  const slug = item.slug?.toLowerCase() || "";
-  const name = item.name?.toLowerCase() || "";
-  return BLACKLISTED_PROVIDERS.some(
-    (provider) => slug === provider || name === provider,
-  );
+  return isBlacklistedProviderSlug(item);
 }
 
 export interface CurrencyConfig {

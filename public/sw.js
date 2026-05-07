@@ -4,6 +4,7 @@ const CACHE_NAME = "comparadolar-pwa-v1";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
+  "/market-constants.json",
   "/assets/icons/icon-192.png",
   "/assets/icons/icon-512.png",
   "/assets/favicon.png",
@@ -14,14 +15,7 @@ const DEFAULT_PREFERENCES = {
   currencies: [],
   notifyOn: "both",
 };
-const CURRENCY_LABELS = {
-  usd: "USD",
-  "usd-ccl": "USD CCL",
-  usdc: "USDC",
-  usdt: "USDT",
-  btc: "BTC",
-  eth: "ETH",
-};
+let marketConstantsPromise;
 const DB_NAME = "comparadolar-pwa";
 const DB_VERSION = 1;
 const STORE_NAME = "kv";
@@ -58,6 +52,30 @@ async function dbSet(key, value) {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
+}
+
+async function getMarketConstants() {
+  if (!marketConstantsPromise) {
+    marketConstantsPromise = fetch("/market-constants.json", {
+      cache: "no-store",
+    })
+      .then((response) => response.json())
+      .catch((error) => {
+        marketConstantsPromise = undefined;
+        throw error;
+      });
+  }
+
+  return marketConstantsPromise;
+}
+
+function toApiCurrency(currency, constants) {
+  return constants.apiCurrencyAliases?.[currency] || currency;
+}
+
+function isUsdCclRate(rate, constants) {
+  const usdCclProviders = new Set(constants.providerGroups?.usdCcl || []);
+  return usdCclProviders.has(rate.slug.toLowerCase());
 }
 
 function normalizeRate(raw) {
@@ -114,7 +132,8 @@ function describeChange(previous, next, notifyOn) {
 }
 
 async function fetchTop3(currency) {
-  const apiCurrency = currency === "usd-ccl" ? "usd" : currency;
+  const constants = await getMarketConstants();
+  const apiCurrency = toApiCurrency(currency, constants);
   const response = await fetch(`${API_BASE_URL}/${apiCurrency}`, {
     cache: "no-store",
   });
@@ -122,14 +141,8 @@ async function fetchTop3(currency) {
 
   if (currency !== "usd" && currency !== "usd-ccl") return top3For(payload);
 
-  const usdCclProviders = new Set([
-    "astropay",
-    "global66",
-    "wallbit",
-    "plus-crypto",
-  ]);
   const filtered = asRateList(payload).filter((rate) => {
-    const isCcl = usdCclProviders.has(rate.slug.toLowerCase());
+    const isCcl = isUsdCclRate(rate, constants);
     return currency === "usd-ccl" ? isCcl : !isCcl;
   });
 
@@ -139,7 +152,8 @@ async function fetchTop3(currency) {
 async function notifyTop3Change(currency, message) {
   if (Notification.permission !== "granted") return;
 
-  const label = CURRENCY_LABELS[currency] || currency.toUpperCase();
+  const constants = await getMarketConstants();
+  const label = constants.currencyLabels?.[currency] || currency.toUpperCase();
   await self.registration.showNotification(`Cambió el Top 3 de ${label}`, {
     body: `En ComparaDólar ${message}. Tocá para ver el ranking actualizado.`,
     icon: "/assets/icons/icon-192.png",

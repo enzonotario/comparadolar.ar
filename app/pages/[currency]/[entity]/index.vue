@@ -11,6 +11,7 @@ import {
   isValidCurrency,
 } from "~/lib/currencies-config";
 import { useEntityData } from "~/composables/useEntityData";
+import { toApiCurrency } from "~/lib/market-constants";
 
 definePageMeta({
   layout: "minimal",
@@ -39,7 +40,7 @@ const { data, isLoading, error, refresh } = useEntityData(
   entity,
 );
 
-const apiCurrency = currency === "usd-ccl" ? "usd" : currency;
+const apiCurrency = toApiCurrency(currency);
 
 const { data: ratesData, refresh: refreshRates } = useDataFetching<
   ExchangeRate[]

@@ -10,6 +10,7 @@ import {
 import type { ValueType } from "~/composables/useProviderHistory";
 import { useRouteQuery } from "@vueuse/router";
 import { useChartState } from "~/composables/useChartState";
+import { toApiCurrency } from "~/lib/market-constants";
 
 export interface ChartHistoryItem {
   bid: number;
@@ -88,9 +89,7 @@ export function useChartData(
   currency: Ref<CurrencyType> | ComputedRef<CurrencyType>,
 ) {
   const currencyValue = computed(() => currency.value);
-  const apiCurrency = computed(() =>
-    currencyValue.value === "usd-ccl" ? "usd" : currencyValue.value,
-  );
+  const apiCurrency = computed(() => toApiCurrency(currencyValue.value));
   const { data: providersDataRaw } = useProvidersCatalogForCurrency(
     currencyValue,
     {

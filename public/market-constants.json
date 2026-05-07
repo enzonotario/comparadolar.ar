@@ -1,0 +1,21 @@
+{
+  "apiCurrencyAliases": {
+    "usd-ccl": "usd"
+  },
+  "providerGroups": {
+    "usdCcl": ["astropay", "global66", "wallbit", "plus-crypto"]
+  },
+  "blacklistedProviders": ["brubank"],
+  "currencyGroups": {
+    "crypto": ["usdc", "usdt", "btc", "eth"],
+    "fiat": ["usd", "usd-ccl"]
+  },
+  "currencyLabels": {
+    "usd": "USD",
+    "usd-ccl": "USD CCL",
+    "usdc": "USDC",
+    "usdt": "USDT",
+    "btc": "BTC",
+    "eth": "ETH"
+  }
+}

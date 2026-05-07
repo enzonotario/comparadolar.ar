@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CryptoType } from "@/lib/types";
 import { isValidCurrency } from "@/lib/currencies-config";
+import { isCryptoCurrency } from "@/lib/market-constants";
 
 interface Props {
   currency: string;
@@ -9,9 +10,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const cryptoType = computed(() => {
-  const validCryptos = ["usdc", "usdt", "btc", "eth"];
-  return validCryptos.includes(props.currency) &&
-    isValidCurrency(props.currency)
+  return isCryptoCurrency(props.currency) && isValidCurrency(props.currency)
     ? (props.currency as CryptoType)
     : "usdc";
 });

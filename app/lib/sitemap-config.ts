@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "./types";
 import { currencies, USD_CCL_PROVIDERS } from "./currencies-config";
+import { toApiCurrency } from "./market-constants";
 
 export async function getSitemapUrls() {
   const urls: any[] = [];
@@ -50,7 +51,7 @@ export async function getSitemapUrls() {
 
     try {
       // Fetch de proveedores en tiempo de build
-      const apiCurrency = currency.value === "usd-ccl" ? "usd" : currency.value;
+      const apiCurrency = toApiCurrency(currency.value);
       const response = await fetch(`${API_BASE_URL}/${apiCurrency}`);
       const data = (await response.json()) as any[];
 

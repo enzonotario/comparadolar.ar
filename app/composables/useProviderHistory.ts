@@ -1,5 +1,6 @@
 import { API_BASE_URL, type CurrencyType } from "~/lib/types";
 import { calculateSpread } from "~/lib/utils";
+import { toApiCurrency } from "~/lib/market-constants";
 
 export interface HistoryData {
   bid: number;
@@ -23,7 +24,7 @@ export function useProviderHistory(
   const isLoading = ref(false);
   const error = ref<Error | null>(null);
 
-  const apiCurrency = currency === "usd-ccl" ? "usd" : currency;
+  const apiCurrency = toApiCurrency(currency);
 
   const fetchHistories = async () => {
     isLoading.value = true;

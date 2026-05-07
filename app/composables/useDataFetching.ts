@@ -1,15 +1,5 @@
-import {
-  USD_CCL_PROVIDERS,
-  isBlacklistedProvider,
-} from "~/lib/currencies-config";
-
-const isUsdCclProvider = (item: any): boolean => {
-  const slug = item.slug?.toLowerCase() || "";
-  const name = item.name?.toLowerCase() || "";
-  return USD_CCL_PROVIDERS.some(
-    (provider) => slug === provider || name === provider,
-  );
-};
+import { isBlacklistedProvider } from "~/lib/currencies-config";
+import { isUsdCclProvider } from "~/lib/market-constants";
 
 export function useDataFetching<T>(url: string) {
   const lastUpdateIso = useState<string>(`lastUpdate:${url}`, () =>

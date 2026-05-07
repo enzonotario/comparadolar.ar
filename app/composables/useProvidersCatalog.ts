@@ -1,8 +1,6 @@
 import { computed, type MaybeRefOrGetter, toValue } from "vue";
-import {
-  USD_CCL_PROVIDERS,
-  isBlacklistedProvider,
-} from "~/lib/currencies-config";
+import { isBlacklistedProvider } from "~/lib/currencies-config";
+import { isUsdCclProvider, toApiCurrency } from "~/lib/market-constants";
 import type { CurrencyType, ProviderInfo } from "~/lib/types";
 import { API_BASE_URL } from "~/lib/types";
 
@@ -12,7 +10,7 @@ export type ProvidersCatalogApi = "usd" | "usdc" | "usdt" | "btc" | "eth";
 export function toProvidersCatalogApi(
   currency: CurrencyType,
 ): ProvidersCatalogApi {
-  return currency === "usd-ccl" ? "usd" : currency;
+  return toApiCurrency(currency) as ProvidersCatalogApi;
 }
 
 function catalogAsyncKey(api: ProvidersCatalogApi): string {
@@ -62,12 +60,6 @@ export function filterProvidersCatalogForCurrency(
   currency: CurrencyType,
 ): ProviderInfo[] {
   const data = [...providers];
-
-  const isUsdCclProvider = (provider: ProviderInfo) => {
-    const slug = provider.slug?.toLowerCase() || "";
-    const name = provider.name?.toLowerCase() || "";
-    return USD_CCL_PROVIDERS.some((p) => slug === p || name === p);
-  };
 
   if (currency === "usd-ccl") {
     return data.filter(isUsdCclProvider);

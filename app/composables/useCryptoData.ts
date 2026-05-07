@@ -4,6 +4,7 @@ import type {
   CryptoType,
 } from "@/lib/types";
 import { API_ENDPOINTS } from "@/lib/types";
+import { isCryptoCurrency } from "@/lib/market-constants";
 
 const PROVIDER_OVERRIDES: Record<
   string,
@@ -41,9 +42,7 @@ function normalizeData(data: any): NormalizedCryptoRate[] {
 }
 
 export function useCryptoData(cryptoType: CryptoType) {
-  const validType = ["usdc", "usdt", "btc", "eth"].includes(cryptoType)
-    ? cryptoType
-    : "usdc";
+  const validType = isCryptoCurrency(cryptoType) ? cryptoType : "usdc";
 
   const url = API_ENDPOINTS[validType];
   const { data, error, isLoading, lastUpdate, refresh } =
