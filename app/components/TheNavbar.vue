@@ -51,6 +51,10 @@ function toggleProviderSearch() {
 
       <template #right>
         <div class="flex shrink-0 items-center gap-1.5">
+          <ClientOnly>
+            <PwaNotificationsMenu v-if="!isSumarsePage" />
+          </ClientOnly>
+
           <template v-if="!isSumarsePage">
             <UTooltip text="Buscar proveedor" :content="{ side: 'bottom' }">
               <UButton

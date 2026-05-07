@@ -109,6 +109,13 @@ export default defineNuxtConfig({
         { name: "format-detection", content: "telephone=no" },
         { name: "theme-color", content: "#10b981" },
         { name: "msapplication-TileColor", content: "#10b981" },
+        { name: "mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-title", content: SITE_CONFIG.name },
+        {
+          name: "apple-mobile-web-app-status-bar-style",
+          content: "black-translucent",
+        },
         { name: "robots", content: "index, follow" },
         { property: "og:type", content: "website" },
         { property: "og:site_name", content: "ComparaDólar" },
@@ -129,7 +136,13 @@ export default defineNuxtConfig({
         },
       ],
       link: [
+        { rel: "manifest", href: "/manifest.webmanifest" },
         { rel: "icon", type: "image/png", href: "/assets/favicon.png" },
+        {
+          rel: "apple-touch-icon",
+          sizes: "180x180",
+          href: "/assets/icons/apple-touch-icon.png",
+        },
         {
           rel: "preload",
           href: "/assets/favicon.png",

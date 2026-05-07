@@ -1,0 +1,364 @@
+import type { CurrencyType } from "~/lib/types";
+import { currencies, USD_CCL_PROVIDERS } from "~/lib/currencies-config";
+import { API_BASE_URL } from "~/lib/types";
+
+const STORAGE_KEY = "comparadolar:top3-notifications";
+const LAST_TOP3_KEY = "comparadolar:last-top3";
+
+export type Top3NotificationMode = "buy" | "sell" | "both";
+
+interface Top3NotificationPreferences {
+  enabled: boolean;
+  currencies: CurrencyType[];
+  notifyOn: Top3NotificationMode;
+}
+
+interface NormalizedRate {
+  slug: string;
+  name: string;
+  ask: number;
+  bid: number;
+}
+
+interface CurrencyTop3 {
+  buy: string[];
+  sell: string[];
+}
+
+const DEFAULT_PREFERENCES: Top3NotificationPreferences = {
+  enabled: false,
+  currencies: ["usd"],
+  notifyOn: "both",
+};
+
+function normalizeRate(raw: any): NormalizedRate {
+  return {
+    slug: raw?.slug || raw?.name || raw?.prettyName || "",
+    name: raw?.prettyName || raw?.name || raw?.slug || "Proveedor",
+    ask: Number(raw?.ask ?? raw?.totalAsk ?? 0),
+    bid: Number(raw?.bid ?? raw?.totalBid ?? 0),
+  };
+}
+
+function asRateList(payload: unknown): NormalizedRate[] {
+  if (Array.isArray(payload)) return payload.map(normalizeRate);
+
+  if (payload && typeof payload === "object") {
+    return Object.entries(payload).map(([name, raw]) => {
+      const value = raw && typeof raw === "object" ? raw : {};
+      return normalizeRate({ name, ...(value as Record<string, unknown>) });
+    });
+  }
+
+  return [];
+}
+
+function top3For(rates: NormalizedRate[]): CurrencyTop3 {
+  const validRates = rates.filter((rate) => rate.slug && rate.ask && rate.bid);
+
+  return {
+    buy: [...validRates]
+      .sort((a, b) => a.ask - b.ask)
+      .slice(0, 3)
+      .map((rate) => rate.slug),
+    sell: [...validRates]
+      .sort((a, b) => b.bid - a.bid)
+      .slice(0, 3)
+      .map((rate) => rate.slug),
+  };
+}
+
+function signature(top3: CurrencyTop3) {
+  return `buy:${top3.buy.join(",")}|sell:${top3.sell.join(",")}`;
+}
+
+function isUsdCclRate(rate: NormalizedRate) {
+  const slug = rate.slug.toLowerCase();
+  const name = rate.name.toLowerCase();
+  return USD_CCL_PROVIDERS.some(
+    (provider) => slug === provider || name === provider,
+  );
+}
+
+function describeChange(
+  previous: CurrencyTop3,
+  next: CurrencyTop3,
+  notifyOn: Top3NotificationMode,
+) {
+  const changedBuy = previous.buy.join(",") !== next.buy.join(",");
+  const changedSell = previous.sell.join(",") !== next.sell.join(",");
+
+  if (notifyOn === "buy" && !changedBuy) return null;
+  if (notifyOn === "sell" && !changedSell) return null;
+  if (notifyOn === "both" && !changedBuy && !changedSell) return null;
+
+  if (changedBuy && changedSell) return "cambió el top 3 de compra y venta";
+  if (changedBuy) return "cambió el top 3 de compra";
+  return "cambió el top 3 de venta";
+}
+
+function loadPreferences(): Top3NotificationPreferences {
+  if (!import.meta.client) return DEFAULT_PREFERENCES;
+
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_PREFERENCES;
+
+    return {
+      ...DEFAULT_PREFERENCES,
+      ...JSON.parse(raw),
+    };
+  } catch {
+    return DEFAULT_PREFERENCES;
+  }
+}
+
+function savePreferences(preferences: Top3NotificationPreferences) {
+  if (!import.meta.client) return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+}
+
+function loadLastTop3(): Record<string, CurrencyTop3> {
+  if (!import.meta.client) return {};
+
+  try {
+    return JSON.parse(localStorage.getItem(LAST_TOP3_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveLastTop3(value: Record<string, CurrencyTop3>) {
+  if (!import.meta.client) return;
+  localStorage.setItem(LAST_TOP3_KEY, JSON.stringify(value));
+}
+
+async function showTop3Notification(currency: CurrencyType, message: string) {
+  const label =
+    currencies.find((item) => item.value === currency)?.label ??
+    currency.toUpperCase();
+  const url = currency === "usd" ? "/" : `/${currency}`;
+  const options: NotificationOptions = {
+    body: `En ComparaDólar ${message}. Tocá para ver el ranking actualizado.`,
+    icon: "/assets/icons/icon-192.png",
+    badge: "/assets/favicon.png",
+    tag: `top3-${currency}`,
+    renotify: true,
+    data: { url },
+  };
+
+  if ("serviceWorker" in navigator) {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification(`Cambió el Top 3 de ${label}`, options);
+    return;
+  }
+
+  new Notification(`Cambió el Top 3 de ${label}`, options);
+}
+
+async function postPreferencesToServiceWorker(
+  preferences: Top3NotificationPreferences,
+) {
+  if (!("serviceWorker" in navigator)) return;
+
+  const registration = await navigator.serviceWorker.ready;
+  registration.active?.postMessage({
+    type: "COMPARADOLAR_UPDATE_TOP3_PREFERENCES",
+    preferences,
+  });
+}
+
+async function requestPeriodicSync() {
+  if (!("serviceWorker" in navigator)) return;
+
+  const registration = await navigator.serviceWorker.ready;
+  if (!("periodicSync" in registration)) return;
+
+  try {
+    await (registration as any).periodicSync.register("comparadolar-top3", {
+      minInterval: 5 * 60 * 1000,
+    });
+  } catch {
+    // API experimental: puede no estar disponible o no tener permiso.
+  }
+}
+
+export function useTop3Notifications() {
+  const preferences = useState<Top3NotificationPreferences>(
+    "top3-notifications:preferences",
+    () => DEFAULT_PREFERENCES,
+  );
+  const permission = useState<NotificationPermission>(
+    "top3-notifications:permission",
+    () => "default",
+  );
+  const isChecking = useState("top3-notifications:is-checking", () => false);
+  const lastCheckAt = useState<string | null>(
+    "top3-notifications:last-check-at",
+    () => null,
+  );
+
+  const supportsNotifications = computed(
+    () => import.meta.client && "Notification" in window,
+  );
+
+  const enabledCurrencies = computed(
+    () => new Set(preferences.value.currencies),
+  );
+
+  const syncPreferences = async () => {
+    savePreferences(preferences.value);
+    if (supportsNotifications.value) {
+      await postPreferencesToServiceWorker(preferences.value);
+    }
+  };
+
+  const fetchCurrencyTop3 = async (
+    currency: CurrencyType,
+  ): Promise<CurrencyTop3> => {
+    const apiCurrency = currency === "usd-ccl" ? "usd" : currency;
+    const payload = await $fetch<unknown>(`${API_BASE_URL}/${apiCurrency}`);
+    let rates = asRateList(payload);
+
+    if (currency === "usd") {
+      rates = rates.filter((rate) => !isUsdCclRate(rate));
+    } else if (currency === "usd-ccl") {
+      rates = rates.filter(isUsdCclRate);
+    }
+
+    return top3For(rates);
+  };
+
+  const checkNow = async ({ notify = true } = {}) => {
+    if (!preferences.value.enabled || permission.value !== "granted") return;
+    if (isChecking.value) return;
+
+    isChecking.value = true;
+
+    try {
+      const previousByCurrency = loadLastTop3();
+      const nextByCurrency = { ...previousByCurrency };
+
+      await Promise.all(
+        preferences.value.currencies.map(async (currency) => {
+          const nextTop3 = await fetchCurrencyTop3(currency);
+          const previousTop3 = previousByCurrency[currency];
+          nextByCurrency[currency] = nextTop3;
+
+          if (!previousTop3 || signature(previousTop3) === signature(nextTop3))
+            return;
+
+          const message = describeChange(
+            previousTop3,
+            nextTop3,
+            preferences.value.notifyOn,
+          );
+
+          if (notify && message) await showTop3Notification(currency, message);
+        }),
+      );
+
+      saveLastTop3(nextByCurrency);
+      lastCheckAt.value = new Date().toISOString();
+    } finally {
+      isChecking.value = false;
+    }
+  };
+
+  const requestPermission = async () => {
+    if (!supportsNotifications.value) return "denied" as NotificationPermission;
+
+    const result = await Notification.requestPermission();
+    permission.value = result;
+
+    if (result === "granted") {
+      preferences.value = {
+        ...preferences.value,
+        enabled: true,
+      };
+      await syncPreferences();
+      await requestPeriodicSync();
+      await checkNow({ notify: false });
+    }
+
+    return result;
+  };
+
+  const setEnabled = async (enabled: boolean) => {
+    if (enabled && permission.value !== "granted") {
+      await requestPermission();
+      return;
+    }
+
+    preferences.value = {
+      ...preferences.value,
+      enabled,
+    };
+    await syncPreferences();
+
+    if (enabled) await checkNow({ notify: false });
+  };
+
+  const toggleCurrency = async (currency: CurrencyType) => {
+    const selected = new Set(preferences.value.currencies);
+
+    if (selected.has(currency)) {
+      selected.delete(currency);
+    } else {
+      selected.add(currency);
+    }
+
+    preferences.value = {
+      ...preferences.value,
+      currencies: Array.from(selected),
+    };
+    await syncPreferences();
+    await checkNow({ notify: false });
+  };
+
+  const setNotifyOn = async (notifyOn: Top3NotificationMode) => {
+    preferences.value = {
+      ...preferences.value,
+      notifyOn,
+    };
+    await syncPreferences();
+  };
+
+  if (import.meta.client) {
+    onMounted(() => {
+      preferences.value = loadPreferences();
+      permission.value = supportsNotifications.value
+        ? Notification.permission
+        : "denied";
+      void syncPreferences();
+    });
+
+    const { registerAutoRefreshHandler } = useAutoRefresh();
+    let unregisterAutoRefreshHandler: (() => void) | undefined;
+
+    onMounted(() => {
+      unregisterAutoRefreshHandler = registerAutoRefreshHandler(
+        "top3-notifications",
+        () => checkNow(),
+      );
+    });
+
+    onUnmounted(() => {
+      unregisterAutoRefreshHandler?.();
+    });
+  }
+
+  return {
+    preferences,
+    permission: readonly(permission),
+    supportsNotifications,
+    enabledCurrencies,
+    isChecking: readonly(isChecking),
+    lastCheckAt: readonly(lastCheckAt),
+    requestPermission,
+    setEnabled,
+    toggleCurrency,
+    setNotifyOn,
+    checkNow,
+  };
+}

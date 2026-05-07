@@ -1,0 +1,58 @@
+{
+  "name": "ComparaDólar",
+  "short_name": "ComparaDólar",
+  "description": "Cotizaciones del dólar, stablecoins y criptomonedas en Argentina en tiempo real.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#020617",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "lang": "es-AR",
+  "categories": ["finance", "business", "utilities"],
+  "icons": [
+    {
+      "src": "/assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "USD",
+      "short_name": "USD",
+      "description": "Ver ranking de dólar",
+      "url": "/?source=pwa-shortcut",
+      "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "USDC",
+      "short_name": "USDC",
+      "description": "Ver ranking de USDC",
+      "url": "/usdc?source=pwa-shortcut",
+      "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Terminal",
+      "short_name": "Terminal",
+      "description": "Abrir terminal de cotizaciones",
+      "url": "/terminal?source=pwa-shortcut",
+      "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
