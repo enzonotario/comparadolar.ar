@@ -32,6 +32,16 @@ const DEFAULT_PREFERENCES: Top3NotificationPreferences = {
   notifyOn: "both",
 };
 
+function toPlainPreferences(
+  preferences: Top3NotificationPreferences,
+): Top3NotificationPreferences {
+  return {
+    enabled: Boolean(preferences.enabled),
+    currencies: [...preferences.currencies],
+    notifyOn: preferences.notifyOn,
+  };
+}
+
 function normalizeRate(raw: any): NormalizedRate {
   return {
     slug: raw?.slug || raw?.name || raw?.prettyName || "",
@@ -155,6 +165,28 @@ async function showTop3Notification(currency: CurrencyType, message: string) {
   new Notification(`Cambió el Top 3 de ${label}`, options);
 }
 
+async function showTestNotification() {
+  if (Notification.permission !== "granted") return false;
+
+  const options: NotificationOptions = {
+    body: "Las alertas del Top 3 están funcionando correctamente.",
+    icon: "/assets/icons/icon-192.png",
+    badge: "/assets/favicon.png",
+    tag: "top3-test",
+    renotify: true,
+    data: { url: "/" },
+  };
+
+  if ("serviceWorker" in navigator) {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification("Prueba de ComparaDólar", options);
+    return true;
+  }
+
+  new Notification("Prueba de ComparaDólar", options);
+  return true;
+}
+
 async function postPreferencesToServiceWorker(
   preferences: Top3NotificationPreferences,
 ) {
@@ -206,9 +238,10 @@ export function useTop3Notifications() {
   );
 
   const syncPreferences = async () => {
-    savePreferences(preferences.value);
+    const plainPreferences = toPlainPreferences(preferences.value);
+    savePreferences(plainPreferences);
     if (supportsNotifications.value) {
-      await postPreferencesToServiceWorker(preferences.value);
+      await postPreferencesToServiceWorker(plainPreferences);
     }
   };
 
@@ -233,9 +266,13 @@ export function useTop3Notifications() {
   ) => {
     const { notify = true, ignoreEnabled = false } = options;
 
-    if (!ignoreEnabled && !preferences.value.enabled) return;
-    if (notify && permission.value !== "granted") return;
-    if (isChecking.value) return;
+    if (!ignoreEnabled && !preferences.value.enabled) {
+      return { checked: 0, changed: 0 };
+    }
+    if (notify && permission.value !== "granted") {
+      return { checked: 0, changed: 0 };
+    }
+    if (isChecking.value) return { checked: 0, changed: 0 };
 
     isChecking.value = true;
 
@@ -243,14 +280,18 @@ export function useTop3Notifications() {
       const previousByCurrency = loadLastTop3();
       const nextByCurrency = { ...previousByCurrency };
 
-      await Promise.all(
+      const results = await Promise.all(
         preferences.value.currencies.map(async (currency) => {
           const nextTop3 = await fetchCurrencyTop3(currency);
           const previousTop3 = previousByCurrency[currency];
           nextByCurrency[currency] = nextTop3;
 
-          if (!previousTop3 || signature(previousTop3) === signature(nextTop3))
-            return;
+          if (
+            !previousTop3 ||
+            signature(previousTop3) === signature(nextTop3)
+          ) {
+            return { changed: false };
+          }
 
           const message = describeChange(
             previousTop3,
@@ -259,11 +300,17 @@ export function useTop3Notifications() {
           );
 
           if (notify && message) await showTop3Notification(currency, message);
+          return { changed: Boolean(message) };
         }),
       );
 
       saveLastTop3(nextByCurrency);
       lastCheckAt.value = new Date().toISOString();
+
+      return {
+        checked: results.length,
+        changed: results.filter((result) => result.changed).length,
+      };
     } finally {
       isChecking.value = false;
     }
@@ -364,5 +411,6 @@ export function useTop3Notifications() {
     toggleCurrency,
     setNotifyOn,
     checkNow,
+    sendTestNotification: showTestNotification,
   };
 }

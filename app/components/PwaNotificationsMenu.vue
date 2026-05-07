@@ -20,7 +20,10 @@ const {
   toggleCurrency,
   setNotifyOn,
   checkNow,
+  sendTestNotification,
 } = useTop3Notifications();
+
+const toast = useToast();
 
 const notifyModes: Array<{ value: Top3NotificationMode; label: string }> = [
   { value: "both", label: "Compra y venta" },
@@ -67,9 +70,33 @@ const handleTestClick = async () => {
     await requestPermission();
   }
 
-  await checkNow({
+  if (permission.value === "denied") {
+    toast.add({
+      title: "Notificaciones bloqueadas",
+      description:
+        "Habilitalas desde los permisos del navegador para probarlas.",
+      color: "error",
+      icon: "i-lucide-bell-off",
+    });
+    return;
+  }
+
+  const result = await checkNow({
     ignoreEnabled: true,
-    notify: preferences.value.enabled && permission.value === "granted",
+    notify: false,
+  });
+
+  if (permission.value === "granted") {
+    await sendTestNotification();
+  }
+
+  toast.add({
+    title: "Prueba ejecutada",
+    description: result?.checked
+      ? `Se revisaron ${result.checked} moneda(s). Cambios detectados: ${result.changed}.`
+      : "Se inicializó la prueba de alertas.",
+    color: "success",
+    icon: "i-lucide-check",
   });
 };
 </script>
