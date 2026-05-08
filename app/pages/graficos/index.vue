@@ -40,16 +40,21 @@ const { data: ogHistories } = await useAsyncData(
   async () => {
     return Promise.all(
       top3.map(async ({ slug, name }) => {
-        const data = await $fetch<Array<{ bid: number; ask: number; timestamp: string }>>(
-          `https://api.comparadolar.ar/usd/providers/${slug}/history`,
-        );
+        const data = await $fetch<
+          Array<{ bid: number; ask: number; timestamp: string }>
+        >(`https://api.comparadolar.ar/usd/providers/${slug}/history`);
         return { name, data };
       }),
     );
   },
 );
 
-const { lines, yTicks } = buildOgChartLines(ogHistories.value ?? [], since3Days, 960, 200);
+const { lines, yTicks } = buildOgChartLines(
+  ogHistories.value ?? [],
+  since3Days,
+  960,
+  200,
+);
 
 defineOgImage("Graficos", {
   title: "Dólar",
@@ -57,7 +62,7 @@ defineOgImage("Graficos", {
   yTicks,
   accentColor: "#10b981",
   updatedAt: ogUpdatedAtDate(),
-  priceLabel: "Comprás a",
+  priceLabel: "Compras a",
 });
 
 const colorMode = computed(() => useColorMode().value);

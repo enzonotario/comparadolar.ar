@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { provide } from "vue";
 import { calculateSpread } from "~/lib/utils";
+import { RATE_LABELS } from "~/lib/rate-labels";
 
 interface HistoryData {
   bid: number;
@@ -216,7 +217,7 @@ const chartOption = computed(() => {
       },
     },
     legend: {
-      data: ["Compra", "Venta", "Spread"],
+      data: [RATE_LABELS.bid, RATE_LABELS.ask, RATE_LABELS.spread],
       top: 10,
     },
     grid: {
@@ -296,7 +297,7 @@ const chartOption = computed(() => {
     ],
     series: [
       {
-        name: "Compra",
+        name: RATE_LABELS.bid,
         type: "line",
         data: bidData,
         smooth: true,
@@ -325,7 +326,7 @@ const chartOption = computed(() => {
         },
       },
       {
-        name: "Venta",
+        name: RATE_LABELS.ask,
         type: "line",
         data: askData,
         smooth: true,

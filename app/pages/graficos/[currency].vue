@@ -84,7 +84,7 @@ defineOgImage("Graficos", {
   yTicks,
   accentColor: currencyConfig?.gradientColors.from ?? "#10b981",
   updatedAt: ogUpdatedAtDate(),
-  priceLabel: "Comprás a",
+  priceLabel: "Compras a",
 });
 
 const colorMode = computed(() => useColorMode().value);

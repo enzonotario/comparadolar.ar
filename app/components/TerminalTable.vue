@@ -11,6 +11,7 @@ import {
 import { useDebounceFn } from "@vueuse/core";
 import type { ExchangeRate, CurrencyType } from "@/lib/types";
 import { API_ENDPOINTS } from "@/lib/types";
+import { RATE_LABELS_UPPER } from "@/lib/rate-labels";
 import type { TableColumn } from "@nuxt/ui";
 import { use24x7Filter } from "@/composables/use24x7Filter";
 import { useTerminalColors } from "@/composables/useTerminalColors";
@@ -286,7 +287,7 @@ const columns: TableColumn<any>[] = [
         h(UButton, {
           color: "neutral",
           variant: "ghost",
-          label: "COMPRA",
+          label: RATE_LABELS_UPPER.bid,
           icon: isSorted
             ? isSorted === "asc"
               ? "i-lucide-arrow-up-narrow-wide"
@@ -307,7 +308,7 @@ const columns: TableColumn<any>[] = [
         h(UButton, {
           color: "neutral",
           variant: "ghost",
-          label: "VENTA",
+          label: RATE_LABELS_UPPER.ask,
           icon: isSorted
             ? isSorted === "asc"
               ? "i-lucide-arrow-up-narrow-wide"
@@ -434,7 +435,14 @@ const downloadCSVHelper = (
 };
 
 const downloadCSV = () => {
-  const headers = ["PROVIDER", "CURRENCY", "BUY", "SELL", "SPREAD", "SPREAD %"];
+  const headers = [
+    "PROVIDER",
+    "CURRENCY",
+    RATE_LABELS_UPPER.bid,
+    RATE_LABELS_UPPER.ask,
+    "SPREAD",
+    "SPREAD %",
+  ];
   const csvData = filteredRates.value.map((rate) => [
     rate.prettyName || rate.name,
     rate.currency,
@@ -456,7 +464,14 @@ const downloadCSV = () => {
 };
 
 const copyToClipboard = async () => {
-  const headers = ["PROVIDER", "CURRENCY", "BUY", "SELL", "SPREAD", "SPREAD %"];
+  const headers = [
+    "PROVIDER",
+    "CURRENCY",
+    RATE_LABELS_UPPER.bid,
+    RATE_LABELS_UPPER.ask,
+    "SPREAD",
+    "SPREAD %",
+  ];
   const tableData = filteredRates.value.map((rate) => [
     rate.prettyName || rate.name,
     rate.currency,

@@ -2,6 +2,7 @@
 import { calculateSpread, formatCurrency } from "@/lib/utils";
 import type { ExchangeRate, ProviderInfo } from "@/lib/types";
 import { useAnalytics } from "@/composables/useAnalytics";
+import { RATE_LABELS } from "@/lib/rate-labels";
 
 const { trackProviderClick } = useAnalytics();
 
@@ -134,7 +135,7 @@ const handleProviderClick = () => {
               />
               <div>
                 <h3 class="font-semibold text-gray-900 dark:text-white">
-                  Compra
+                  {{ RATE_LABELS.bid }}
                 </h3>
               </div>
             </div>
@@ -164,7 +165,7 @@ const handleProviderClick = () => {
               />
               <div>
                 <h3 class="font-semibold text-gray-900 dark:text-white">
-                  Venta
+                  {{ RATE_LABELS.ask }}
                 </h3>
               </div>
             </div>

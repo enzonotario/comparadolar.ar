@@ -172,7 +172,7 @@ function formatTop3Rows(top3: CurrencyTop3) {
       `${index + 1}. ${entry.slug}: $${formatQuote(entry.value)}`,
   );
 
-  return [`Compra:`, ...buyRows, `Venta:`, ...sellRows].join("\n");
+  return [`Compras a:`, ...buyRows, `Vendes a:`, ...sellRows].join("\n");
 }
 
 async function showTop3Notification(

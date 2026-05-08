@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "comparadolar-pwa-v4";
+const CACHE_NAME = "comparadolar-pwa-v5";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
@@ -175,7 +175,7 @@ function formatTop3Rows(top3) {
       `${index + 1}. ${entry.slug}: $${formatQuote(entry.value)}`,
   );
 
-  return [`Compra:`, ...buyRows, `Venta:`, ...sellRows].join("\n");
+  return [`Compras a:`, ...buyRows, `Vendes a:`, ...sellRows].join("\n");
 }
 
 async function notifyTop3Change(currency, message, top3) {

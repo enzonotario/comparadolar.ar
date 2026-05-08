@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatCurrency } from "@/lib/utils";
+import { RATE_LABELS } from "@/lib/rate-labels";
 import type { ExchangeRate } from "@/lib/types";
 
 interface Props {
@@ -96,9 +97,9 @@ const relatedProviders = computed(() => {
 
             <div class="space-y-3">
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600 dark:text-white/60"
-                  >Compra</span
-                >
+                <span class="text-sm text-gray-600 dark:text-white/60">{{
+                  RATE_LABELS.bid
+                }}</span>
                 <span class="font-bold text-gray-900 dark:text-white">
                   {{
                     provider.bid ? formatCurrency(provider.bid) : "Sin datos"
@@ -106,9 +107,9 @@ const relatedProviders = computed(() => {
                 </span>
               </div>
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600 dark:text-white/60"
-                  >Venta</span
-                >
+                <span class="text-sm text-gray-600 dark:text-white/60">{{
+                  RATE_LABELS.ask
+                }}</span>
                 <span class="font-bold text-gray-900 dark:text-white">
                   {{
                     provider.ask ? formatCurrency(provider.ask) : "Sin datos"

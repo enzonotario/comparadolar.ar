@@ -2,6 +2,7 @@
 import { provide, onMounted, nextTick, ref as vueRef } from "vue";
 import type { ExchangeRate, CurrencyType } from "@/lib/types";
 import { API_ENDPOINTS, API_BASE_URL } from "@/lib/types";
+import { RATE_LABELS } from "@/lib/rate-labels";
 
 interface Props {
   currency?: CurrencyType;
@@ -543,6 +544,8 @@ const chartOption = computed(() => {
   }
 
   const allProviderPoints: ProviderDataPoint[] = [];
+  const getPointLabel = (type: ProviderDataPoint["type"]) =>
+    type === "buy" ? RATE_LABELS.bid : RATE_LABELS.ask;
 
   topProvidersForBuy.value.forEach((provider) => {
     const latestValue = getLatestProviderValue(
@@ -623,7 +626,7 @@ const chartOption = computed(() => {
       const color = point.type === "buy" ? "#10b981" : "#ef4444";
 
       providerSeries.push({
-        name: `${point.provider.displayName} (${point.type === "buy" ? "Compra" : "Venta"}) - Punto`,
+        name: `${point.provider.displayName} (${getPointLabel(point.type)}) - Punto`,
         type: "scatter" as const,
         data: [[todayTimestamp, actualValue]],
         symbol: "circle",
@@ -648,15 +651,15 @@ const chartOption = computed(() => {
               return (
                 `<strong>${point.provider.displayName}</strong><br/>` +
                 `<strong>${timeString}</strong><br/>` +
-                `Compra (Bid): $${formatPrice(actualValue)}<br/>` +
-                `Venta (Ask): $${formatPrice(point.historyItem?.ask || point.provider.ask || 0)}`
+                `${RATE_LABELS.bid}: $${formatPrice(actualValue)}<br/>` +
+                `${RATE_LABELS.ask}: $${formatPrice(point.historyItem?.ask || point.provider.ask || 0)}`
               );
             } else {
               return (
                 `<strong>${point.provider.displayName}</strong><br/>` +
                 `<strong>${timeString}</strong><br/>` +
-                `Compra (Bid): $${formatPrice(point.historyItem?.bid || point.provider.bid || 0)}<br/>` +
-                `Venta (Ask): $${formatPrice(actualValue)}`
+                `${RATE_LABELS.bid}: $${formatPrice(point.historyItem?.bid || point.provider.bid || 0)}<br/>` +
+                `${RATE_LABELS.ask}: $${formatPrice(actualValue)}`
               );
             }
           },
@@ -664,7 +667,7 @@ const chartOption = computed(() => {
       });
 
       providerSeries.push({
-        name: `${point.provider.displayName} (${point.type === "buy" ? "Compra" : "Venta"}) - Línea`,
+        name: `${point.provider.displayName} (${getPointLabel(point.type)}) - Línea`,
         type: "line" as const,
         data: [
           [todayTimestamp, actualValue],
@@ -681,7 +684,7 @@ const chartOption = computed(() => {
         silent: true,
       });
 
-      const badgeText = point.type === "buy" ? "Vendes a" : "Compras a";
+      const badgeText = getPointLabel(point.type);
       const badgeBgColor = point.type === "buy" ? "#10b981" : "#ef4444";
 
       providerSeries.push({
@@ -732,15 +735,15 @@ const chartOption = computed(() => {
               return (
                 `<strong>${point.provider.displayName}</strong><br/>` +
                 `<strong>${timeString}</strong><br/>` +
-                `Compra (Bid): $${formatPrice(actualValue)}<br/>` +
-                `Venta (Ask): $${formatPrice(point.historyItem?.ask || point.provider.ask || 0)}`
+                `${RATE_LABELS.bid}: $${formatPrice(actualValue)}<br/>` +
+                `${RATE_LABELS.ask}: $${formatPrice(point.historyItem?.ask || point.provider.ask || 0)}`
               );
             } else {
               return (
                 `<strong>${point.provider.displayName}</strong><br/>` +
                 `<strong>${timeString}</strong><br/>` +
-                `Compra (Bid): $${formatPrice(point.historyItem?.bid || point.provider.bid || 0)}<br/>` +
-                `Venta (Ask): $${formatPrice(actualValue)}`
+                `${RATE_LABELS.bid}: $${formatPrice(point.historyItem?.bid || point.provider.bid || 0)}<br/>` +
+                `${RATE_LABELS.ask}: $${formatPrice(actualValue)}`
               );
             }
           },
@@ -775,9 +778,9 @@ const chartOption = computed(() => {
             item.seriesName === "Banda inferior"
           ) {
             bandas.push(item);
-          } else if (item.seriesName?.includes("Vendes a")) {
+          } else if (item.seriesName?.includes(RATE_LABELS.bid)) {
             vendesA.push(item);
-          } else if (item.seriesName?.includes("Compras a")) {
+          } else if (item.seriesName?.includes(RATE_LABELS.ask)) {
             comprasA.push(item);
           }
         });
@@ -818,14 +821,14 @@ const chartOption = computed(() => {
           return 0;
         });
 
-        // Ordenar "Vendes a" de mayor a menor valor
+        // Ordenar RATE_LABELS.bid de mayor a menor valor
         vendesA.sort((a: any, b: any) => {
           const valueA = a.data?.[1] ?? a.value?.[1] ?? 0;
           const valueB = b.data?.[1] ?? b.value?.[1] ?? 0;
           return valueB - valueA; // Mayor a menor
         });
 
-        // Ordenar "Compras a" de menor a mayor valor
+        // Ordenar RATE_LABELS.ask de menor a mayor valor
         comprasA.sort((a: any, b: any) => {
           const valueA = a.data?.[1] || a.value?.[1] || 0;
           const valueB = b.data?.[1] || b.value?.[1] || 0;
@@ -842,9 +845,9 @@ const chartOption = computed(() => {
           )}<br/>`;
         });
 
-        // Mostrar "Vendes a" ordenados de mayor a menor
+        // Mostrar RATE_LABELS.bid ordenados de mayor a menor
         if (vendesA.length > 0) {
-          tooltip += `<br/><strong>Vendes a:</strong><br/>`;
+          tooltip += `<br/><strong>${RATE_LABELS.bid}:</strong><br/>`;
           vendesA.forEach((item: any) => {
             // Obtener el valor del punto scatter (puede estar en data[1] o value[1])
             const value =
@@ -852,16 +855,16 @@ const chartOption = computed(() => {
               item.value?.[1] ??
               (Array.isArray(item.data) ? item.data[1] : item.data);
             const providerName =
-              item.seriesName?.replace(" (Vendes a)", "") ||
+              item.seriesName?.replace(` (${RATE_LABELS.bid})`, "") ||
               item.seriesName ||
               "";
             tooltip += `${item.marker || "•"} ${providerName}: $${formatPrice(value)}<br/>`;
           });
         }
 
-        // Mostrar "Compras a" ordenados de menor a mayor
+        // Mostrar RATE_LABELS.ask ordenados de menor a mayor
         if (comprasA.length > 0) {
-          tooltip += `<br/><strong>Compras a:</strong><br/>`;
+          tooltip += `<br/><strong>${RATE_LABELS.ask}:</strong><br/>`;
           comprasA.forEach((item: any) => {
             // Obtener el valor del punto scatter (puede estar en data[1] o value[1])
             const value =
@@ -869,7 +872,7 @@ const chartOption = computed(() => {
               item.value?.[1] ??
               (Array.isArray(item.data) ? item.data[1] : item.data);
             const providerName =
-              item.seriesName?.replace(" (Compras a)", "") ||
+              item.seriesName?.replace(` (${RATE_LABELS.ask})`, "") ||
               item.seriesName ||
               "";
             tooltip += `${item.marker || "•"} ${providerName}: $${formatPrice(value)}<br/>`;

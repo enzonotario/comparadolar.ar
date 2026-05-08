@@ -11,6 +11,7 @@ import type { ValueType } from "~/composables/useProviderHistory";
 import { useRouteQuery } from "@vueuse/router";
 import { useChartState } from "~/composables/useChartState";
 import { toApiCurrency } from "~/lib/market-constants";
+import { RATE_LABELS } from "~/lib/rate-labels";
 
 export interface ChartHistoryItem {
   bid: number;
@@ -44,8 +45,8 @@ export const timeRanges: TimeRange[] = [
 ];
 
 export const valueTypes: ValueTypeOption[] = [
-  { value: "bid", label: "Compra" },
-  { value: "ask", label: "Venta" },
+  { value: "bid", label: RATE_LABELS.bid },
+  { value: "ask", label: RATE_LABELS.ask },
   { value: "spread", label: "Spread" },
 ];
 
