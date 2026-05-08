@@ -1,6 +1,10 @@
 import type { CurrencyType } from "~/lib/types";
 import { currencies } from "~/lib/currencies-config";
-import { isUsdCclProvider, toApiCurrency } from "~/lib/market-constants";
+import {
+  isBlacklistedProviderSlug,
+  isUsdCclProvider,
+  toApiCurrency,
+} from "~/lib/market-constants";
 import { API_BASE_URL } from "~/lib/types";
 
 const STORAGE_KEY = "comparadolar:top3-notifications";
@@ -23,6 +27,7 @@ interface NormalizedRate {
 
 interface Top3Entry {
   slug: string;
+  name: string;
   value: number;
 }
 
@@ -76,11 +81,11 @@ function top3For(rates: NormalizedRate[]): CurrencyTop3 {
     buy: [...validRates]
       .sort((a, b) => a.ask - b.ask)
       .slice(0, 3)
-      .map((rate) => ({ slug: rate.slug, value: rate.ask })),
+      .map((rate) => ({ slug: rate.slug, name: rate.name, value: rate.ask })),
     sell: [...validRates]
       .sort((a, b) => b.bid - a.bid)
       .slice(0, 3)
-      .map((rate) => ({ slug: rate.slug, value: rate.bid })),
+      .map((rate) => ({ slug: rate.slug, name: rate.name, value: rate.bid })),
   };
 }
 
@@ -165,11 +170,11 @@ function formatQuote(value: number) {
 function formatTop3Rows(top3: CurrencyTop3) {
   const buyRows = top3.buy.map(
     (entry, index) =>
-      `${index + 1}. ${entry.slug}: $${formatQuote(entry.value)}`,
+      `${index + 1}. ${entry.name || entry.slug}: $${formatQuote(entry.value)}`,
   );
   const sellRows = top3.sell.map(
     (entry, index) =>
-      `${index + 1}. ${entry.slug}: $${formatQuote(entry.value)}`,
+      `${index + 1}. ${entry.name || entry.slug}: $${formatQuote(entry.value)}`,
   );
 
   return [`Compras a:`, ...buyRows, `Vendes a:`, ...sellRows].join("\n");
@@ -287,7 +292,9 @@ export function useTop3Notifications() {
   ): Promise<CurrencyTop3> => {
     const apiCurrency = toApiCurrency(currency);
     const payload = await $fetch<unknown>(`${API_BASE_URL}/${apiCurrency}`);
-    let rates = asRateList(payload);
+    let rates = asRateList(payload).filter(
+      (rate) => !isBlacklistedProviderSlug(rate),
+    );
 
     if (currency === "usd") {
       rates = rates.filter((rate) => !isUsdCclRate(rate));

@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "comparadolar-pwa-v5";
+const CACHE_NAME = "comparadolar-pwa-v6";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
@@ -76,7 +76,18 @@ function toApiCurrency(currency, constants) {
 
 function isUsdCclRate(rate, constants) {
   const usdCclProviders = new Set(constants.providerGroups?.usdCcl || []);
-  return usdCclProviders.has(rate.slug.toLowerCase());
+  return (
+    usdCclProviders.has(rate.slug.toLowerCase()) ||
+    usdCclProviders.has(rate.name.toLowerCase())
+  );
+}
+
+function isBlacklistedRate(rate, constants) {
+  const blacklistedProviders = new Set(constants.blacklistedProviders || []);
+  return (
+    blacklistedProviders.has(rate.slug.toLowerCase()) ||
+    blacklistedProviders.has(rate.name.toLowerCase())
+  );
 }
 
 function normalizeRate(raw) {
@@ -106,11 +117,11 @@ function top3For(payload) {
   const buy = [...rates]
     .sort((a, b) => a.ask - b.ask)
     .slice(0, 3)
-    .map((rate) => ({ slug: rate.slug, value: rate.ask }));
+    .map((rate) => ({ slug: rate.slug, name: rate.name, value: rate.ask }));
   const sell = [...rates]
     .sort((a, b) => b.bid - a.bid)
     .slice(0, 3)
-    .map((rate) => ({ slug: rate.slug, value: rate.bid }));
+    .map((rate) => ({ slug: rate.slug, name: rate.name, value: rate.bid }));
 
   return { buy, sell };
 }
@@ -148,9 +159,10 @@ async function fetchTop3(currency) {
   });
   const payload = await response.json();
 
-  if (currency !== "usd" && currency !== "usd-ccl") return top3For(payload);
-
   const filtered = asRateList(payload).filter((rate) => {
+    if (isBlacklistedRate(rate, constants)) return false;
+    if (currency !== "usd" && currency !== "usd-ccl") return true;
+
     const isCcl = isUsdCclRate(rate, constants);
     return currency === "usd-ccl" ? isCcl : !isCcl;
   });
@@ -168,11 +180,11 @@ function formatQuote(value) {
 function formatTop3Rows(top3) {
   const buyRows = top3.buy.map(
     (entry, index) =>
-      `${index + 1}. ${entry.slug}: $${formatQuote(entry.value)}`,
+      `${index + 1}. ${entry.name || entry.slug}: $${formatQuote(entry.value)}`,
   );
   const sellRows = top3.sell.map(
     (entry, index) =>
-      `${index + 1}. ${entry.slug}: $${formatQuote(entry.value)}`,
+      `${index + 1}. ${entry.name || entry.slug}: $${formatQuote(entry.value)}`,
   );
 
   return [`Compras a:`, ...buyRows, `Vendes a:`, ...sellRows].join("\n");
