@@ -279,7 +279,7 @@ const columns: TableColumn<any>[] = [
     },
   },
   {
-    accessorKey: "bid",
+    accessorKey: "ask",
     header: ({ column }) => {
       const isSorted = column.getIsSorted();
 
@@ -287,7 +287,7 @@ const columns: TableColumn<any>[] = [
         h(UButton, {
           color: "neutral",
           variant: "ghost",
-          label: RATE_LABELS_UPPER.bid,
+          label: RATE_LABELS_UPPER.ask,
           icon: isSorted
             ? isSorted === "asc"
               ? "i-lucide-arrow-up-narrow-wide"
@@ -300,7 +300,7 @@ const columns: TableColumn<any>[] = [
     },
   },
   {
-    accessorKey: "ask",
+    accessorKey: "bid",
     header: ({ column }) => {
       const isSorted = column.getIsSorted();
 
@@ -308,7 +308,7 @@ const columns: TableColumn<any>[] = [
         h(UButton, {
           color: "neutral",
           variant: "ghost",
-          label: RATE_LABELS_UPPER.ask,
+          label: RATE_LABELS_UPPER.bid,
           icon: isSorted
             ? isSorted === "asc"
               ? "i-lucide-arrow-up-narrow-wide"
@@ -438,16 +438,16 @@ const downloadCSV = () => {
   const headers = [
     "PROVIDER",
     "CURRENCY",
-    RATE_LABELS_UPPER.bid,
     RATE_LABELS_UPPER.ask,
+    RATE_LABELS_UPPER.bid,
     "SPREAD",
     "SPREAD %",
   ];
   const csvData = filteredRates.value.map((rate) => [
     rate.prettyName || rate.name,
     rate.currency,
-    rate.bid?.toFixed(2) || "0.00",
     rate.ask?.toFixed(2) || "0.00",
+    rate.bid?.toFixed(2) || "0.00",
     getSpread(rate).toFixed(2),
     getSpreadPercentage(rate).toFixed(2),
   ]);
@@ -467,16 +467,16 @@ const copyToClipboard = async () => {
   const headers = [
     "PROVIDER",
     "CURRENCY",
-    RATE_LABELS_UPPER.bid,
     RATE_LABELS_UPPER.ask,
+    RATE_LABELS_UPPER.bid,
     "SPREAD",
     "SPREAD %",
   ];
   const tableData = filteredRates.value.map((rate) => [
     rate.prettyName || rate.name,
     rate.currency,
-    rate.bid?.toFixed(2) || "0.00",
     rate.ask?.toFixed(2) || "0.00",
+    rate.bid?.toFixed(2) || "0.00",
     getSpread(rate).toFixed(2),
     getSpreadPercentage(rate).toFixed(2),
   ]);

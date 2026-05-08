@@ -217,7 +217,7 @@ const chartOption = computed(() => {
       },
     },
     legend: {
-      data: [RATE_LABELS.bid, RATE_LABELS.ask, RATE_LABELS.spread],
+      data: [RATE_LABELS.ask, RATE_LABELS.bid, RATE_LABELS.spread],
       top: 10,
     },
     grid: {
@@ -297,35 +297,6 @@ const chartOption = computed(() => {
     ],
     series: [
       {
-        name: RATE_LABELS.bid,
-        type: "line",
-        data: bidData,
-        smooth: true,
-        showSymbol: false,
-        connectNulls: true,
-        sampling: "lttb",
-        lineStyle: {
-          color: "#10b981",
-          width: 2,
-        },
-        itemStyle: {
-          color: "#10b981",
-        },
-        areaStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: "rgba(16, 185, 129, 0.3)" },
-              { offset: 1, color: "rgba(16, 185, 129, 0.05)" },
-            ],
-          },
-        },
-      },
-      {
         name: RATE_LABELS.ask,
         type: "line",
         data: askData,
@@ -350,6 +321,35 @@ const chartOption = computed(() => {
             colorStops: [
               { offset: 0, color: "rgba(239, 68, 68, 0.3)" },
               { offset: 1, color: "rgba(239, 68, 68, 0.05)" },
+            ],
+          },
+        },
+      },
+      {
+        name: RATE_LABELS.bid,
+        type: "line",
+        data: bidData,
+        smooth: true,
+        showSymbol: false,
+        connectNulls: true,
+        sampling: "lttb",
+        lineStyle: {
+          color: "#10b981",
+          width: 2,
+        },
+        itemStyle: {
+          color: "#10b981",
+        },
+        areaStyle: {
+          color: {
+            type: "linear",
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: "rgba(16, 185, 129, 0.3)" },
+              { offset: 1, color: "rgba(16, 185, 129, 0.05)" },
             ],
           },
         },

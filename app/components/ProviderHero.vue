@@ -130,36 +130,6 @@ const handleProviderClick = () => {
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <UIcon
-                name="i-heroicons-arrow-down"
-                class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
-              />
-              <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">
-                  {{ RATE_LABELS.bid }}
-                </h3>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <div
-          class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
-        >
-          {{ rateData?.bid ? formatCurrency(rateData.bid) : "Sin datos" }}
-        </div>
-        <p
-          v-if="rateData?.bid"
-          class="text-sm text-gray-600 dark:text-white/60 mt-2"
-        >
-          Al vender {{ currencySymbol }}, recibirás este precio por unidad
-        </p>
-      </UCard>
-
-      <UCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <UIcon
                 name="i-heroicons-arrow-up"
                 class="w-5 h-5 text-indigo-600 dark:text-indigo-400"
               />
@@ -182,6 +152,36 @@ const handleProviderClick = () => {
           class="text-sm text-gray-600 dark:text-white/60 mt-2"
         >
           Al comprar {{ currencySymbol }}, pagarás este precio por unidad
+        </p>
+      </UCard>
+
+      <UCard>
+        <template #header>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <UIcon
+                name="i-heroicons-arrow-down"
+                class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+              />
+              <div>
+                <h3 class="font-semibold text-gray-900 dark:text-white">
+                  {{ RATE_LABELS.bid }}
+                </h3>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <div
+          class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"
+        >
+          {{ rateData?.bid ? formatCurrency(rateData.bid) : "Sin datos" }}
+        </div>
+        <p
+          v-if="rateData?.bid"
+          class="text-sm text-gray-600 dark:text-white/60 mt-2"
+        >
+          Al vender {{ currencySymbol }}, recibirás este precio por unidad
         </p>
       </UCard>
     </div>

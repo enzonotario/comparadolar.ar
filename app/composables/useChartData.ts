@@ -45,8 +45,8 @@ export const timeRanges: TimeRange[] = [
 ];
 
 export const valueTypes: ValueTypeOption[] = [
-  { value: "bid", label: RATE_LABELS.bid },
   { value: "ask", label: RATE_LABELS.ask },
+  { value: "bid", label: RATE_LABELS.bid },
   { value: "spread", label: "Spread" },
 ];
 
