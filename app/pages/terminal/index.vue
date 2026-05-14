@@ -104,5 +104,7 @@ defineOgImage("Terminal", {
     <SponsorBanner />
 
     <CurrencyNavigation :currency="currency" />
+
+    <CrossSellRemesas />
   </div>
 </template>
