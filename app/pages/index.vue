@@ -47,6 +47,8 @@ defineOgImage("ComparaDolar", {
 
     <ExchangeBandsChart :currency="currency" />
 
+    <CrossSellRemesas />
+
     <div class="sticky bottom-4 z-10 flex justify-center pointer-events-none">
       <div>
         <USwitch

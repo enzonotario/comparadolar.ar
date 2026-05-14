@@ -55,6 +55,8 @@ defineOgImage("ComparaDolar", {
 
     <CryptoRates :currency="currency" />
 
+    <CrossSellRemesas />
+
     <LegalDisclaimer />
 
     <CurrencyNavigation />
