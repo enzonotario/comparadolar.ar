@@ -40,6 +40,8 @@ defineOgImage("ComparaDolar", {
 
     <ExchangeBandsChart :currency="currency" />
 
+    <CrossSellRemesas />
+
     <LazyLegalDisclaimer />
 
     <CurrencyNavigation />
