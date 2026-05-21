@@ -2,7 +2,7 @@
 import { calculateSpread, formatCurrency } from "@/lib/utils";
 import type { ExchangeRate, ProviderInfo } from "@/lib/types";
 import { useAnalytics } from "@/composables/useAnalytics";
-import { RATE_LABELS } from "@/lib/rate-labels";
+import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
 
 const { trackProviderClick } = useAnalytics();
 
@@ -55,6 +55,9 @@ const handleProviderClick = () => {
     contentType: "button",
   });
 };
+
+const askIconClass = `w-5 h-5 ${RATE_DISPLAY.ask.textClass} ${RATE_DISPLAY.ask.darkTextClass}`;
+const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.darkTextClass}`;
 </script>
 
 <template>
@@ -129,10 +132,7 @@ const handleProviderClick = () => {
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <UIcon
-                name="i-heroicons-arrow-up"
-                class="w-5 h-5 text-indigo-600 dark:text-indigo-400"
-              />
+              <UIcon :name="RATE_DISPLAY.ask.icon" :class="askIconClass" />
               <div>
                 <h3 class="font-semibold text-gray-900 dark:text-white">
                   {{ RATE_LABELS.ask }}
@@ -159,10 +159,7 @@ const handleProviderClick = () => {
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <UIcon
-                name="i-heroicons-arrow-down"
-                class="w-5 h-5 text-emerald-600 dark:text-emerald-400"
-              />
+              <UIcon :name="RATE_DISPLAY.bid.icon" :class="bidIconClass" />
               <div>
                 <h3 class="font-semibold text-gray-900 dark:text-white">
                   {{ RATE_LABELS.bid }}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ExchangeRate } from "@/lib/types";
+import { RATE_DISPLAY } from "@/lib/rate-labels";
 
 interface Props {
   data: ExchangeRate[] | null;
@@ -75,14 +76,18 @@ const lowestSpreadAmount = computed(() => {
   if (!first) return 0;
   return first.ask - first.bid;
 });
+
+const buyIconClass = `w-5 h-5 ${RATE_DISPLAY.ask.textClass}`;
+const sellIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass}`;
+const spreadIconClass = `w-5 h-5 ${RATE_DISPLAY.spread.textClass}`;
 </script>
 
 <template>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
     <SummaryCard
       title="Mejor para comprar"
-      icon="i-heroicons-arrow-down"
-      icon-class="w-5 h-5 text-green-600"
+      :icon="RATE_DISPLAY.ask.icon"
+      :icon-class="buyIconClass"
       :data="isLoading ? null : bestBuy"
       :value="bestBuy?.[0]?.ask ?? 0"
       :currency="props.currency"
@@ -90,8 +95,8 @@ const lowestSpreadAmount = computed(() => {
 
     <SummaryCard
       title="Mejor para vender"
-      icon="i-heroicons-arrow-up"
-      icon-class="w-5 h-5 text-red-600"
+      :icon="RATE_DISPLAY.bid.icon"
+      :icon-class="sellIconClass"
       :data="isLoading ? null : bestSell"
       :value="bestSell?.[0]?.bid ?? 0"
       :currency="props.currency"
@@ -99,8 +104,8 @@ const lowestSpreadAmount = computed(() => {
 
     <SummaryCard
       title="Menor Spread"
-      icon="i-heroicons-arrows-pointing-out"
-      icon-class="w-5 h-5 text-blue-600"
+      :icon="RATE_DISPLAY.spread.icon"
+      :icon-class="spreadIconClass"
       :data="isLoading ? null : lowestSpread"
       :value="lowestSpreadAmount"
       :currency="props.currency"

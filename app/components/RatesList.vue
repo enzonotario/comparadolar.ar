@@ -2,17 +2,18 @@
 import { h, resolveComponent } from "vue";
 import type { ExchangeRate } from "@/lib/types";
 import type { TableColumn, TabsItem } from "@nuxt/ui";
+import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
 
 const items = [
   {
     label: "Quiero comprar",
     value: "buy",
-    icon: "i-heroicons-arrow-down",
+    icon: RATE_DISPLAY.ask.icon,
   },
   {
     label: "Quiero vender",
     value: "sell",
-    icon: "i-heroicons-arrow-up",
+    icon: RATE_DISPLAY.bid.icon,
   },
 ] satisfies TabsItem[];
 
@@ -92,7 +93,8 @@ const columns = computed<TableColumn<ExchangeRate>[]>(() => {
           h(UButton, {
             color: "neutral",
             variant: "ghost",
-            label: activeTab.value === "buy" ? "Compras a" : "Vendes a",
+            label:
+              activeTab.value === "buy" ? RATE_LABELS.ask : RATE_LABELS.bid,
             icon: isSorted
               ? isSorted === "asc"
                 ? "i-lucide-arrow-up-narrow-wide"

@@ -2,6 +2,7 @@
 import { SITE_CONFIG, type CurrencyType, type ExchangeRate } from "~/lib/types";
 import ComparativeChart from "~/components/ComparativeChart.vue";
 import ProviderSelector from "~/components/ProviderSelector.vue";
+import { RATE_LABELS } from "~/lib/rate-labels";
 import {
   top3SlugsForBuyUsd,
   buildOgChartLines,
@@ -62,7 +63,7 @@ defineOgImage("Graficos", {
   yTicks,
   accentColor: "#10b981",
   updatedAt: ogUpdatedAtDate(),
-  priceLabel: "Compras a",
+  priceLabel: RATE_LABELS.ask,
 });
 
 const colorMode = computed(() => useColorMode().value);

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide } from "vue";
 import { calculateSpread } from "~/lib/utils";
-import { RATE_LABELS } from "~/lib/rate-labels";
+import { RATE_DISPLAY, RATE_LABELS } from "~/lib/rate-labels";
 
 interface HistoryData {
   bid: number;
@@ -305,11 +305,11 @@ const chartOption = computed(() => {
         connectNulls: true,
         sampling: "lttb",
         lineStyle: {
-          color: "#ef4444",
+          color: RATE_DISPLAY.ask.chartColor,
           width: 2,
         },
         itemStyle: {
-          color: "#ef4444",
+          color: RATE_DISPLAY.ask.chartColor,
         },
         areaStyle: {
           color: {
@@ -319,8 +319,8 @@ const chartOption = computed(() => {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: "rgba(239, 68, 68, 0.3)" },
-              { offset: 1, color: "rgba(239, 68, 68, 0.05)" },
+              { offset: 0, color: RATE_DISPLAY.ask.chartAreaStart },
+              { offset: 1, color: RATE_DISPLAY.ask.chartAreaEnd },
             ],
           },
         },
@@ -334,11 +334,11 @@ const chartOption = computed(() => {
         connectNulls: true,
         sampling: "lttb",
         lineStyle: {
-          color: "#10b981",
+          color: RATE_DISPLAY.bid.chartColor,
           width: 2,
         },
         itemStyle: {
-          color: "#10b981",
+          color: RATE_DISPLAY.bid.chartColor,
         },
         areaStyle: {
           color: {
@@ -348,8 +348,8 @@ const chartOption = computed(() => {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: "rgba(16, 185, 129, 0.3)" },
-              { offset: 1, color: "rgba(16, 185, 129, 0.05)" },
+              { offset: 0, color: RATE_DISPLAY.bid.chartAreaStart },
+              { offset: 1, color: RATE_DISPLAY.bid.chartAreaEnd },
             ],
           },
         },

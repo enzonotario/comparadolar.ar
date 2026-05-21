@@ -4,6 +4,7 @@ import ComparativeChart from "~/components/ComparativeChart.vue";
 import ProviderSelector from "~/components/ProviderSelector.vue";
 import { isValidCurrency, getCurrencyConfig } from "~/lib/currencies-config";
 import { isCryptoCurrency, toApiCurrency } from "~/lib/market-constants";
+import { RATE_LABELS } from "~/lib/rate-labels";
 import {
   top3SlugsForBuyUsd,
   top3SlugsForBuyUsdCcl,
@@ -84,7 +85,7 @@ defineOgImage("Graficos", {
   yTicks,
   accentColor: currencyConfig?.gradientColors.from ?? "#10b981",
   updatedAt: ogUpdatedAtDate(),
-  priceLabel: "Compras a",
+  priceLabel: RATE_LABELS.ask,
 });
 
 const colorMode = computed(() => useColorMode().value);
