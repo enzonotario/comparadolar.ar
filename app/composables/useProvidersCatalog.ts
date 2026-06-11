@@ -1,6 +1,7 @@
 import { computed, type MaybeRefOrGetter, toValue } from "vue";
 import { isBlacklistedProvider } from "~/lib/currencies-config";
 import { isUsdCclProvider, toApiCurrency } from "~/lib/market-constants";
+import { applyProviderDisplayName } from "~/lib/provider-display";
 import type { CurrencyType, ProviderInfo } from "~/lib/types";
 import { API_BASE_URL } from "~/lib/types";
 
@@ -23,7 +24,7 @@ function normalizeCatalogProvider(
 ): ProviderInfo {
   const slug = raw.slug ?? "";
   const logoUrl = raw.logoUrl || raw.logo || "";
-  return {
+  return applyProviderDisplayName({
     slug,
     name: raw.name || slug,
     logoUrl,
@@ -31,7 +32,7 @@ function normalizeCatalogProvider(
     url: raw.url ?? "",
     prettyName: raw.prettyName || raw.name || slug,
     isBank: Boolean(raw.isBank),
-  };
+  });
 }
 
 export async function fetchNormalizedProviders(

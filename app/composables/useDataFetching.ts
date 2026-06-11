@@ -1,5 +1,6 @@
 import { isBlacklistedProvider } from "~/lib/currencies-config";
 import { isUsdCclProvider, isUsdCryptoProvider } from "~/lib/market-constants";
+import { applyProviderDisplayName } from "~/lib/provider-display";
 
 export function useDataFetching<T>(url: string) {
   const lastUpdateIso = useState<string>(`lastUpdate:${url}`, () =>
@@ -13,6 +14,8 @@ export function useDataFetching<T>(url: string) {
       result = result.filter((item: any) => !isBlacklistedProvider(item)) as T;
 
       result.forEach((item: any) => {
+        applyProviderDisplayName(item);
+
         if (item.prettyName && !item.displayName) {
           item.displayName = item.prettyName;
         }
