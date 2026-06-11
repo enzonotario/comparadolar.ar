@@ -2,10 +2,11 @@ import type { CurrencyType } from "./types";
 import {
   BLACKLISTED_PROVIDERS,
   USD_CCL_PROVIDERS,
+  USD_CRYPTO_PROVIDERS,
   isBlacklistedProviderSlug,
 } from "./market-constants";
 
-export { BLACKLISTED_PROVIDERS, USD_CCL_PROVIDERS };
+export { BLACKLISTED_PROVIDERS, USD_CCL_PROVIDERS, USD_CRYPTO_PROVIDERS };
 
 export function isBlacklistedProvider(item: {
   slug?: string;

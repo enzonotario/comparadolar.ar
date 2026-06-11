@@ -112,6 +112,9 @@ const singleProviderPath = computed(() => {
             >
               CCL
             </UBadge>
+            <UBadge v-if="provider?.isUsdCrypto" color="secondary" size="xs">
+              Cripto
+            </UBadge>
             <span class="flex-1" />
             <UIcon
               name="i-heroicons-chevron-right-solid"
@@ -144,6 +147,9 @@ const singleProviderPath = computed(() => {
             size="xs"
           >
             CCL
+          </UBadge>
+          <UBadge v-if="providers[0]?.isUsdCrypto" color="secondary" size="xs">
+            Cripto
           </UBadge>
         </div>
 

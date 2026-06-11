@@ -9,6 +9,7 @@ export const API_CURRENCY_ALIASES =
   >;
 
 export const USD_CCL_PROVIDERS = marketConstants.providerGroups.usdCcl;
+export const USD_CRYPTO_PROVIDERS = marketConstants.providerGroups.usdCrypto;
 export const BLACKLISTED_PROVIDERS = marketConstants.blacklistedProviders;
 export const CRYPTO_CURRENCIES = marketConstants.currencyGroups
   .crypto as CryptoType[];
@@ -39,6 +40,17 @@ export function isUsdCclProvider(item: {
   const slug = item.slug?.toLowerCase() || "";
   const name = item.name?.toLowerCase() || "";
   return USD_CCL_PROVIDERS.some(
+    (provider) => slug === provider || name === provider,
+  );
+}
+
+export function isUsdCryptoProvider(item: {
+  slug?: string;
+  name?: string;
+}): boolean {
+  const slug = item.slug?.toLowerCase() || "";
+  const name = item.name?.toLowerCase() || "";
+  return USD_CRYPTO_PROVIDERS.some(
     (provider) => slug === provider || name === provider,
   );
 }

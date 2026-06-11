@@ -12,6 +12,7 @@ export interface ExchangeRate {
   slowChange?: boolean;
   isBank?: boolean;
   isUsdCcl?: boolean;
+  isUsdCrypto?: boolean;
 }
 
 export interface CryptoRate {

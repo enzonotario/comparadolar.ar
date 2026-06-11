@@ -588,6 +588,13 @@ defineExpose({
             <span :class="terminalColors.cellText">
               {{ row.original.prettyName || row.original.name }}
             </span>
+            <UBadge
+              v-if="row.original.isUsdCrypto"
+              color="secondary"
+              size="xs"
+            >
+              Cripto
+            </UBadge>
             <RateVariationBadge :value="row.original.pct_variation" />
             <UIcon
               v-if="!row.original.is24x7 && !marketHours"

@@ -1,5 +1,5 @@
 import { isBlacklistedProvider } from "~/lib/currencies-config";
-import { isUsdCclProvider } from "~/lib/market-constants";
+import { isUsdCclProvider, isUsdCryptoProvider } from "~/lib/market-constants";
 
 export function useDataFetching<T>(url: string) {
   const lastUpdateIso = useState<string>(`lastUpdate:${url}`, () =>
@@ -19,6 +19,10 @@ export function useDataFetching<T>(url: string) {
 
         if (isUsdCclProvider(item)) {
           item.isUsdCcl = true;
+        }
+
+        if (isUsdCryptoProvider(item)) {
+          item.isUsdCrypto = true;
         }
       });
     }

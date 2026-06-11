@@ -19,6 +19,8 @@ const catalogs = useProvidersCatalogRegistry();
 const PROVIDER_SEARCH_ALIASES: Record<string, string> = {
   arq: "DolarApp",
   nexo: "Buenbit",
+  "fiwind-cripto": "fiwind",
+  "fiwind-mep": "fiwind",
 };
 
 const open = ref(false);

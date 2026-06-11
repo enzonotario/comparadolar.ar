@@ -3,7 +3,8 @@
     "usd-ccl": "usd"
   },
   "providerGroups": {
-    "usdCcl": ["astropay", "global66", "wallbit", "plus-crypto"]
+    "usdCcl": ["astropay", "global66", "wallbit", "plus-crypto"],
+    "usdCrypto": ["fiwind-cripto"]
   },
   "blacklistedProviders": ["brubank"],
   "currencyGroups": {
