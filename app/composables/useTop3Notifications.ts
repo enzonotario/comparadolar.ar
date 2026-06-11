@@ -6,7 +6,7 @@ import {
   toApiCurrency,
 } from "~/lib/market-constants";
 import { API_BASE_URL } from "~/lib/types";
-import { applyProviderDisplayName } from "~/lib/provider-display";
+import { getProviderDisplayName } from "~/lib/provider-display";
 
 const STORAGE_KEY = "comparadolar:top3-notifications";
 const LAST_TOP3_KEY = "comparadolar:last-top3";
@@ -54,14 +54,15 @@ function toPlainPreferences(
 }
 
 function normalizeRate(raw: any): NormalizedRate {
-  const rate = applyProviderDisplayName({
-    slug: raw?.slug || raw?.name || raw?.prettyName || "",
-    prettyName: raw?.prettyName || raw?.name || raw?.slug || "Proveedor",
-  });
+  const slug = raw?.slug || raw?.name || raw?.prettyName || "";
 
   return {
-    slug: rate.slug || "",
-    name: rate.prettyName || rate.slug || "Proveedor",
+    slug,
+    name: getProviderDisplayName({
+      slug,
+      prettyName: raw?.prettyName || raw?.name || slug || "Proveedor",
+      name: raw?.name,
+    }),
     ask: Number(raw?.ask ?? raw?.totalAsk ?? 0),
     bid: Number(raw?.bid ?? raw?.totalBid ?? 0),
   };

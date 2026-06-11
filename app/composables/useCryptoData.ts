@@ -28,7 +28,7 @@ function normalizeData(data: any): NormalizedCryptoRate[] {
 
   return Object.entries(data).map(([key, item]: [string, any]) => {
     const override = PROVIDER_OVERRIDES[key.toLowerCase()];
-    return applyProviderDisplayName({
+    const rate: NormalizedCryptoRate = {
       name: key,
       slug: item.slug ?? key,
       bid: item.totalBid || 0,
@@ -38,7 +38,9 @@ function normalizeData(data: any): NormalizedCryptoRate[] {
       is24x7: true,
       prettyName: override?.prettyName ?? item.prettyName ?? key,
       url: override?.url ?? item.url ?? "",
-    });
+    };
+
+    return applyProviderDisplayName(rate);
   });
 }
 

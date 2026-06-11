@@ -13,21 +13,23 @@ export function useDataFetching<T>(url: string) {
     if (Array.isArray(result)) {
       result = result.filter((item: any) => !isBlacklistedProvider(item)) as T;
 
-      result.forEach((item: any) => {
-        applyProviderDisplayName(item);
+      result = result.map((item: any) => {
+        let normalized = applyProviderDisplayName(item);
 
-        if (item.prettyName && !item.displayName) {
-          item.displayName = item.prettyName;
+        if (normalized.prettyName && !normalized.displayName) {
+          normalized = { ...normalized, displayName: normalized.prettyName };
         }
 
-        if (isUsdCclProvider(item)) {
-          item.isUsdCcl = true;
+        if (isUsdCclProvider(normalized)) {
+          normalized = { ...normalized, isUsdCcl: true };
         }
 
-        if (isUsdCryptoProvider(item)) {
-          item.isUsdCrypto = true;
+        if (isUsdCryptoProvider(normalized)) {
+          normalized = { ...normalized, isUsdCrypto: true };
         }
-      });
+
+        return normalized;
+      }) as T;
     }
 
     lastUpdateIso.value = new Date().toISOString();

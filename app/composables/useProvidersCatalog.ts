@@ -24,7 +24,7 @@ function normalizeCatalogProvider(
 ): ProviderInfo {
   const slug = raw.slug ?? "";
   const logoUrl = raw.logoUrl || raw.logo || "";
-  return applyProviderDisplayName({
+  const provider: ProviderInfo = {
     slug,
     name: raw.name || slug,
     logoUrl,
@@ -32,7 +32,9 @@ function normalizeCatalogProvider(
     url: raw.url ?? "",
     prettyName: raw.prettyName || raw.name || slug,
     isBank: Boolean(raw.isBank),
-  });
+  };
+
+  return applyProviderDisplayName(provider);
 }
 
 export async function fetchNormalizedProviders(

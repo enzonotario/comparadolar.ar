@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ExchangeRate } from "@/lib/types";
+import { getProviderDisplayName } from "@/lib/provider-display";
 
 interface Props {
   rate: ExchangeRate;
@@ -41,14 +42,14 @@ const handleImageError = (event: Event) => {
     <div class="flex items-center gap-3">
       <img
         :src="rate.logoUrl || rate.logo || '/placeholder.svg'"
-        :alt="rate.prettyName || rate.name"
+        :alt="getProviderDisplayName(rate)"
         class="w-8 h-8 rounded-full"
         @error="handleImageError"
       />
       <div>
         <div class="flex items-center gap-2">
           <h3 class="text-sm font-medium text-gray-900 dark:text-white">
-            {{ rate.prettyName || rate.name }}
+            {{ getProviderDisplayName(rate) }}
           </h3>
           <RateVariationBadge :value="rate.pct_variation" />
           <UBadge v-if="rate.is24x7" color="success" size="xs"> 24/7 </UBadge>

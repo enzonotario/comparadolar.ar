@@ -16,6 +16,7 @@ import type { TableColumn } from "@nuxt/ui";
 import { use24x7Filter } from "@/composables/use24x7Filter";
 import { useTerminalColors } from "@/composables/useTerminalColors";
 import { useRouteQuery } from "@vueuse/router";
+import { getProviderDisplayName } from "@/lib/provider-display";
 
 interface Props {
   currency: CurrencyType;
@@ -444,7 +445,7 @@ const downloadCSV = () => {
     "SPREAD %",
   ];
   const csvData = filteredRates.value.map((rate) => [
-    rate.prettyName || rate.name,
+    getProviderDisplayName(rate),
     rate.currency,
     rate.ask?.toFixed(2) || "0.00",
     rate.bid?.toFixed(2) || "0.00",
@@ -473,7 +474,7 @@ const copyToClipboard = async () => {
     "SPREAD %",
   ];
   const tableData = filteredRates.value.map((rate) => [
-    rate.prettyName || rate.name,
+    getProviderDisplayName(rate),
     rate.currency,
     rate.ask?.toFixed(2) || "0.00",
     rate.bid?.toFixed(2) || "0.00",
@@ -582,11 +583,11 @@ defineExpose({
             <img
               v-if="row.original.logoUrl"
               :src="row.original.logoUrl"
-              :alt="row.original.prettyName || row.original.name"
+              :alt="getProviderDisplayName(row.original)"
               class="w-4 h-4"
             />
             <span :class="terminalColors.cellText">
-              {{ row.original.prettyName || row.original.name }}
+              {{ getProviderDisplayName(row.original) }}
             </span>
             <UBadge
               v-if="row.original.isUsdCrypto"

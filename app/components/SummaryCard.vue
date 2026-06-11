@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getProviderDisplayName } from "@/lib/provider-display";
 import { resolveComponent } from "vue";
 import type { ExchangeRate } from "@/lib/types";
 
@@ -93,14 +94,14 @@ const singleProviderPath = computed(() => {
           >
             <img
               :src="provider.logoUrl || provider.logo || '/placeholder.svg'"
-              :alt="provider.prettyName || provider.name"
+              :alt="getProviderDisplayName(provider)"
               class="w-6 h-6 rounded-full flex-shrink-0"
               @error="handleImageError"
             />
             <span
               class="text-sm font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white"
             >
-              {{ provider.prettyName || provider.name }}
+              {{ getProviderDisplayName(provider) }}
             </span>
             <UBadge v-if="provider?.is24x7" color="success" size="xs">
               24/7
@@ -131,12 +132,12 @@ const singleProviderPath = computed(() => {
             :src="
               providers[0].logoUrl || providers[0].logo || '/placeholder.svg'
             "
-            :alt="providers[0].prettyName || providers[0].name"
+            :alt="getProviderDisplayName(providers[0])"
             class="w-6 h-6 rounded-full"
             @error="handleImageError"
           />
           <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-            {{ providers[0].prettyName || providers[0].name }}
+            {{ getProviderDisplayName(providers[0]) }}
           </span>
           <UBadge v-if="providers[0]?.is24x7" color="success" size="xs">
             24/7
