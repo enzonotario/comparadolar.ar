@@ -10,7 +10,7 @@
     "cocos": "MEP",
     "uala": "Oficial"
   },
-  "blacklistedProviders": ["brubank"],
+  "blacklistedProviders": ["brubank", "bbva"],
   "currencyGroups": {
     "crypto": ["usdc", "usdt", "btc", "eth"],
     "fiat": ["usd", "usd-ccl"]
