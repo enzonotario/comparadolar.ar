@@ -1,5 +1,5 @@
 import { isBlacklistedProvider } from "~/lib/currencies-config";
-import { isUsdCclProvider, isUsdCryptoProvider } from "~/lib/market-constants";
+import { getProviderUsdType, isUsdCclProvider } from "~/lib/market-constants";
 import { applyProviderDisplayName } from "~/lib/provider-display";
 
 export function useDataFetching<T>(url: string) {
@@ -24,9 +24,10 @@ export function useDataFetching<T>(url: string) {
           normalized = { ...normalized, isUsdCcl: true };
         }
 
-        if (isUsdCryptoProvider(normalized)) {
-          normalized = { ...normalized, isUsdCrypto: true };
-        }
+        normalized = {
+          ...normalized,
+          usdType: getProviderUsdType(normalized),
+        };
 
         return normalized;
       }) as T;

@@ -60,9 +60,11 @@ const handleImageError = (event: Event) => {
           >
             CCL
           </UBadge>
-          <UBadge v-if="rate.isUsdCrypto" color="secondary" size="xs">
-            Cripto
-          </UBadge>
+          <UsdTypeBadge
+            :usd-type="rate.usdType"
+            :slug="rate.slug"
+            :name="rate.name"
+          />
         </div>
         <p
           v-if="hasValidSpread"

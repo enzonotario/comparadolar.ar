@@ -1,3 +1,5 @@
+export type UsdProviderType = "Oficial" | "MEP" | "Cripto";
+
 export interface ExchangeRate {
   slug: string;
   name: string;
@@ -12,7 +14,7 @@ export interface ExchangeRate {
   slowChange?: boolean;
   isBank?: boolean;
   isUsdCcl?: boolean;
-  isUsdCrypto?: boolean;
+  usdType?: UsdProviderType;
 }
 
 export interface CryptoRate {
