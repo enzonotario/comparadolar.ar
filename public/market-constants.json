@@ -11,7 +11,7 @@
     "cocos": "MEP",
     "uala": "Oficial",
     "reba": "Oficial",
-    "plus": "Oficial",
+    "plus": "Oficial"
   },
   "blacklistedProviders": ["brubank", "bbva"],
   "currencyGroups": {
