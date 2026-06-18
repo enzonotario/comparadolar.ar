@@ -9,7 +9,8 @@
     "fiwind-cripto": "Cripto",
     "cocos": "MEP",
     "uala": "Oficial",
-    "reba": "Oficial"
+    "reba": "Oficial",
+    "plus": "Oficial"
   },
   "blacklistedProviders": ["brubank", "bbva"],
   "currencyGroups": {
