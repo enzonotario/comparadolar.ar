@@ -12,7 +12,13 @@
     "uala": "Oficial",
     "reba": "Oficial",
     "plus": "Oficial",
-    "balanz": "Oficial"
+    "balanz": "Oficial",
+    "banco-ciudad": "Oficial",
+    "banco-provincia": "Oficial",
+    "banco-supervielle": "Oficial",
+    "banco-hipotecario": "Oficial",
+    "banco-nacion": "Oficial",
+    "plus-inversiones": "MEP"
   },
   "blacklistedProviders": ["brubank", "bbva"],
   "currencyGroups": {
