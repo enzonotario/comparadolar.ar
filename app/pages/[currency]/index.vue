@@ -1,50 +1,35 @@
 <script setup lang="ts">
-import { isValidCurrency, getCurrencyConfig } from "~/lib/currencies-config";
-import type { CurrencyType } from "~/lib/types";
+import { API_BASE_URL } from "~/lib/types";
 import {
-  top3BuyCrypto,
-  top3SellCrypto,
-  ogUpdatedAtDate,
-} from "~/utils/og-data";
+  useComparePageSeo,
+  buildCompareOgImage,
+} from "~/composables/useComparePageSeo";
+import { useValidatedRouteCurrency } from "~/composables/useValidatedRouteCurrency";
 
-const { currency } = useCurrency();
+const { currency, apiCurrency } = useValidatedRouteCurrency();
 
-if (!isValidCurrency(currency.value as string)) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: "Moneda no soportada",
-  });
-}
-
-useSeo({
-  currency: currency.value as CurrencyType,
+useComparePageSeo({
+  currency: currency.value,
+  structuredDataType: "FinancialProduct",
 });
 
-useStructuredData({
-  currency: currency.value as CurrencyType,
-  type: "FinancialProduct",
-});
-
-const currencyConfig = getCurrencyConfig(currency.value as CurrencyType);
-
-const { data: ogData } = await useAsyncData(`og-${currency.value}`, () =>
-  $fetch<
-    Array<{
-      slug: string;
-      prettyName?: string;
-      totalAsk: number;
-      totalBid: number;
-    }>
-  >(`https://api.comparadolar.ar/${currency.value}`),
+const { data: ogData } = await useAsyncData(
+  computed(() => `og-${currency.value}`),
+  () =>
+    $fetch<
+      Array<{
+        slug: string;
+        prettyName?: string;
+        totalAsk: number;
+        totalBid: number;
+      }>
+    >(`${API_BASE_URL}/${apiCurrency.value}`),
 );
 
-defineOgImage("ComparaDolar", {
-  title: `Compará ${currencyConfig?.fullName ?? currency.value.toUpperCase()}`,
-  buy: top3BuyCrypto(ogData.value ?? []),
-  sell: top3SellCrypto(ogData.value ?? []),
-  updatedAt: ogUpdatedAtDate(),
-  accentColor: currencyConfig?.gradientColors.from,
-});
+defineOgImage(
+  "ComparaDolar",
+  buildCompareOgImage(currency.value, ogData.value ?? []),
+);
 </script>
 
 <template>

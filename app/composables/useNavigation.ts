@@ -22,18 +22,17 @@ export function useNavigation() {
     return baseRoute;
   };
 
+  const getSectionCurrencyPath = (currency: CurrencyType): string => {
+    if (currency === "usd") return "/usd";
+    return getCurrencyRoute(currency);
+  };
+
   const getFullRoute = (section: string, currency: CurrencyType): string => {
     const sectionPrefix = getSectionPrefix(section);
-    const currencyRoute = getCurrencyRoute(currency);
+    const currencyRoute = getSectionCurrencyPath(currency);
 
-    // Si es la sección de comparar, solo usar la ruta de la moneda
     if (section === "compare") {
-      return currencyRoute;
-    }
-
-    // Para otras secciones, combinar el prefijo con la ruta de la moneda
-    if (currencyRoute === "/") {
-      return sectionPrefix;
+      return currency === "usd" ? "/" : currencyRoute;
     }
 
     return `${sectionPrefix}${currencyRoute}`;

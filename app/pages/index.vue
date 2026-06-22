@@ -1,38 +1,26 @@
 <script setup lang="ts">
-import { SITE_CONFIG, type ExchangeRate } from "~/lib/types";
+import { API_BASE_URL, type ExchangeRate } from "~/lib/types";
+import { toApiCurrency } from "~/lib/market-constants";
 import {
-  top3BuyUsd,
-  top3SellUsd,
-  ogUpdatedAtDate,
-  shouldOgShowOnly24x7,
-} from "~/utils/og-data";
+  useComparePageSeo,
+  getCompareHomeTitle,
+  buildCompareOgImage,
+} from "~/composables/useComparePageSeo";
 
-const { showOnly24x7 } = use24x7Filter();
 const currency = "usd";
+const { showOnly24x7 } = use24x7Filter();
 
-useSeo({
+useComparePageSeo({
   currency,
-  title: `${SITE_CONFIG.name} | Cotizaciones del dólar en tiempo real`,
-});
-
-useStructuredData({
-  currency,
-  type: "WebPage",
+  title: getCompareHomeTitle(),
+  structuredDataType: "WebPage",
 });
 
 const { data: ogData } = await useAsyncData("og-usd", () =>
-  $fetch<ExchangeRate[]>("https://api.comparadolar.ar/usd"),
+  $fetch<ExchangeRate[]>(`${API_BASE_URL}/${toApiCurrency(currency)}`),
 );
 
-const only24x7 = shouldOgShowOnly24x7();
-
-defineOgImage("ComparaDolar", {
-  title: "Compará Dólar",
-  buy: top3BuyUsd(ogData.value ?? [], only24x7),
-  sell: top3SellUsd(ogData.value ?? [], only24x7),
-  updatedAt: ogUpdatedAtDate(),
-  accentColor: "#10b981",
-});
+defineOgImage("ComparaDolar", buildCompareOgImage(currency, ogData.value ?? []));
 </script>
 
 <template>

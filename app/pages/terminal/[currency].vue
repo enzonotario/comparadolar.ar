@@ -1,93 +1,47 @@
 <script setup lang="ts">
-import { SITE_CONFIG, type CurrencyType } from "@/lib/types";
-import { isValidCurrency, getCurrencyConfig } from "@/lib/currencies-config";
-import { useTerminalColors } from "@/composables/useTerminalColors";
+import { API_BASE_URL } from "~/lib/types";
+import { useValidatedRouteCurrency } from "~/composables/useValidatedRouteCurrency";
 import {
-  top5TerminalUsd,
-  top5TerminalUsdCcl,
-  top5TerminalCrypto,
-  ogUpdatedAtDate,
-} from "~/utils/og-data";
-
-const { currency } = useCurrency();
-
-if (!isValidCurrency(currency.value as string)) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: "Moneda no encontrada",
-  });
-}
-
-const { terminalColors } = useTerminalColors(
-  computed(() => currency.value as CurrencyType),
-);
-const terminalTableRef = ref();
-
-const providerCount = computed(() => {
-  return terminalTableRef.value?.filteredRates?.length || 0;
-});
-
-const isLoading = computed(() => {
-  return terminalTableRef.value?.isLoading ?? true;
-});
+  useTerminalPageSeo,
+  buildTerminalOgImage,
+} from "~/composables/useTerminalPageSeo";
 
 definePageMeta({
   layout: "minimal",
 });
 
-useSeo({
-  title: computed(
-    () => `Terminal ${currency.value.toUpperCase()} | ${SITE_CONFIG.name}`,
-  ),
-  description: computed(
-    () =>
-      `Terminal ${currency.value.toUpperCase()} en ComparaDólar: cotizaciones en vivo, tabla compacta y exportación CSV. Compará compra, venta y spread entre proveedores sin distracciones.`,
-  ),
-});
+const {
+  currency,
+  currencyConfig,
+  isCcl,
+  isFiat,
+} = useValidatedRouteCurrency("Moneda no encontrada");
 
-const currencyConfig = getCurrencyConfig(currency.value as CurrencyType);
+useTerminalPageSeo(currency);
 
-const isCcl = currency.value === "usd-ccl";
-const isFiat = currency.value === "usd" || isCcl;
+const { terminalColors, terminalTableRef, providerCount, isLoading } =
+  useTerminalPageState(currency);
 
 const { data: ogData } = await useAsyncData(
-  `og-terminal-${currency.value}`,
+  computed(() => `og-terminal-${currency.value}`),
   () => {
-    if (isFiat) {
-      return $fetch<
-        Array<{
-          slug: string;
-          prettyName?: string;
-          ask: number;
-          bid: number;
-          name: string;
-        }>
-      >("https://api.comparadolar.ar/usd");
+    if (isFiat.value) {
+      return $fetch(`${API_BASE_URL}/usd`);
     }
-    return $fetch<
-      Array<{
-        slug: string;
-        prettyName?: string;
-        totalAsk: number;
-        totalBid: number;
-      }>
-    >(`https://api.comparadolar.ar/${currency.value}`);
+    return $fetch(`${API_BASE_URL}/${currency.value}`);
   },
 );
 
-const terminalRows = computed(() => {
-  if (!ogData.value) return [];
-  if (isCcl) return top5TerminalUsdCcl(ogData.value as never);
-  if (isFiat) return top5TerminalUsd(ogData.value as never);
-  return top5TerminalCrypto(ogData.value as never);
-});
-
-defineOgImage("Terminal", {
-  title: currencyConfig?.label ?? currency.value.toUpperCase(),
-  rows: terminalRows.value,
-  updatedAt: ogUpdatedAtDate(),
-  accentColor: currencyConfig?.gradientColors.from,
-});
+defineOgImage(
+  "Terminal",
+  buildTerminalOgImage({
+    currency: currency.value,
+    currencyConfig: currencyConfig.value,
+    isCcl: isCcl.value,
+    isFiat: isFiat.value,
+    data: ogData.value ?? [],
+  }),
+);
 </script>
 
 <template>

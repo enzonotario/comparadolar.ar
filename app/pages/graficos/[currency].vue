@@ -1,70 +1,50 @@
 <script setup lang="ts">
-import { SITE_CONFIG, type CurrencyType } from "~/lib/types";
-import ComparativeChart from "~/components/ComparativeChart.vue";
-import ProviderSelector from "~/components/ProviderSelector.vue";
-import { isValidCurrency, getCurrencyConfig } from "~/lib/currencies-config";
-import { isCryptoCurrency, toApiCurrency } from "~/lib/market-constants";
-import { RATE_LABELS } from "~/lib/rate-labels";
+import { API_BASE_URL, type CurrencyType } from "~/lib/types";
+import { useValidatedRouteCurrency } from "~/composables/useValidatedRouteCurrency";
 import {
-  top3SlugsForBuyUsd,
-  top3SlugsForBuyUsdCcl,
-  top3SlugsForBuyCrypto,
-  buildOgChartLines,
-  ogUpdatedAtDate,
-  shouldOgShowOnly24x7,
-} from "~/utils/og-data";
-
-const { currency } = useCurrency();
-
-if (!isValidCurrency(currency.value as string)) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: "Moneda no soportada",
-  });
-}
+  useGraficosPageSeo,
+  getGraficosTop3Slugs,
+  buildGraficosOgImage,
+} from "~/composables/useGraficosPageSeo";
 
 definePageMeta({
   layout: "minimal",
 });
 
-useSeo({
-  title: computed(
-    () => `Gráficos ${currency.value.toUpperCase()} | ${SITE_CONFIG.name}`,
-  ),
-  description: computed(
-    () =>
-      `Gráficos de ${currency.value.toUpperCase()} en ComparaDólar: histórico, comparación de proveedores y tendencias. Analizá el tipo de cambio en Argentina con datos en tiempo real.`,
-  ),
-});
+const {
+  currency,
+  currencyConfig,
+  apiCurrency,
+  isCrypto,
+  isCcl,
+} = useValidatedRouteCurrency();
 
-const currencyConfig = getCurrencyConfig(currency.value as CurrencyType);
-const isCrypto = isCryptoCurrency(currency.value);
-const apiCurrency = toApiCurrency(currency.value);
+useGraficosPageSeo(currency);
 
 const { data: ogRates } = await useAsyncData(
-  `og-graficos-${currency.value}-rates`,
-  () => $fetch<any[]>(`https://api.comparadolar.ar/${apiCurrency}`),
+  computed(() => `og-graficos-${currency.value}-rates`),
+  () => $fetch<any[]>(`${API_BASE_URL}/${apiCurrency.value}`),
 );
 
-const only24x7 = shouldOgShowOnly24x7();
-const top3 = isCrypto
-  ? top3SlugsForBuyCrypto(ogRates.value ?? [])
-  : currency.value === "usd-ccl"
-    ? top3SlugsForBuyUsdCcl(ogRates.value ?? [])
-    : top3SlugsForBuyUsd(ogRates.value ?? [], only24x7);
+const top3 = getGraficosTop3Slugs({
+  currency: currency.value,
+  isCrypto: isCrypto.value,
+  isCcl: isCcl.value,
+  rates: ogRates.value ?? [],
+});
 
 const since3Days = new Date();
 since3Days.setDate(since3Days.getDate() - 3);
 
 const { data: ogHistories } = await useAsyncData(
-  `og-graficos-${currency.value}-history`,
+  computed(() => `og-graficos-${currency.value}-history`),
   async () => {
     return Promise.all(
       top3.map(async ({ slug, name }) => {
         const data = await $fetch<
           Array<{ bid: number; ask: number; timestamp: string }>
         >(
-          `https://api.comparadolar.ar/${apiCurrency}/providers/${slug}/history`,
+          `${API_BASE_URL}/${apiCurrency.value}/providers/${slug}/history`,
         );
         return { name, data };
       }),
@@ -72,23 +52,17 @@ const { data: ogHistories } = await useAsyncData(
   },
 );
 
-const { lines, yTicks } = buildOgChartLines(
-  ogHistories.value ?? [],
-  since3Days,
-  960,
-  200,
+defineOgImage(
+  "Graficos",
+  buildGraficosOgImage({
+    currency: currency.value,
+    currencyConfig: currencyConfig.value,
+    histories: ogHistories.value ?? [],
+  }),
 );
 
-defineOgImage("Graficos", {
-  title: `${currencyConfig?.fullName ?? currency.value.toUpperCase()}`,
-  lines,
-  yTicks,
-  accentColor: currencyConfig?.gradientColors.from ?? "#10b981",
-  updatedAt: ogUpdatedAtDate(),
-  priceLabel: RATE_LABELS.ask,
-});
-
 const colorMode = computed(() => useColorMode().value);
+const showExchangeBands = computed(() => currency.value === "usd");
 
 const {
   selectedRange,
@@ -192,6 +166,8 @@ const {
         :provider-names="providerNames"
       />
     </UCard>
+
+    <ExchangeBandsChart v-if="showExchangeBands" :currency="currency" />
 
     <CurrencyNavigation />
   </div>

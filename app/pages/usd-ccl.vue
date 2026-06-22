@@ -1,33 +1,23 @@
 <script setup lang="ts">
-import type { ExchangeRate } from "~/lib/types";
+import { API_BASE_URL, type ExchangeRate } from "~/lib/types";
+import { toApiCurrency } from "~/lib/market-constants";
 import {
-  top3BuyUsdCcl,
-  top3SellUsdCcl,
-  ogUpdatedAtDate,
-} from "~/utils/og-data";
+  useComparePageSeo,
+  buildCompareOgImage,
+} from "~/composables/useComparePageSeo";
 
 const currency = "usd-ccl";
 
-useSeo({
+useComparePageSeo({
   currency,
-});
-
-useStructuredData({
-  currency,
-  type: "WebPage",
+  structuredDataType: "WebPage",
 });
 
 const { data: ogData } = await useAsyncData("og-usd-ccl", () =>
-  $fetch<ExchangeRate[]>("https://api.comparadolar.ar/usd"),
+  $fetch<ExchangeRate[]>(`${API_BASE_URL}/${toApiCurrency(currency)}`),
 );
 
-defineOgImage("ComparaDolar", {
-  title: "Compará Dólar CCL",
-  buy: top3BuyUsdCcl(ogData.value ?? []),
-  sell: top3SellUsdCcl(ogData.value ?? []),
-  updatedAt: ogUpdatedAtDate(),
-  accentColor: "#3b82f6",
-});
+defineOgImage("ComparaDolar", buildCompareOgImage(currency, ogData.value ?? []));
 </script>
 
 <template>

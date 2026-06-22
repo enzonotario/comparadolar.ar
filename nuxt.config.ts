@@ -8,6 +8,8 @@ export default defineNuxtConfig({
 
   routeRules: {
     "/usdc/dolarapp": { redirect: "/usdc/arq" },
+    "/terminal": { redirect: "/terminal/usd" },
+    "/graficos": { redirect: "/graficos/usd" },
   },
 
   ssr: true,
