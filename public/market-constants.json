@@ -18,7 +18,8 @@
     "banco-supervielle": "Oficial",
     "banco-hipotecario": "Oficial",
     "banco-nacion": "Oficial",
-    "plus-inversiones": "MEP"
+    "plus-inversiones": "MEP",
+    "tienda-dolar": "Oficial"
   },
   "blacklistedProviders": ["brubank", "bbva"],
   "currencyGroups": {
