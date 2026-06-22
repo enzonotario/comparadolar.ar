@@ -19,7 +19,8 @@
     "banco-hipotecario": "Oficial",
     "banco-nacion": "Oficial",
     "plus-inversiones": "MEP",
-    "tiendadolar": "Oficial"
+    "tiendadolar": "Oficial",
+    "ripio": "Cripto"
   },
   "blacklistedProviders": ["brubank", "bbva"],
   "currencyGroups": {
