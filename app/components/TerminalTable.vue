@@ -594,7 +594,6 @@ defineExpose({
               :slug="row.original.slug"
               :name="row.original.name"
             />
-            <RateVariationBadge :value="row.original.pct_variation" />
             <UIcon
               v-if="!row.original.is24x7 && !marketHours"
               name="i-heroicons-moon"
