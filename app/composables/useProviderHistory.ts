@@ -1,6 +1,7 @@
 import { API_BASE_URL, type CurrencyType } from "~/lib/types";
 import { calculateSpread } from "~/lib/utils";
 import { toApiCurrency } from "~/lib/market-constants";
+import { getDateRange } from "~/composables/useChartData";
 
 export interface HistoryData {
   bid: number;
@@ -45,36 +46,6 @@ export function useProviderHistory(
     } finally {
       isLoading.value = false;
     }
-  };
-
-  const getDateRange = (range: string) => {
-    const now = new Date();
-    const start = new Date();
-
-    switch (range) {
-      case "1d":
-        start.setDate(now.getDate() - 1);
-        break;
-      case "7d":
-        start.setDate(now.getDate() - 7);
-        break;
-      case "1m":
-        start.setMonth(now.getMonth() - 1);
-        break;
-      case "3m":
-        start.setMonth(now.getMonth() - 3);
-        break;
-      case "6m":
-        start.setMonth(now.getMonth() - 6);
-        break;
-      case "1a":
-        start.setFullYear(now.getFullYear() - 1);
-        break;
-      default:
-        start.setDate(now.getDate() - 7);
-    }
-
-    return { start, end: now };
   };
 
   const getFilteredData = (range: string) => {

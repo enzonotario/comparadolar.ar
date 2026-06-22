@@ -2,6 +2,7 @@
 import { provide } from "vue";
 import { calculateSpread } from "~/lib/utils";
 import { RATE_DISPLAY, RATE_LABELS } from "~/lib/rate-labels";
+import { getDateRange, timeRanges } from "~/composables/useChartData";
 
 interface HistoryData {
   bid: number;
@@ -20,45 +21,6 @@ const colorMode = computed(() => useColorMode().value);
 provide(THEME_KEY, colorMode.value);
 
 const selectedRange = ref("7d");
-
-const timeRanges = [
-  { value: "1d", label: "1 día" },
-  { value: "7d", label: "7 días" },
-  { value: "1m", label: "1 mes" },
-  { value: "3m", label: "3 meses" },
-  { value: "6m", label: "6 meses" },
-  { value: "1a", label: "1 año" },
-];
-
-const getDateRange = (range: string) => {
-  const now = new Date();
-  const start = new Date();
-
-  switch (range) {
-    case "1d":
-      start.setDate(now.getDate() - 1);
-      break;
-    case "7d":
-      start.setDate(now.getDate() - 7);
-      break;
-    case "1m":
-      start.setMonth(now.getMonth() - 1);
-      break;
-    case "3m":
-      start.setMonth(now.getMonth() - 3);
-      break;
-    case "6m":
-      start.setMonth(now.getMonth() - 6);
-      break;
-    case "1a":
-      start.setFullYear(now.getFullYear() - 1);
-      break;
-    default:
-      start.setDate(now.getDate() - 7);
-  }
-
-  return { start, end: now };
-};
 
 const renderer = ref("svg");
 const initOptions = computed(() => ({

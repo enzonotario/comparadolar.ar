@@ -40,9 +40,18 @@ export const timeRanges: TimeRange[] = [
   { value: "7d", label: "7 días" },
   { value: "1m", label: "1 mes" },
   { value: "3m", label: "3 meses" },
-  { value: "6m", label: "6 meses" },
-  { value: "1a", label: "1 año" },
 ];
+
+const validRangeValues = new Set(timeRanges.map((range) => range.value));
+
+export function normalizeChartRange(
+  range: string | null | undefined,
+  fallback = "1d",
+): string {
+  if (range && validRangeValues.has(range)) return range;
+  if (range === "6m" || range === "1a") return "3m";
+  return fallback;
+}
 
 export const valueTypes: ValueTypeOption[] = [
   { value: "ask", label: RATE_LABELS.ask },
@@ -69,12 +78,6 @@ export function getDateRange(range: string) {
       break;
     case "3m":
       start.setMonth(now.getMonth() - 3);
-      break;
-    case "6m":
-      start.setMonth(now.getMonth() - 6);
-      break;
-    case "1a":
-      start.setFullYear(now.getFullYear() - 1);
       break;
     default:
       start.setDate(now.getDate() - 7);
@@ -146,7 +149,8 @@ export function useChartData(
     const { savedRange, savedValueType, savedProviders } = loadSavedState(
       currencyValue.value,
     );
-    const range = rangeQuery.value || savedRange || "1d";
+    const rawRange = rangeQuery.value || savedRange || "1d";
+    const range = normalizeChartRange(rawRange);
     const valueType = (valueTypeQuery.value ||
       savedValueType ||
       "bid") as ValueType;
@@ -154,8 +158,12 @@ export function useChartData(
       providersQuery.value || savedProviders || null,
     );
 
-    if (!rangeQuery.value && savedRange) {
-      rangeQuery.value = savedRange;
+    if (rangeQuery.value) {
+      if (rangeQuery.value !== range) {
+        rangeQuery.value = range;
+      }
+    } else if (savedRange) {
+      rangeQuery.value = range;
     }
     if (!valueTypeQuery.value && savedValueType) {
       valueTypeQuery.value = savedValueType;
