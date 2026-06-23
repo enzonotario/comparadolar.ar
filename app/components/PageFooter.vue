@@ -12,7 +12,7 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <footer class="w-full mt-12 flex flex-col gap-8">
+  <footer class="w-full flex flex-col gap-8">
     <CrossSellRemesas v-if="crossSell" />
 
     <slot name="before-nav" />
