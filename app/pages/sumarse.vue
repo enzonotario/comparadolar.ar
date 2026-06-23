@@ -1,12 +1,8 @@
 <script setup lang="ts">
-useSeo({
+useStaticPage({
   title: "Integrar tu servicio - ComparaDolar.ar",
   description:
     "Integrá tu API de cotizaciones en ComparaDolar.ar sin costo: requisitos técnicos y visibilidad entre quienes comparan dólar y cripto en Argentina.",
-});
-
-useStructuredData({
-  type: "WebPage",
 });
 </script>
 

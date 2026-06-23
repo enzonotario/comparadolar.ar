@@ -54,7 +54,7 @@ const nextConfig = computed(() => {
 <template>
   <div
     v-if="previousCurrency || nextCurrency"
-    class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-800"
+    class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 border-t border-zinc-200 dark:border-zinc-800"
   >
     <NuxtLink
       v-if="previousCurrency && previousConfig"

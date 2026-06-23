@@ -1,35 +1,5 @@
 <script setup lang="ts">
-import { API_BASE_URL } from "~/lib/types";
-import {
-  useComparePageSeo,
-  buildCompareOgImage,
-} from "~/composables/useComparePageSeo";
-import { useValidatedRouteCurrency } from "~/composables/useValidatedRouteCurrency";
-
-const { currency, apiCurrency } = useValidatedRouteCurrency();
-
-useComparePageSeo({
-  currency: currency.value,
-  structuredDataType: "FinancialProduct",
-});
-
-const { data: ogData } = await useAsyncData(
-  computed(() => `og-${currency.value}`),
-  () =>
-    $fetch<
-      Array<{
-        slug: string;
-        prettyName?: string;
-        totalAsk: number;
-        totalBid: number;
-      }>
-    >(`${API_BASE_URL}/${apiCurrency.value}`),
-);
-
-defineOgImage(
-  "ComparaDolar",
-  buildCompareOgImage(currency.value, ogData.value ?? []),
-);
+const { currency } = useCompareCryptoPage();
 </script>
 
 <template>
@@ -40,10 +10,6 @@ defineOgImage(
 
     <CryptoRates :currency="currency" />
 
-    <CrossSellRemesas />
-
-    <LegalDisclaimer />
-
-    <CurrencyNavigation />
+    <PageFooter cross-sell legal-disclaimer="eager" />
   </div>
 </template>

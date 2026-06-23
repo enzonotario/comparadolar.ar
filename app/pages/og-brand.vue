@@ -1,12 +1,13 @@
 <script setup lang="ts">
+useStaticPage({
+  title: "OG — Brand",
+  description: "Vista técnica para generar imagen OG de marca.",
+  robots: "noindex, nofollow",
+});
+
 defineOgImage("Brand", {
   title: "ComparaDolar",
   accentColor: "#10b981",
-});
-
-useHead({
-  title: "OG — Brand",
-  meta: [{ name: "robots", content: "noindex, nofollow" }],
 });
 </script>
 
