@@ -1,6 +1,6 @@
 import { isBlacklistedProvider } from "~/lib/currencies-config";
 import { getProviderUsdType, isUsdCclProvider } from "~/lib/market-constants";
-import { applyProviderDisplayName } from "~/lib/provider-display";
+import { applyProviderDisplayName, getProviderLogoUrl } from "~/lib/provider-display";
 
 export function useDataFetching<T>(url: string) {
   const lastUpdateIso = useState<string>(`lastUpdate:${url}`, () =>
@@ -15,6 +15,15 @@ export function useDataFetching<T>(url: string) {
 
       result = result.map((item: any) => {
         let normalized = applyProviderDisplayName(item);
+
+        const logoUrl = getProviderLogoUrl({
+          slug: normalized.slug,
+          logo: normalized.logo,
+          logoUrl: normalized.logoUrl,
+        });
+        if (logoUrl) {
+          normalized = { ...normalized, logoUrl, logo: logoUrl };
+        }
 
         if (normalized.prettyName && !normalized.displayName) {
           normalized = { ...normalized, displayName: normalized.prettyName };

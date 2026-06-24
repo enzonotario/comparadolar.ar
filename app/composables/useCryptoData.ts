@@ -5,7 +5,10 @@ import type {
 } from "@/lib/types";
 import { API_ENDPOINTS } from "@/lib/types";
 import { isCryptoCurrency } from "@/lib/market-constants";
-import { applyProviderDisplayName } from "@/lib/provider-display";
+import {
+  applyProviderDisplayName,
+  getProviderLogoUrl,
+} from "@/lib/provider-display";
 
 const PROVIDER_OVERRIDES: Record<
   string,
@@ -28,13 +31,18 @@ function normalizeData(data: any): NormalizedCryptoRate[] {
 
   return Object.entries(data).map(([key, item]: [string, any]) => {
     const override = PROVIDER_OVERRIDES[key.toLowerCase()];
+    const slug = item.slug ?? key;
+    const logoUrl =
+      override?.logo ||
+      getProviderLogoUrl({ slug, logo: item.logo, logoUrl: item.logoUrl }) ||
+      "";
     const rate: NormalizedCryptoRate = {
       name: key,
-      slug: item.slug ?? key,
+      slug,
       bid: item.totalBid || 0,
       ask: item.totalAsk || 0,
-      logo: override?.logo ?? item.logo ?? "",
-      logoUrl: override?.logo ?? item.logo ?? "",
+      logo: logoUrl,
+      logoUrl,
       is24x7: true,
       prettyName: override?.prettyName ?? item.prettyName ?? key,
       url: override?.url ?? item.url ?? "",
