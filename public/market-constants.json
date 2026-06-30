@@ -20,7 +20,8 @@
     "banco-nacion": "Oficial",
     "plus-inversiones": "MEP",
     "tiendadolar": "Oficial",
-    "ripio": "Cripto"
+    "ripio": "Cripto",
+    "nexo": "Cripto"
   },
   "blacklistedProviders": ["brubank", "bbva"],
   "currencyGroups": {
