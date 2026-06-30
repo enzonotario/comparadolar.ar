@@ -21,6 +21,8 @@ const updateIsMobile = () => {
 };
 
 onMounted(() => {
+  updateFormattedTime();
+
   const defer =
     window.requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1));
 
@@ -34,13 +36,16 @@ onUnmounted(() => {
   window.removeEventListener("resize", updateIsMobile);
 });
 
-const formattedTime = computed(() => {
-  const options: Intl.DateTimeFormatOptions = {
+const formattedTime = ref("");
+
+const updateFormattedTime = () => {
+  formattedTime.value = props.lastUpdate.toLocaleTimeString("es-AR", {
     hour: "2-digit",
     minute: "2-digit",
-  };
-  return props.lastUpdate.toLocaleTimeString("es-AR", options);
-});
+  });
+};
+
+watch(() => props.lastUpdate, updateFormattedTime);
 
 const handleRefresh = async () => {
   isAnimating.value = true;
@@ -63,7 +68,10 @@ const handleRefresh = async () => {
     <div class="text-sm text-gray-500 dark:text-white/60 self-end">
       <span v-if="isMobile">Actualizado:</span>
       <span v-else>Última actualización:</span>
-      {{ formattedTime }}
+      <ClientOnly>
+        {{ formattedTime }}
+        <template #fallback>--:--</template>
+      </ClientOnly>
     </div>
 
     <UButton

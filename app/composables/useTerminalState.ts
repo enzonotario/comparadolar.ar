@@ -18,15 +18,10 @@ export function useTerminalState() {
     return { savedSort, savedSelected };
   };
 
-  const buildRouteWithState = (basePath: string, currency: CurrencyType) => {
-    const { savedSort, savedSelected } = loadSavedState(currency);
-
-    const queryParams = new URLSearchParams();
-    if (savedSort) queryParams.set("sort", savedSort);
-    if (savedSelected) queryParams.set("selected", savedSelected);
-
-    const queryString = queryParams.toString();
-    return queryString ? `${basePath}?${queryString}` : basePath;
+  const buildRouteWithState = (basePath: string, _currency: CurrencyType) => {
+    // Keep links stable during SSR/hydration. Terminal restores sort/selection
+    // from localStorage on mount.
+    return basePath;
   };
 
   const saveSortToStorage = (currency: CurrencyType, value: string) => {

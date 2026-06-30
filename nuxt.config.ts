@@ -10,6 +10,9 @@ export default defineNuxtConfig({
     "/usdc/dolarapp": { redirect: "/usdc/arq" },
     "/terminal": { redirect: "/terminal/usd" },
     "/graficos": { redirect: "/graficos/usd" },
+    "/usd-ccl": { redirect: "/usd" },
+    "/terminal/usd-ccl": { redirect: "/terminal/usd" },
+    "/graficos/usd-ccl": { redirect: "/graficos/usd" },
   },
 
   ssr: true,

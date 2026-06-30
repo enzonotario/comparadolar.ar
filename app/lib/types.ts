@@ -1,4 +1,5 @@
 export type UsdProviderType = "Oficial" | "MEP" | "Cripto";
+export type UsdFilterCategory = UsdProviderType | "CCL";
 
 export interface ExchangeRate {
   slug: string;

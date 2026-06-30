@@ -30,6 +30,7 @@ const colorMode = computed(() => useColorMode().value);
   <UCard>
     <template #header>
       <div class="space-y-4">
+        <UsdTypeFilters v-if="currency === 'usd'" />
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <ChartFilters

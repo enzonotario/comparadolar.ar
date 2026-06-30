@@ -1,6 +1,6 @@
 import { computed, type MaybeRefOrGetter, toValue } from "vue";
 import { isBlacklistedProvider } from "~/lib/currencies-config";
-import { isUsdCclProvider, toApiCurrency } from "~/lib/market-constants";
+import { toApiCurrency } from "~/lib/market-constants";
 import {
   applyProviderDisplayName,
   getProviderLogoUrl,
@@ -67,19 +67,9 @@ export async function fetchNormalizedProviders(
 
 export function filterProvidersCatalogForCurrency(
   providers: ProviderInfo[],
-  currency: CurrencyType,
+  _currency: CurrencyType,
 ): ProviderInfo[] {
-  const data = [...providers];
-
-  if (currency === "usd-ccl") {
-    return data.filter(isUsdCclProvider);
-  }
-
-  if (currency === "usd") {
-    return data.filter((provider) => !isUsdCclProvider(provider));
-  }
-
-  return data;
+  return [...providers];
 }
 
 /** Ruta canónica de ficha de proveedor (alineada con RelatedProviders). */

@@ -10,7 +10,7 @@ import {
 import type { ValueType } from "~/composables/useProviderHistory";
 import { useRouteQuery } from "@vueuse/router";
 import { useChartState } from "~/composables/useChartState";
-import { toApiCurrency } from "~/lib/market-constants";
+import { toApiCurrency, getUsdFilterCategory } from "~/lib/market-constants";
 import { RATE_LABELS } from "~/lib/rate-labels";
 
 export interface ChartHistoryItem {
@@ -94,6 +94,7 @@ export function useChartData(
 ) {
   const currencyValue = computed(() => currency.value);
   const apiCurrency = computed(() => toApiCurrency(currencyValue.value));
+  const { enabledTypes } = useUsdTypeFilter();
   const { data: providersDataRaw } = useProvidersCatalogForCurrency(
     currencyValue,
     {
@@ -105,7 +106,15 @@ export function useChartData(
   const providersData = computed(() => {
     const data = providersDataRaw.value;
     if (!Array.isArray(data)) return [];
-    return filterProvidersCatalogForCurrency(data, currencyValue.value);
+    let filtered = filterProvidersCatalogForCurrency(data, currencyValue.value);
+
+    if (currencyValue.value === "usd") {
+      filtered = filtered.filter((provider) =>
+        enabledTypes.value[getUsdFilterCategory(provider)],
+      );
+    }
+
+    return filtered;
   });
 
   const providerOptions = computed(() => {
@@ -145,47 +154,67 @@ export function useChartData(
     return query.split(",").filter((slug) => slug.length > 0);
   };
 
-  const getInitialState = () => {
-    const { savedRange, savedValueType, savedProviders } = loadSavedState(
-      currencyValue.value,
-    );
-    const rawRange = rangeQuery.value || savedRange || "1d";
+  const getStateFromQuery = () => {
+    const rawRange = rangeQuery.value || "1d";
     const range = normalizeChartRange(rawRange);
-    const valueType = (valueTypeQuery.value ||
-      savedValueType ||
-      "bid") as ValueType;
-    const providers = parseProvidersQuery(
-      providersQuery.value || savedProviders || null,
-    );
+    const valueType = (valueTypeQuery.value || "bid") as ValueType;
+    const providers = parseProvidersQuery(providersQuery.value || null);
 
-    if (rangeQuery.value) {
-      if (rangeQuery.value !== range) {
-        rangeQuery.value = range;
-      }
-    } else if (savedRange) {
+    if (rangeQuery.value && rangeQuery.value !== range) {
       rangeQuery.value = range;
-    }
-    if (!valueTypeQuery.value && savedValueType) {
-      valueTypeQuery.value = savedValueType;
-    }
-    if (!providersQuery.value && savedProviders) {
-      providersQuery.value = savedProviders;
     }
 
     return { range, valueType, providers };
   };
 
-  const initialState = getInitialState();
+  const hydrateStateFromStorage = () => {
+    if (!import.meta.client) return;
+
+    const { savedRange, savedValueType, savedProviders } = loadSavedState(
+      currencyValue.value,
+    );
+
+    if (!rangeQuery.value && savedRange) {
+      const range = normalizeChartRange(savedRange);
+      selectedRange.value = range;
+      rangeQuery.value = range;
+    }
+
+    if (!valueTypeQuery.value && savedValueType) {
+      selectedValueType.value = savedValueType as ValueType;
+      valueTypeQuery.value = savedValueType;
+    }
+
+    if (!providersQuery.value && savedProviders) {
+      selectedProviders.value = parseProvidersQuery(savedProviders);
+      providersQuery.value = savedProviders;
+    }
+  };
+
+  const initialState = getStateFromQuery();
   const selectedRange = ref(initialState.range);
   const selectedValueType = ref<ValueType>(initialState.valueType);
   const selectedProviders = ref<string[]>(initialState.providers);
 
   watch(currencyValue, () => {
-    const newState = getInitialState();
+    const newState = getStateFromQuery();
     selectedRange.value = newState.range;
     selectedValueType.value = newState.valueType;
     selectedProviders.value = newState.providers;
+    hydrateStateFromStorage();
   });
+
+  watch(
+    enabledTypes,
+    () => {
+      if (currencyValue.value !== "usd") return;
+      const availableSlugs = providerOptions.value.map((p) => p.value);
+      selectedProviders.value = selectedProviders.value.filter((slug) =>
+        availableSlugs.includes(slug),
+      );
+    },
+    { deep: true },
+  );
 
   watch(
     providerOptions,
@@ -268,6 +297,8 @@ export function useChartData(
   let unregisterAutoRefreshHandler: (() => void) | undefined;
 
   onMounted(() => {
+    hydrateStateFromStorage();
+
     unregisterAutoRefreshHandler = registerAutoRefreshHandler(
       "chart-history",
       loadHistories,

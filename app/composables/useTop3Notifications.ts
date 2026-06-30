@@ -2,7 +2,6 @@ import type { CurrencyType } from "~/lib/types";
 import { currencies } from "~/lib/currencies-config";
 import {
   isBlacklistedProviderSlug,
-  isUsdCclProvider,
   toApiCurrency,
 } from "~/lib/market-constants";
 import { API_BASE_URL } from "~/lib/types";
@@ -104,12 +103,6 @@ function top3Slugs(entries: Array<string | Top3Entry>) {
 
 function signature(top3: CurrencyTop3) {
   return `buy:${top3Slugs(top3.buy).join(",")}|sell:${top3Slugs(top3.sell).join(",")}`;
-}
-
-function isUsdCclRate(rate: NormalizedRate) {
-  const slug = rate.slug.toLowerCase();
-  const name = rate.name.toLowerCase();
-  return isUsdCclProvider({ slug, name });
 }
 
 function describeChange(
@@ -302,12 +295,6 @@ export function useTop3Notifications() {
     let rates = asRateList(payload).filter(
       (rate) => !isBlacklistedProviderSlug(rate),
     );
-
-    if (currency === "usd") {
-      rates = rates.filter((rate) => !isUsdCclRate(rate));
-    } else if (currency === "usd-ccl") {
-      rates = rates.filter(isUsdCclRate);
-    }
 
     return top3For(rates);
   };

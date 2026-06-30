@@ -3,6 +3,7 @@ import { provide } from "vue";
 import { calculateSpread } from "~/lib/utils";
 import { RATE_DISPLAY, RATE_LABELS } from "~/lib/rate-labels";
 import { getDateRange, timeRanges } from "~/composables/useChartData";
+import { toApiCurrency } from "~/lib/market-constants";
 
 interface HistoryData {
   bid: number;
@@ -30,7 +31,7 @@ const initOptions = computed(() => ({
 }));
 provide(INIT_OPTIONS_KEY, initOptions);
 
-const apiCurrency = props.currency === "usd-ccl" ? "usd" : props.currency;
+const apiCurrency = toApiCurrency(props.currency);
 
 const {
   data: historyData,

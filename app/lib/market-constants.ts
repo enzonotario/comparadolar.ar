@@ -1,5 +1,5 @@
 import marketConstants from "../../public/market-constants.json";
-import type { CurrencyType, CryptoType, UsdProviderType } from "./types";
+import type { CurrencyType, CryptoType, UsdFilterCategory, UsdProviderType } from "./types";
 
 export type ApiCurrencyType = Exclude<CurrencyType, "usd-ccl">;
 
@@ -13,6 +13,12 @@ export const PROVIDER_USD_TYPES = marketConstants.providerUsdTypes as Partial<
   Record<string, UsdProviderType>
 >;
 export const DEFAULT_USD_PROVIDER_TYPE: UsdProviderType = "Oficial";
+export const USD_FILTER_CATEGORIES: UsdFilterCategory[] = [
+  "Oficial",
+  "MEP",
+  "CCL",
+  "Cripto",
+];
 export const BLACKLISTED_PROVIDERS = marketConstants.blacklistedProviders;
 export const CRYPTO_CURRENCIES = marketConstants.currencyGroups
   .crypto as CryptoType[];
@@ -63,6 +69,28 @@ function getConfiguredUsdType(item: {
   }
 
   return undefined;
+}
+
+export function getUsdFilterCategory(item: {
+  slug?: string;
+  name?: string;
+  isUsdCcl?: boolean;
+  usdType?: UsdProviderType;
+}): UsdFilterCategory {
+  if (item.isUsdCcl || isUsdCclProvider(item)) return "CCL";
+  return item.usdType ?? getProviderUsdType(item);
+}
+
+export function matchesUsdTypeFilter(
+  item: {
+    slug?: string;
+    name?: string;
+    isUsdCcl?: boolean;
+    usdType?: UsdProviderType;
+  },
+  enabled: Record<UsdFilterCategory, boolean>,
+): boolean {
+  return enabled[getUsdFilterCategory(item)];
 }
 
 export function getProviderUsdType(item: {

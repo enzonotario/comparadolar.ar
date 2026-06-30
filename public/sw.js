@@ -74,14 +74,6 @@ function toApiCurrency(currency, constants) {
   return constants.apiCurrencyAliases?.[currency] || currency;
 }
 
-function isUsdCclRate(rate, constants) {
-  const usdCclProviders = new Set(constants.providerGroups?.usdCcl || []);
-  return (
-    usdCclProviders.has(rate.slug.toLowerCase()) ||
-    usdCclProviders.has(rate.name.toLowerCase())
-  );
-}
-
 function isBlacklistedRate(rate, constants) {
   const blacklistedProviders = new Set(constants.blacklistedProviders || []);
   return (
@@ -161,10 +153,7 @@ async function fetchTop3(currency) {
 
   const filtered = asRateList(payload).filter((rate) => {
     if (isBlacklistedRate(rate, constants)) return false;
-    if (currency !== "usd" && currency !== "usd-ccl") return true;
-
-    const isCcl = isUsdCclRate(rate, constants);
-    return currency === "usd-ccl" ? isCcl : !isCcl;
+    return true;
   });
 
   return top3For(filtered);

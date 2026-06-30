@@ -107,8 +107,8 @@ const singleProviderPath = computed(() => {
               24/7
             </UBadge>
             <UBadge
-              v-if="provider?.isUsdCcl && currency !== 'usd-ccl'"
-              color="blue"
+              v-if="provider?.isUsdCcl"
+              color="info"
               size="xs"
             >
               CCL
@@ -145,8 +145,8 @@ const singleProviderPath = computed(() => {
             24/7
           </UBadge>
           <UBadge
-            v-if="providers[0]?.isUsdCcl && currency !== 'usd-ccl'"
-            color="blue"
+            v-if="providers[0]?.isUsdCcl"
+            color="info"
             size="xs"
           >
             CCL

@@ -18,11 +18,6 @@ const {
 
 const data = computed(() => {
   if (!rawData.value || !Array.isArray(rawData.value)) return null;
-
-  if (props.currency === "usd-ccl") {
-    return rawData.value.filter((item) => item.isUsdCcl === true);
-  }
-
   return rawData.value;
 });
 

@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "./types";
-import { currencies, USD_CCL_PROVIDERS } from "./currencies-config";
+import { currencies } from "./currencies-config";
 import { toApiCurrency } from "./market-constants";
 
 export async function getSitemapUrls() {
@@ -59,19 +59,6 @@ export async function getSitemapUrls() {
         for (const provider of data) {
           if (!provider.slug) continue;
 
-          // Filtrado para USD CCL
-          if (currency.value === "usd-ccl") {
-            if (USD_CCL_PROVIDERS.includes(provider.slug)) {
-              urls.push({
-                loc: `/${currency.value}/${provider.slug}`,
-                changefreq: "daily",
-                priority: 0.6,
-              });
-            }
-            continue;
-          }
-
-          // Rutas de proveedores generales
           urls.push({
             loc: `/${currency.value}/${provider.slug}`,
             changefreq: "daily",

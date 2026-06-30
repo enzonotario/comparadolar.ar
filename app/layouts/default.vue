@@ -10,7 +10,7 @@ const colorScheme = computed(() => {
   const path = route.path;
 
   const currency = validCurrencies.find((c) => {
-    if (c === "usd") return path === "/";
+    if (c === "usd") return path === "/" || path === "/usd" || path.startsWith("/usd/");
     return path.includes(`/${c}`);
   });
 

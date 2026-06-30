@@ -27,6 +27,7 @@ const props = defineProps<Props>();
 const toast = useToast();
 const marketHours = ref(true);
 const { showOnly24x7 } = use24x7Filter();
+const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
 const { saveSortToStorage, saveSelectedToStorage, loadSavedState } =
   useTerminalState();
 
@@ -47,14 +48,11 @@ const parseSelectedQuery = (query: string | null) => {
   return Object.fromEntries(slugs.map((slug) => [slug, true]));
 };
 
-// Initialize state from URL params or localStorage
-const { savedSort, savedSelected } = loadSavedState(props.currency);
-const sorting = ref(parseSortQuery(sortQuery.value || savedSort || null));
+// Initialize from URL params only; localStorage is restored on mount.
+const sorting = ref(parseSortQuery(sortQuery.value || null));
 
 const selectedQuery = useRouteQuery<string | null>("selected", null);
-const rowSelection = ref(
-  parseSelectedQuery(selectedQuery.value || savedSelected || null),
-);
+const rowSelection = ref(parseSelectedQuery(selectedQuery.value || null));
 
 const debouncedSaveSort = useDebounceFn((sortString: string) => {
   saveSortToStorage(props.currency, sortString);
@@ -121,11 +119,6 @@ const { data: usdtRates, isLoading: usdtLoading } = useCryptoData("usdt");
 const { data: btcRates, isLoading: btcLoading } = useCryptoData("btc");
 const { data: ethRates, isLoading: ethLoading } = useCryptoData("eth");
 
-const usdCclRates = computed(() => {
-  if (!usdRates.value || !Array.isArray(usdRates.value)) return [];
-  return usdRates.value.filter((rate) => rate.isUsdCcl === true);
-});
-
 const isMarketHours = () => {
   const now = new Date();
   const hours = now.getHours();
@@ -151,9 +144,20 @@ onMounted(() => {
 
     if (sortQuery.value) {
       sorting.value = parseSortQuery(sortQuery.value);
+    } else {
+      const { savedSort } = loadSavedState(props.currency);
+      if (savedSort) {
+        sorting.value = parseSortQuery(savedSort);
+      }
     }
+
     if (selectedQuery.value) {
       rowSelection.value = parseSelectedQuery(selectedQuery.value);
+    } else {
+      const { savedSelected } = loadSavedState(props.currency);
+      if (savedSelected) {
+        rowSelection.value = parseSelectedQuery(savedSelected);
+      }
     }
   }
 });
@@ -167,7 +171,6 @@ const allRates = computed(() => {
 
   if (usdRates.value && Array.isArray(usdRates.value)) {
     usdRates.value.forEach((rate) => {
-      if (rate.isUsdCcl) return;
       if (rate.bid && rate.ask) {
         rates.push({
           ...rate,
@@ -203,30 +206,19 @@ const allRates = computed(() => {
     }
   });
 
-  if (usdCclRates.value && Array.isArray(usdCclRates.value)) {
-    usdCclRates.value.forEach((rate) => {
-      if (rate.bid && rate.ask) {
-        rates.push({
-          ...rate,
-          currency: "USD-CCL",
-          spread: getSpread(rate),
-          spreadPercentage: getSpreadPercentage(rate),
-          slug: rate.slug,
-        });
-      }
-    });
-  }
-
   return rates;
 });
 
 const filteredRates = computed(() => {
-  const currencyMatch =
-    props.currency === "usd-ccl" ? "USD-CCL" : props.currency.toUpperCase();
+  const currencyMatch = props.currency.toUpperCase();
   let rates = allRates.value.filter((rate) => rate.currency === currencyMatch);
 
   if (showOnly24x7.value && props.currency === "usd") {
     rates = rates.filter((rate) => rate.is24x7 === true);
+  }
+
+  if (props.currency === "usd") {
+    rates = rates.filter((rate) => matchesUsdType(rate));
   }
 
   return rates;
@@ -525,6 +517,8 @@ defineExpose({
 
 <template>
   <div class="w-full space-y-4">
+    <UsdTypeFilters v-if="currency === 'usd'" class="font-sans" />
+
     <div
       v-if="isLoading"
       :class="`border rounded ${terminalColors.tableBorder} overflow-hidden`"
@@ -594,6 +588,13 @@ defineExpose({
               :slug="row.original.slug"
               :name="row.original.name"
             />
+            <UBadge
+              v-if="row.original.isUsdCcl"
+              color="info"
+              size="xs"
+            >
+              CCL
+            </UBadge>
             <UIcon
               v-if="!row.original.is24x7 && !marketHours"
               name="i-heroicons-moon"

@@ -13,6 +13,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const { showOnly24x7 } = use24x7Filter();
+const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
 
 const filteredData = computed(() => {
   if (!props.data || !Array.isArray(props.data)) return null;
@@ -23,8 +24,8 @@ const filteredData = computed(() => {
     data = data.filter((item) => item.is24x7 === true);
   }
 
-  if (props.currency !== "usd-ccl") {
-    data = data.filter((item) => !item.isUsdCcl);
+  if (props.currency === "usd") {
+    data = data.filter((item) => matchesUsdType(item));
   }
 
   return data;

@@ -17,6 +17,7 @@ const colorMode = computed(() => useColorMode().value);
 provide(THEME_KEY, colorMode);
 
 const { showOnly24x7 } = use24x7Filter();
+const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
 
 const { data: providersData } = useDataFetching<ExchangeRate[]>(
   API_ENDPOINTS.usd,
@@ -31,11 +32,7 @@ const topProvidersForBuy = computed(() => {
     .filter((p) => {
       if (!p.bid || p.bid <= 0 || p.slowChange) return false;
       if (showOnly24x7.value && !p.is24x7) return false;
-      if (props.currency === "usd-ccl") {
-        if (!p.isUsdCcl) return false;
-      } else {
-        if (p.isUsdCcl) return false;
-      }
+      if (props.currency === "usd" && !matchesUsdType(p)) return false;
       return true;
     })
     .sort((a, b) => (b.bid || 0) - (a.bid || 0))
@@ -56,11 +53,7 @@ const topProvidersForSell = computed(() => {
     .filter((p) => {
       if (!p.ask || p.ask <= 0 || p.slowChange) return false;
       if (showOnly24x7.value && !p.is24x7) return false;
-      if (props.currency === "usd-ccl") {
-        if (!p.isUsdCcl) return false;
-      } else {
-        if (p.isUsdCcl) return false;
-      }
+      if (props.currency === "usd" && !matchesUsdType(p)) return false;
       return true;
     })
     .sort((a, b) => (a.ask || 0) - (b.ask || 0))

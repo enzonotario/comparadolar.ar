@@ -51,7 +51,6 @@ export function top3BuyUsd(data: ExchangeRate[], only24x7 = false): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
-        !isCcl(item.slug ?? "") &&
         item.ask > 0 &&
         (!only24x7 || item.is24x7),
     )
@@ -68,7 +67,6 @@ export function top3SellUsd(data: ExchangeRate[], only24x7 = false): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
-        !isCcl(item.slug ?? "") &&
         item.bid > 0 &&
         (!only24x7 || item.is24x7),
     )
@@ -155,7 +153,6 @@ export function top3SlugsForBuyUsd(
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
-        !isCcl(item.slug ?? "") &&
         item.ask > 0 &&
         (!only24x7 || item.is24x7),
     )
@@ -289,7 +286,6 @@ export function top5TerminalUsd(
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
-        !isCcl(item.slug ?? "") &&
         item.ask > 0 &&
         item.bid > 0 &&
         (!only24x7 || item.is24x7),

@@ -8,6 +8,18 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const colorMode = useColorMode();
+const isDark = useState("layout-background-dark", () => false);
+
+onMounted(() => {
+  isDark.value = colorMode.value === "dark";
+});
+
+watch(
+  () => colorMode.value,
+  (mode) => {
+    isDark.value = mode === "dark";
+  },
+);
 
 const lightGradientConfigs = {
   green: {
@@ -88,8 +100,7 @@ const darkGradientConfigs = {
 };
 
 const backgroundStyle = computed(() => {
-  const isDark = colorMode.value === "dark";
-  const configs = isDark ? darkGradientConfigs : lightGradientConfigs;
+  const configs = isDark.value ? darkGradientConfigs : lightGradientConfigs;
   const colors = configs[props.colorScheme];
 
   return {

@@ -23,10 +23,6 @@ export const use24x7Filter = () => {
     showOnly24x7.value = marketMode.value !== "normal";
   };
 
-  if (import.meta.client) {
-    hydratePreference();
-  }
-
   onMounted(hydratePreference);
 
   watch(marketMode, (newMode) => {

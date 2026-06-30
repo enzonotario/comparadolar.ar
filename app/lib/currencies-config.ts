@@ -165,11 +165,12 @@ export const currenciesConfig: Record<CurrencyType, CurrencyConfig> = {
   },
 };
 
-export const currencies = Object.values(currenciesConfig);
+export const currencies = Object.values(currenciesConfig).filter(
+  (currency) => currency.value !== "usd-ccl",
+);
 
 export const validCurrencies: CurrencyType[] = [
   "usd",
-  "usd-ccl",
   "usdc",
   "usdt",
   "btc",

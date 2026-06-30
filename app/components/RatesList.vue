@@ -31,6 +31,7 @@ const props = defineProps<Props>();
 
 const activeTab = ref<"buy" | "sell">("buy");
 const { showOnly24x7 } = use24x7Filter();
+const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
 const sorting: Ref<Array<{ id: string; desc: boolean }>> = ref([]);
 
 const isMobile = ref(false);
@@ -158,6 +159,7 @@ const filteredRates = computed(() => {
   }
 
   rates = rates.filter((rate) => {
+    if (props.currency === "usd" && !matchesUsdType(rate)) return false;
     if (activeTab.value === "buy") {
       return rate.ask != null && rate.ask > 0;
     } else {
@@ -169,9 +171,8 @@ const filteredRates = computed(() => {
 });
 
 const realTimeRates = computed(() => {
-  const excludeCcl = props.currency !== "usd-ccl";
   return filteredRates.value
-    .filter((rate) => !rate.slowChange && (!excludeCcl || !rate.isUsdCcl))
+    .filter((rate) => !rate.slowChange)
     .map((rate) => ({
       ...rate,
       price: activeTab.value === "buy" ? rate.ask : rate.bid,
@@ -179,22 +180,8 @@ const realTimeRates = computed(() => {
 });
 
 const slowChangeRates = computed(() => {
-  const excludeCcl = props.currency !== "usd-ccl";
   return filteredRates.value
-    .filter(
-      (rate) => rate.slowChange === true && (!excludeCcl || !rate.isUsdCcl),
-    )
-    .map((rate) => ({
-      ...rate,
-      price: activeTab.value === "buy" ? rate.ask : rate.bid,
-    }));
-});
-
-const usdCclRates = computed(() => {
-  if (props.currency === "usd-ccl") return [];
-
-  return filteredRates.value
-    .filter((rate) => rate.isUsdCcl === true)
+    .filter((rate) => rate.slowChange === true)
     .map((rate) => ({
       ...rate,
       price: activeTab.value === "buy" ? rate.ask : rate.bid,
@@ -243,12 +230,10 @@ const handleRetry = () => {
         class="gap-0 w-full"
       >
         <template #content>
-          <div
-            v-if="props.currency === 'usd' || props.currency === 'usd-ccl'"
-            class="bg-zinc-50 dark:bg-zinc-800 px-4 py-2 border-b border-zinc-200 dark:border-zinc-700 text-sm text-zinc-800 dark:text-zinc-200 font-medium"
-          >
-            Actualizado en tiempo real
-          </div>
+          <UsdTypeFilters
+            v-if="props.currency === 'usd'"
+            variant="bar"
+          />
 
           <div
             v-if="isLoading"
@@ -298,37 +283,6 @@ const handleRetry = () => {
             :active-tab="activeTab"
             :is-loading="isLoading"
           />
-
-          <div
-            v-if="!isLoading && usdCclRates.length > 0"
-            class="bg-zinc-50 dark:bg-zinc-800 px-4 py-2 border-t border-b border-zinc-200 dark:border-zinc-700 text-sm text-zinc-800 dark:text-zinc-200 font-medium"
-          >
-            USD CCL
-          </div>
-          <RateTable
-            v-if="!isLoading && usdCclRates.length > 0"
-            v-model:sorting="sorting"
-            :rates="usdCclRates"
-            :columns="columns"
-            :currency="props.currency"
-            :active-tab="activeTab"
-            :is-loading="isLoading"
-          />
-
-          <div
-            v-if="!isLoading && usdCclRates.length > 0"
-            class="border-t border-zinc-200 dark:border-zinc-700 px-4 py-3 flex justify-center"
-          >
-            <UButton
-              to="/usd-ccl"
-              color="neutral"
-              variant="outline"
-              size="sm"
-              trailing-icon="i-heroicons-arrow-right"
-            >
-              Ver solo USD CCL
-            </UButton>
-          </div>
         </template>
       </UTabs>
     </UCard>

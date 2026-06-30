@@ -53,7 +53,7 @@ const handleImageError = (event: Event) => {
           </h3>
           <UBadge v-if="rate.is24x7" color="success" size="xs"> 24/7 </UBadge>
           <UBadge
-            v-if="rate.isUsdCcl && currency !== 'usd-ccl'"
+            v-if="rate.isUsdCcl"
             color="info"
             size="xs"
           >
