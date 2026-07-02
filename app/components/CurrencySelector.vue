@@ -23,18 +23,32 @@ const getCurrencyRoute = (currency: CurrencyType) => {
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-2 justify-center">
-    <UButton
+  <div
+    class="relative flex flex-wrap items-center justify-center gap-2 overflow-visible"
+    :class="isActive('usd') ? 'pb-36 md:pb-9' : undefined"
+  >
+    <div
       v-for="currency in currencies"
       :key="currency.value"
-      :variant="isActive(currency.value) ? 'solid' : 'outline'"
-      color="neutral"
-      size="sm"
-      :to="getCurrencyRoute(currency.value)"
-      class="transition-all duration-200"
+      :class="currency.value === 'usd' ? 'relative overflow-visible' : undefined"
     >
-      <UIcon :name="currency.icon" class="mr-2" />
-      {{ currency.label }}
-    </UButton>
+      <UButton
+        :variant="isActive(currency.value) ? 'solid' : 'outline'"
+        color="neutral"
+        size="sm"
+        :to="getCurrencyRoute(currency.value)"
+        class="transition-all duration-200"
+      >
+        <UIcon :name="currency.icon" class="mr-2" />
+        {{ currency.label }}
+      </UButton>
+
+      <div
+        v-if="currency.value === 'usd' && isActive('usd')"
+        class="absolute left-0 top-full z-10 mt-1.5 md:whitespace-nowrap"
+      >
+        <UsdTypeFilters variant="subtabs" />
+      </div>
+    </div>
   </div>
 </template>

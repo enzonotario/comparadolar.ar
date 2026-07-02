@@ -517,8 +517,6 @@ defineExpose({
 
 <template>
   <div class="w-full space-y-4">
-    <UsdTypeFilters v-if="currency === 'usd'" class="font-sans" />
-
     <div
       v-if="isLoading"
       :class="`border rounded ${terminalColors.tableBorder} overflow-hidden`"

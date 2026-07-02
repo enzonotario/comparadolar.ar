@@ -230,11 +230,6 @@ const handleRetry = () => {
         class="gap-0 w-full"
       >
         <template #content>
-          <UsdTypeFilters
-            v-if="props.currency === 'usd'"
-            variant="bar"
-          />
-
           <div
             v-if="isLoading"
             class="divide-y divide-zinc-200 dark:divide-zinc-700"
