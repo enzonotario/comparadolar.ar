@@ -25,7 +25,7 @@ const getCurrencyRoute = (currency: CurrencyType) => {
 <template>
   <div
     class="relative flex flex-wrap items-center justify-center gap-2 overflow-visible"
-    :class="isActive('usd') ? 'pb-36 md:pb-9' : undefined"
+    :class="isActive('usd') ? 'pb-9' : undefined"
   >
     <div
       v-for="currency in currencies"
@@ -45,7 +45,7 @@ const getCurrencyRoute = (currency: CurrencyType) => {
 
       <div
         v-if="currency.value === 'usd' && isActive('usd')"
-        class="absolute left-0 top-full z-10 mt-1.5 md:whitespace-nowrap"
+        class="absolute left-0 top-full z-20 mt-1.5 md:whitespace-nowrap"
       >
         <UsdTypeFilters variant="subtabs" />
       </div>
