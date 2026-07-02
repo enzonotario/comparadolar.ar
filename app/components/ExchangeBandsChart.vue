@@ -36,7 +36,7 @@ const topProvidersForBuy = computed(() => {
       return true;
     })
     .sort((a, b) => (b.bid || 0) - (a.bid || 0))
-    .slice(0, 3)
+    .slice(0, 1)
     .map((p) => ({
       ...p,
       logoUrl: p.logoUrl || p.logo || "/placeholder.svg",
@@ -57,7 +57,7 @@ const topProvidersForSell = computed(() => {
       return true;
     })
     .sort((a, b) => (a.ask || 0) - (b.ask || 0))
-    .slice(0, 3)
+    .slice(0, 1)
     .map((p) => ({
       ...p,
       logoUrl: p.logoUrl || p.logo || "/placeholder.svg",
@@ -303,23 +303,10 @@ const maxTimestamp = computed(
   () => lowerBandData.value[lowerBandData.value.length - 1]?.[0] ?? 0,
 );
 
-const initialRange = computed(() => {
-  const referenceDate =
-    todayTimestamp >= minTimestamp.value ? todayTimestamp : minTimestamp.value;
-
-  const threeMonthsBefore = new Date(referenceDate);
-  threeMonthsBefore.setMonth(threeMonthsBefore.getMonth() - 3);
-  threeMonthsBefore.setHours(0, 0, 0, 0);
-
-  const threeMonthsAfter = new Date(referenceDate);
-  threeMonthsAfter.setMonth(threeMonthsAfter.getMonth() + 3);
-  threeMonthsAfter.setHours(23, 59, 59, 999);
-
-  const initialMin = Math.max(minTimestamp.value, threeMonthsBefore.getTime());
-  const initialMax = Math.min(maxTimestamp.value, threeMonthsAfter.getTime());
-
-  return { min: initialMin, max: initialMax };
-});
+const initialRange = computed(() => ({
+  min: minTimestamp.value,
+  max: maxTimestamp.value,
+}));
 
 const visibleRange = ref<{ min: number; max: number }>({ min: 0, max: 0 });
 watch(
@@ -364,40 +351,17 @@ const setInitialYZoom = () => {
       chartRef.value?.getEchartsInstance?.() ||
       (chartRef.value as any)?.__echarts_instance__;
     if (chart) {
-      const allProviders = [
-        ...topProvidersForBuy.value,
-        ...topProvidersForSell.value,
-      ];
-      const allValues: number[] = [];
-
-      allProviders.forEach((provider) => {
-        if (provider.bid && provider.bid > 0) allValues.push(provider.bid);
-        if (provider.ask && provider.ask > 0) allValues.push(provider.ask);
+      chart.dispatchAction({
+        type: "dataZoom",
+        dataZoomIndex: 3,
+        yAxisIndex: 0,
+        startValue: minY.value,
+        endValue: maxY.value,
       });
 
-      if (allValues.length > 0) {
-        const providerAvg =
-          allValues.reduce((a, b) => a + b, 0) / allValues.length;
-        const providerMin = Math.min(...allValues);
-        const providerMax = Math.max(...allValues);
-        const providerRange = providerMax - providerMin;
-        const margin = Math.max(providerRange * 0.2, 50);
+      visibleYRange.value = { min: minY.value, max: maxY.value };
 
-        const yMin = Math.max(minY.value, providerAvg - margin);
-        const yMax = Math.min(maxY.value, providerAvg + margin);
-
-        chart.dispatchAction({
-          type: "dataZoom",
-          dataZoomIndex: 3,
-          yAxisIndex: 0,
-          startValue: yMin,
-          endValue: yMax,
-        });
-
-        visibleYRange.value = { min: yMin, max: yMax };
-
-        return true;
-      }
+      return true;
     }
   } catch {
     // chart instance might be unavailable
@@ -998,8 +962,7 @@ const chartOption = computed(() => {
         xAxisIndex: [0],
         height: 20,
         bottom: 10,
-        // Usar valores absolutos (timestamps) para el zoom inicial (±1 mes)
-        // Esto es más confiable con ejes de tipo "time"
+        // Rango completo al cargar; el usuario puede hacer zoom después
         rangeMode: ["value", "value"],
         startValue: initialRange.value.min,
         endValue: initialRange.value.max,
@@ -1012,6 +975,8 @@ const chartOption = computed(() => {
         right: 10,
         filterMode: "none",
         rangeMode: ["value", "value"],
+        startValue: minY.value,
+        endValue: maxY.value,
       },
     ],
     series: [
