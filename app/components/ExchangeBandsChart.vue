@@ -583,7 +583,7 @@ const chartOption = computed(() => {
       const color = point.type === "buy" ? "#10b981" : "#ef4444";
 
       providerSeries.push({
-        name: `${point.provider.displayName} (${getPointLabel(point.type)}) - Punto`,
+        name: `${point.provider.displayName} (${getPointLabel(point.type)})`,
         type: "scatter" as const,
         data: [[todayTimestamp, actualValue]],
         symbol: "circle",
@@ -621,24 +621,6 @@ const chartOption = computed(() => {
             }
           },
         },
-      });
-
-      providerSeries.push({
-        name: `${point.provider.displayName} (${getPointLabel(point.type)}) - Línea`,
-        type: "line" as const,
-        data: [
-          [todayTimestamp, actualValue],
-          [logoXPosition, logoVerticalPosition],
-        ],
-        lineStyle: {
-          color,
-          width: 1.5,
-          type: "solid",
-          opacity: 0.6,
-        },
-        symbol: "none",
-        z: 150,
-        silent: true,
       });
 
       const badgeText = getPointLabel(point.type);
