@@ -127,7 +127,14 @@ useStaticPage({
                 IPs de origen
               </div>
               <div class="text-zinc-600 dark:text-zinc-400">
-                GitHub/CloudFlare IPs
+                <a
+                  href="https://www.cloudflare.com/ips/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary-600 dark:text-primary-400 underline hover:no-underline"
+                >
+                  Cloudflare IPs
+                </a>
               </div>
             </div>
           </div>
