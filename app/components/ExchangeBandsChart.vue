@@ -2,7 +2,7 @@
 import type { VueUiXyConfig, VueUiXyDatasetItem } from "vue-data-ui";
 import type { ExchangeRate, CurrencyType } from "@/lib/types";
 import { API_ENDPOINTS, API_BASE_URL } from "@/lib/types";
-import { RATE_LABELS } from "@/lib/rate-labels";
+import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
 
 const VueUiXy = defineAsyncComponent(() =>
   import("vue-data-ui/vue-ui-xy").then((m) => m.VueUiXy ?? m.default),
@@ -371,7 +371,7 @@ const buildProviderLogoMarkers = (svg: {
       return {
         id: String(serie.id ?? serie.name),
         logoUrl: getImageUrl(String(serie.logoUrl)),
-        color: serie.color || "#10b981",
+        color: serie.color || RATE_DISPLAY.ask.chartColor,
         displayName:
           serie.displayName ||
           String(serie.name || "").replace(/\s*\(.*\)$/, ""),
@@ -500,7 +500,11 @@ const chartDataset = computed<VueUiXyDatasetItem[]>(() => {
     series[index] = point.value;
 
     const label = point.type === "buy" ? RATE_LABELS.bid : RATE_LABELS.ask;
-    const color = point.type === "buy" ? "#10b981" : "#ef4444";
+    // buy → Vendes a (bid); sell → Compras a (ask)
+    const color =
+      point.type === "buy"
+        ? RATE_DISPLAY.bid.chartColor
+        : RATE_DISPLAY.ask.chartColor;
 
     dataset.push({
       name: `${point.provider.displayName} (${label})`,
