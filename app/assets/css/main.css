@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+@import "vue-data-ui/style.css";
 
 /* Custom styles for the application */
 .grid-pattern {

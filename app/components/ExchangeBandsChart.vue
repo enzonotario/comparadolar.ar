@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { provide, onMounted, nextTick, ref as vueRef } from "vue";
+import { VueUiXy } from "vue-data-ui";
+import type { VueUiXyConfig, VueUiXyDatasetItem } from "vue-data-ui";
 import type { ExchangeRate, CurrencyType } from "@/lib/types";
 import { API_ENDPOINTS, API_BASE_URL } from "@/lib/types";
 import { RATE_LABELS } from "@/lib/rate-labels";
@@ -12,9 +13,8 @@ const props = withDefaults(defineProps<Props>(), {
   currency: "usd",
 });
 
-const colorMode = computed(() => useColorMode().value);
-
-provide(THEME_KEY, colorMode);
+const colorMode = useColorMode();
+const isDark = computed(() => colorMode.value === "dark");
 
 const { showOnly24x7 } = use24x7Filter();
 const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
@@ -110,51 +110,6 @@ watch(
   { immediate: true },
 );
 
-const getLatestProviderValue = (
-  provider: (typeof topProvidersForBuy.value)[0],
-  valueType: "bid" | "ask",
-  minTimestamp: number,
-  maxTimestamp: number,
-): [number, number] | null => {
-  const history = providerHistories.value[provider.slug] || [];
-
-  const filteredHistory = history
-    .filter((item) => {
-      const itemTimestamp = new Date(item.timestamp).getTime();
-      return itemTimestamp >= minTimestamp && itemTimestamp <= maxTimestamp;
-    })
-    .sort(
-      (a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-    );
-
-  if (filteredHistory.length === 0) {
-    const currentValue = valueType === "bid" ? provider.bid : provider.ask;
-    if (currentValue && currentValue > 0) {
-      return [todayTimestamp, currentValue];
-    }
-    return null;
-  }
-
-  const latestItem = filteredHistory[0];
-  if (!latestItem) {
-    return null;
-  }
-  const timestamp = new Date(latestItem.timestamp).getTime();
-  const value = valueType === "bid" ? latestItem.bid : latestItem.ask;
-
-  return [timestamp, value];
-};
-
-const renderer = ref<"svg" | "canvas">("svg");
-const initOptions = computed(() => ({
-  height: 500,
-  width: "auto",
-  renderer: renderer.value as "svg" | "canvas",
-}));
-provide(INIT_OPTIONS_KEY, initOptions);
-
-// Inflation data fetch
 interface InflationItem {
   fecha: string;
   valor: number;
@@ -165,7 +120,6 @@ const { data: inflationData } = useFetch<InflationItem[]>(
 );
 
 const getInflationForMonth = (year: number, month: number): number => {
-  // Look up inflation from 2 months prior (publication lag)
   let lookupMonth = month - 2;
   let lookupYear = year;
   if (lookupMonth <= 0) {
@@ -174,7 +128,7 @@ const getInflationForMonth = (year: number, month: number): number => {
   }
 
   if (!inflationData.value || !Array.isArray(inflationData.value)) {
-    return 2.5; // Fallback
+    return 2.5;
   }
 
   const match = inflationData.value.find((item) => {
@@ -184,10 +138,9 @@ const getInflationForMonth = (year: number, month: number): number => {
     );
   });
 
-  return match ? match.valor : 2.5; // Fallback to 2.5% if data unavailable
+  return match ? match.valor : 2.5;
 };
 
-// Phase 1 constants (Apr 11, 2025 → Dec 31, 2025)
 const phase1Start = new Date("2025-04-11");
 phase1Start.setHours(0, 0, 0, 0);
 const phase1End = new Date("2025-12-31");
@@ -199,13 +152,12 @@ const phase1DailyUpperFactor = Math.pow(1.01, 1 / 30);
 
 const bandsData = computed(() => {
   const labels: number[] = [];
-  const lower: Array<[number, number]> = [];
-  const upper: Array<[number, number]> = [];
+  const lower: number[] = [];
+  const upper: number[] = [];
 
   let currentLower = phase1LowerBandStart;
   let currentUpper = phase1UpperBandStart;
 
-  // Phase 1: Apr 11, 2025 → Dec 31, 2025 (fixed ±1%/month)
   const phase1Days = Math.floor(
     (phase1End.getTime() - phase1Start.getTime()) / (1000 * 60 * 60 * 24),
   );
@@ -214,24 +166,22 @@ const bandsData = computed(() => {
     const currentDate = new Date(phase1Start);
     currentDate.setDate(phase1Start.getDate() + i);
     currentDate.setHours(0, 0, 0, 0);
-    const timestamp = currentDate.getTime();
 
-    labels.push(timestamp);
-    lower.push([timestamp, currentLower]);
-    upper.push([timestamp, currentUpper]);
+    labels.push(currentDate.getTime());
+    lower.push(currentLower);
+    upper.push(currentUpper);
 
     currentLower *= phase1DailyLowerFactor;
     currentUpper *= phase1DailyUpperFactor;
   }
 
-  // Phase 2: Jan 1, 2026 → end of current month (inflation-based rates)
   const phase2Start = new Date("2026-01-01");
   phase2Start.setHours(0, 0, 0, 0);
   const now = new Date();
   const phase2End = new Date(now.getFullYear(), now.getMonth() + 1, 0);
   phase2End.setHours(0, 0, 0, 0);
 
-  let currentMonth = phase2Start.getMonth() + 1; // 1-indexed
+  let currentMonth = phase2Start.getMonth() + 1;
   let currentYear = phase2Start.getFullYear();
   let daysInCurrentMonth = new Date(currentYear, currentMonth, 0).getDate();
 
@@ -253,9 +203,7 @@ const bandsData = computed(() => {
     const currentDate = new Date(phase2Start);
     currentDate.setDate(phase2Start.getDate() + i);
     currentDate.setHours(0, 0, 0, 0);
-    const timestamp = currentDate.getTime();
 
-    // Check if we've moved to a new month
     const dateMonth = currentDate.getMonth() + 1;
     const dateYear = currentDate.getFullYear();
     if (dateMonth !== currentMonth || dateYear !== currentYear) {
@@ -274,126 +222,73 @@ const bandsData = computed(() => {
       );
     }
 
-    labels.push(timestamp);
-    lower.push([timestamp, currentLower]);
-    upper.push([timestamp, currentUpper]);
+    labels.push(currentDate.getTime());
+    lower.push(currentLower);
+    upper.push(currentUpper);
 
     currentLower *= dailyLowerFactor;
     currentUpper *= dailyUpperFactor;
   }
 
-  return { labels, lowerBandData: lower, upperBandData: upper };
+  return { labels, lower, upper };
 });
-
-const lowerBandData = computed(() => bandsData.value.lowerBandData);
-const upperBandData = computed(() => bandsData.value.upperBandData);
-
-const minY = computed(() => Math.min(...lowerBandData.value.map((d) => d[1])));
-const maxY = computed(() => Math.max(...upperBandData.value.map((d) => d[1])));
 
 const today = new Date();
-const todayYear = today.getFullYear();
-const todayMonth = today.getMonth();
-const todayDay = today.getDate();
-const todayNormalized = new Date(todayYear, todayMonth, todayDay, 0, 0, 0, 0);
+const todayNormalized = new Date(
+  today.getFullYear(),
+  today.getMonth(),
+  today.getDate(),
+  0,
+  0,
+  0,
+  0,
+);
 const todayTimestamp = todayNormalized.getTime();
 
-const minTimestamp = computed(() => lowerBandData.value[0]?.[0] ?? 0);
-const maxTimestamp = computed(
-  () => lowerBandData.value[lowerBandData.value.length - 1]?.[0] ?? 0,
-);
+const todayIndex = computed(() => {
+  const labels = bandsData.value.labels;
+  if (labels.length === 0) return -1;
 
-const initialRange = computed(() => ({
-  min: minTimestamp.value,
-  max: maxTimestamp.value,
-}));
-
-const visibleRange = ref<{ min: number; max: number }>({ min: 0, max: 0 });
-watch(
-  initialRange,
-  (val) => {
-    visibleRange.value = val;
-  },
-  { immediate: true },
-);
-
-const visibleYRange = ref<{ min: number; max: number } | null>(null);
-
-const chartRef = vueRef<any>(null);
-
-const setInitialZoom = () => {
-  try {
-    const chart =
-      chartRef.value?.chart ||
-      chartRef.value?.getEchartsInstance?.() ||
-      (chartRef.value as any)?.__echarts_instance__;
-    if (chart) {
-      chart.dispatchAction({
-        type: "dataZoom",
-        dataZoomIndex: 2,
-        xAxisIndex: 0,
-        startValue: initialRange.value.min,
-        endValue: initialRange.value.max,
-      });
-
-      return true;
+  let closest = 0;
+  let minDiff = Infinity;
+  for (let i = 0; i < labels.length; i++) {
+    const diff = Math.abs(labels[i]! - todayTimestamp);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closest = i;
     }
-  } catch {
-    // chartRef may be null or not initialized
   }
-  return false;
-};
-
-const setInitialYZoom = () => {
-  try {
-    const chart =
-      chartRef.value?.chart ||
-      chartRef.value?.getEchartsInstance?.() ||
-      (chartRef.value as any)?.__echarts_instance__;
-    if (chart) {
-      chart.dispatchAction({
-        type: "dataZoom",
-        dataZoomIndex: 3,
-        yAxisIndex: 0,
-        startValue: minY.value,
-        endValue: maxY.value,
-      });
-
-      visibleYRange.value = { min: minY.value, max: maxY.value };
-
-      return true;
-    }
-  } catch {
-    // chart instance might be unavailable
-  }
-  return false;
-};
-
-onMounted(async () => {
-  await nextTick();
-  const attempts = [100, 300, 500, 1000];
-  for (const delay of attempts) {
-    setTimeout(() => {
-      setInitialZoom();
-      setInitialYZoom();
-    }, delay);
-  }
+  return closest;
 });
 
-watch(
-  [topProvidersForBuy, topProvidersForSell, providerHistories],
-  () => {
-    if (
-      topProvidersForBuy.value.length > 0 ||
-      topProvidersForSell.value.length > 0
-    ) {
-      nextTick(() => {
-        setInitialYZoom();
-      });
-    }
-  },
-  { immediate: false },
-);
+const getLatestProviderValue = (
+  provider: (typeof topProvidersForBuy.value)[0],
+  valueType: "bid" | "ask",
+): number | null => {
+  const history = providerHistories.value[provider.slug] || [];
+  const labels = bandsData.value.labels;
+  const minTimestamp = labels[0] ?? 0;
+  const maxTimestamp = labels[labels.length - 1] ?? 0;
+
+  const filteredHistory = history
+    .filter((item) => {
+      const itemTimestamp = new Date(item.timestamp).getTime();
+      return itemTimestamp >= minTimestamp && itemTimestamp <= maxTimestamp;
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
+
+  if (filteredHistory.length === 0) {
+    const currentValue = valueType === "bid" ? provider.bid : provider.ask;
+    return currentValue && currentValue > 0 ? currentValue : null;
+  }
+
+  const latestItem = filteredHistory[0];
+  if (!latestItem) return null;
+  return valueType === "bid" ? latestItem.bid : latestItem.ask;
+};
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("es-AR", {
@@ -402,700 +297,488 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
+const formatDateLabel = (timestamp: number) => {
+  return new Date(timestamp).toLocaleDateString("es-AR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
 const getImageUrl = (url: string): string => {
   if (!url) return "/placeholder.svg";
-
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
   if (import.meta.client && url.startsWith("/")) {
     return `${window.location.origin}${url}`;
   }
-
   return url;
 };
 
-const handleDataZoom = (params: any) => {
-  const events = Array.isArray(params) ? params : [params];
+interface ProviderLogoMarker {
+  id: string;
+  logoUrl: string;
+  color: string;
+  displayName: string;
+  badgeLabel: string;
+  valueLabel: string;
+  x: number;
+  y: number;
+  plotX: number;
+  plotY: number;
+}
 
-  events.forEach((event: any) => {
-    const isYAxis = event.dataZoomIndex === 1 || event.dataZoomIndex === 3;
+const LOGO_SIZE = 40;
+const LOGO_OFFSET_X = 120;
+const LOGO_STACK_GAP = 56;
 
-    if (isYAxis) {
-      if (event.start !== undefined && event.end !== undefined) {
-        const rangeStart =
-          minY.value + (maxY.value - minY.value) * (event.start / 100);
-        const rangeEnd =
-          minY.value + (maxY.value - minY.value) * (event.end / 100);
-        visibleYRange.value = { min: rangeStart, max: rangeEnd };
-      } else if (event.batch && event.batch[0]) {
-        const zoomData = event.batch[0];
-        if (zoomData.start !== undefined && zoomData.end !== undefined) {
-          const rangeStart =
-            minY.value + (maxY.value - minY.value) * (zoomData.start / 100);
-          const rangeEnd =
-            minY.value + (maxY.value - minY.value) * (zoomData.end / 100);
-          visibleYRange.value = { min: rangeStart, max: rangeEnd };
-        }
-      }
-    } else {
-      if (event.start !== undefined && event.end !== undefined) {
-        const rangeStart =
-          minTimestamp.value +
-          (maxTimestamp.value - minTimestamp.value) * (event.start / 100);
-        const rangeEnd =
-          minTimestamp.value +
-          (maxTimestamp.value - minTimestamp.value) * (event.end / 100);
-        visibleRange.value = { min: rangeStart, max: rangeEnd };
-      } else if (event.batch && event.batch[0]) {
-        const zoomData = event.batch[0];
-        if (zoomData.start !== undefined && zoomData.end !== undefined) {
-          const rangeStart =
-            minTimestamp.value +
-            (maxTimestamp.value - minTimestamp.value) * (zoomData.start / 100);
-          const rangeEnd =
-            minTimestamp.value +
-            (maxTimestamp.value - minTimestamp.value) * (zoomData.end / 100);
-          visibleRange.value = { min: rangeStart, max: rangeEnd };
-        }
-      }
+const buildProviderLogoMarkers = (svg: {
+  data?: Array<{
+    id?: string;
+    type?: string;
+    color?: string;
+    name?: string;
+    logoUrl?: string;
+    displayName?: string;
+    badgeLabel?: string;
+    plots?: Array<{ x: number; y: number; value: number | null }>;
+  }>;
+  drawingArea?: {
+    right: number;
+    left: number;
+    top: number;
+    bottom: number;
+  };
+}): ProviderLogoMarker[] => {
+  if (!svg?.data?.length) return [];
+
+  const plotSeries = svg.data.filter(
+    (serie) => serie.type === "plot" && serie.logoUrl,
+  );
+
+  const rawMarkers = plotSeries
+    .map((serie) => {
+      const plot = serie.plots?.find(
+        (item) => item.value != null && Number.isFinite(item.x),
+      );
+      if (!plot || plot.value == null) return null;
+
+      // Keep a clear gap from the datapoint; draw into the right padding zone.
+      const x = plot.x + LOGO_OFFSET_X;
+
+      return {
+        id: String(serie.id ?? serie.name),
+        logoUrl: getImageUrl(String(serie.logoUrl)),
+        color: serie.color || "#10b981",
+        displayName:
+          serie.displayName ||
+          String(serie.name || "").replace(/\s*\(.*\)$/, ""),
+        badgeLabel: serie.badgeLabel || "",
+        valueLabel: `$${formatPrice(Number(plot.value))}`,
+        x,
+        y: plot.y,
+        plotX: plot.x,
+        plotY: plot.y,
+      };
+    })
+    .filter((marker): marker is ProviderLogoMarker => marker != null)
+    .sort((a, b) => a.y - b.y);
+
+  if (rawMarkers.length <= 1) return rawMarkers;
+
+  const areaTop = svg.drawingArea?.top ?? 0;
+  const areaBottom = svg.drawingArea?.bottom ?? rawMarkers[0]!.y;
+  const stacked = rawMarkers.map((marker) => ({ ...marker }));
+
+  for (let i = 1; i < stacked.length; i++) {
+    const prev = stacked[i - 1]!;
+    const current = stacked[i]!;
+    if (current.y - prev.y < LOGO_STACK_GAP) {
+      current.y = prev.y + LOGO_STACK_GAP;
     }
-  });
-
-  nextTick(() => {
-    try {
-      const chart =
-        chartRef.value?.chart ||
-        chartRef.value?.getEchartsInstance?.() ||
-        (chartRef.value as any)?.__echarts_instance__;
-      if (chart) {
-        const yAxisModel = chart.getModel().getComponent("yAxis", 0);
-        if (yAxisModel) {
-          const scale = yAxisModel.axis.scale;
-          if (scale && scale._extent) {
-            visibleYRange.value = {
-              min: scale._extent[0],
-              max: scale._extent[1],
-            };
-          }
-        }
-      }
-    } catch {
-      // chart instance might be unavailable
-    }
-  });
-};
-
-const chartOption = computed(() => {
-  const showTodayIndicator =
-    todayTimestamp >= minTimestamp.value &&
-    todayTimestamp <= maxTimestamp.value;
-
-  interface ProviderDataPoint {
-    provider: (typeof topProvidersForBuy.value)[0];
-    value: number;
-    timestamp: number;
-    type: "buy" | "sell";
-    historyItem?: HistoryItem;
   }
 
-  const allProviderPoints: ProviderDataPoint[] = [];
-  const getPointLabel = (type: ProviderDataPoint["type"]) =>
-    type === "buy" ? RATE_LABELS.bid : RATE_LABELS.ask;
+  const last = stacked[stacked.length - 1]!;
+  if (last.y + LOGO_SIZE / 2 > areaBottom) {
+    const overflow = last.y + LOGO_SIZE / 2 - areaBottom;
+    for (const marker of stacked) {
+      marker.y -= overflow;
+    }
+  }
+
+  const first = stacked[0]!;
+  if (first.y - LOGO_SIZE / 2 < areaTop) {
+    const shift = areaTop + LOGO_SIZE / 2 - first.y;
+    for (const marker of stacked) {
+      marker.y += shift;
+    }
+  }
+
+  return stacked;
+};
+
+interface ProviderPoint {
+  provider: (typeof topProvidersForBuy.value)[0];
+  value: number;
+  type: "buy" | "sell";
+  historyItem?: HistoryItem;
+}
+
+const providerPoints = computed<ProviderPoint[]>(() => {
+  const points: ProviderPoint[] = [];
 
   topProvidersForSell.value.forEach((provider) => {
-    const latestValue = getLatestProviderValue(
-      provider,
-      "ask",
-      minTimestamp.value,
-      maxTimestamp.value,
-    );
-    if (latestValue) {
-      const [timestamp, value] = latestValue;
-      const historyItem =
-        providerHistories.value[provider.slug]?.find(
-          (item) => new Date(item.timestamp).getTime() === timestamp,
-        ) || providerHistories.value[provider.slug]?.[0];
-      allProviderPoints.push({
-        provider,
-        value,
-        timestamp,
-        type: "sell",
-        historyItem,
-      });
-    }
+    const value = getLatestProviderValue(provider, "ask");
+    if (value == null) return;
+    const historyItem = providerHistories.value[provider.slug]?.[0];
+    points.push({ provider, value, type: "sell", historyItem });
   });
 
   topProvidersForBuy.value.forEach((provider) => {
-    const latestValue = getLatestProviderValue(
-      provider,
-      "bid",
-      minTimestamp.value,
-      maxTimestamp.value,
-    );
-    if (latestValue) {
-      const [timestamp, value] = latestValue;
-      const historyItem =
-        providerHistories.value[provider.slug]?.find(
-          (item) => new Date(item.timestamp).getTime() === timestamp,
-        ) || providerHistories.value[provider.slug]?.[0];
-      allProviderPoints.push({
-        provider,
-        value,
-        timestamp,
-        type: "buy",
-        historyItem,
-      });
-    }
+    const value = getLatestProviderValue(provider, "bid");
+    if (value == null) return;
+    const historyItem = providerHistories.value[provider.slug]?.[0];
+    points.push({ provider, value, type: "buy", historyItem });
   });
 
-  allProviderPoints.sort((a, b) => a.value - b.value);
+  return points.sort((a, b) => a.value - b.value);
+});
 
-  const providerSeries: any[] = [];
-  if (showTodayIndicator && allProviderPoints.length > 0) {
-    const currentYRange = visibleYRange.value || {
-      min: minY.value,
-      max: maxY.value,
-    };
-    const rangeY = currentYRange.max - currentYRange.min;
-    const spacing = rangeY / (allProviderPoints.length + 1);
+const yScale = computed(() => {
+  const { lower, upper } = bandsData.value;
+  const providerValues = providerPoints.value.map((p) => p.value);
+  const allValues = [...lower, ...upper, ...providerValues];
+  if (allValues.length === 0) {
+    return { min: 0, max: 2000 };
+  }
+  const dataMin = Math.min(...allValues);
+  const dataMax = Math.max(...allValues);
+  const padding = (dataMax - dataMin) * 0.08;
+  return {
+    min: Math.max(0, Math.floor(dataMin - padding)),
+    max: Math.ceil(dataMax + padding),
+  };
+});
 
-    const currentRange = visibleRange.value || {
-      min: minTimestamp.value,
-      max: maxTimestamp.value,
-    };
-    const visibleRangeX = currentRange.max - currentRange.min;
-    const todayInRange =
-      todayTimestamp >= currentRange.min && todayTimestamp <= currentRange.max;
-    const logoXPosition = todayInRange
-      ? todayTimestamp + visibleRangeX * 0.05
-      : currentRange.max - visibleRangeX * 0.1;
+const chartDataset = computed<VueUiXyDatasetItem[]>(() => {
+  const { lower, upper, labels } = bandsData.value;
+  const pointCount = labels.length;
+  const index = todayIndex.value;
 
-    allProviderPoints.forEach((point, index) => {
-      const currentYRange = visibleYRange.value || {
-        min: minY.value,
-        max: maxY.value,
-      };
-      const logoVerticalPosition = currentYRange.min + spacing * (index + 1);
-      const actualValue = point.value;
+  const dataset: VueUiXyDatasetItem[] = [
+    {
+      name: "Banda inferior",
+      type: "line",
+      series: lower,
+      color: "#ef4444",
+      useArea: true,
+      smooth: true,
+      dataLabels: false,
+    },
+    {
+      name: "Banda superior",
+      type: "line",
+      series: upper,
+      color: "#f59e0b",
+      useArea: true,
+      smooth: true,
+      dataLabels: false,
+    },
+  ];
 
-      const color = point.type === "buy" ? "#10b981" : "#ef4444";
-
-      providerSeries.push({
-        name: `${point.provider.displayName} (${getPointLabel(point.type)})`,
-        type: "scatter" as const,
-        data: [[todayTimestamp, actualValue]],
-        symbol: "circle",
-        symbolSize: 8,
-        itemStyle: {
-          color: color,
-          borderColor: "#fff",
-          borderWidth: 2,
-        },
-        z: 180,
-        silent: false,
-        tooltip: {
-          formatter: (_params: any) => {
-            const date = new Date(todayTimestamp);
-            const timeString = date.toLocaleDateString("es-AR", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            });
-
-            if (point.type === "buy") {
-              return (
-                `<strong>${point.provider.displayName}</strong><br/>` +
-                `<strong>${timeString}</strong><br/>` +
-                `${RATE_LABELS.ask}: $${formatPrice(point.historyItem?.ask || point.provider.ask || 0)}<br/>` +
-                `${RATE_LABELS.bid}: $${formatPrice(actualValue)}`
-              );
-            } else {
-              return (
-                `<strong>${point.provider.displayName}</strong><br/>` +
-                `<strong>${timeString}</strong><br/>` +
-                `${RATE_LABELS.ask}: $${formatPrice(actualValue)}<br/>` +
-                `${RATE_LABELS.bid}: $${formatPrice(point.historyItem?.bid || point.provider.bid || 0)}`
-              );
-            }
-          },
-        },
-      });
-
-      const badgeText = getPointLabel(point.type);
-      const badgeBgColor = point.type === "buy" ? "#10b981" : "#ef4444";
-
-      providerSeries.push({
-        name: `${point.provider.displayName} (${badgeText})`,
-        type: "scatter" as const,
-        data: [[logoXPosition, logoVerticalPosition]],
-        symbol: `image://${getImageUrl(point.provider.logoUrl)}`,
-        symbolSize: 40,
-        itemStyle: {
-          borderColor: color,
-          borderWidth: 2,
-        },
-        label: {
-          show: true,
-          position: "right",
-          formatter: `{badge|${badgeText}}\n${point.provider.displayName}\n$${formatPrice(actualValue)}`,
-          rich: {
-            badge: {
-              backgroundColor: badgeBgColor,
-              color: "#fff",
-              padding: [2, 6],
-              borderRadius: 3,
-              fontSize: 9,
-              fontWeight: "bold",
-            },
-          },
-          color: colorMode.value === "dark" ? "#fff" : "#000",
-          fontSize: 11,
-          backgroundColor:
-            colorMode.value === "dark"
-              ? "rgba(0, 0, 0, 0.8)"
-              : "rgba(255, 255, 255, 0.8)",
-          padding: [4, 6],
-          borderRadius: 4,
-          borderColor: color,
-          borderWidth: 1,
-        },
-        tooltip: {
-          formatter: (_params: any) => {
-            const date = new Date(todayTimestamp);
-            const timeString = date.toLocaleDateString("es-AR", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            });
-
-            if (point.type === "buy") {
-              return (
-                `<strong>${point.provider.displayName}</strong><br/>` +
-                `<strong>${timeString}</strong><br/>` +
-                `${RATE_LABELS.ask}: $${formatPrice(point.historyItem?.ask || point.provider.ask || 0)}<br/>` +
-                `${RATE_LABELS.bid}: $${formatPrice(actualValue)}`
-              );
-            } else {
-              return (
-                `<strong>${point.provider.displayName}</strong><br/>` +
-                `<strong>${timeString}</strong><br/>` +
-                `${RATE_LABELS.ask}: $${formatPrice(actualValue)}<br/>` +
-                `${RATE_LABELS.bid}: $${formatPrice(point.historyItem?.bid || point.provider.bid || 0)}`
-              );
-            }
-          },
-        },
-        z: 200,
-      });
-    });
+  if (index < 0 || pointCount === 0) {
+    return dataset;
   }
 
-  const legendData = ["Banda inferior", "Banda superior"];
+  providerPoints.value.forEach((point) => {
+    const series = Array.from(
+      { length: pointCount },
+      () => null as number | null,
+    );
+    series[index] = point.value;
+
+    const label = point.type === "buy" ? RATE_LABELS.bid : RATE_LABELS.ask;
+    const color = point.type === "buy" ? "#10b981" : "#ef4444";
+
+    dataset.push({
+      name: `${point.provider.displayName} (${label})`,
+      type: "plot",
+      series,
+      color,
+      useTag: "none",
+      showSerieName: undefined,
+      dataLabels: false,
+      shape: "circle",
+      logoUrl: point.provider.logoUrl,
+      displayName: point.provider.displayName,
+      badgeLabel: label,
+      providerType: point.type,
+      prefix: "$",
+    });
+  });
+
+  return dataset;
+});
+
+const chartConfig = computed<VueUiXyConfig>(() => {
+  const labels = bandsData.value.labels;
+  const index = todayIndex.value;
+  const textColor = isDark.value ? "#f4f4f5" : "#18181b";
+  const mutedColor = isDark.value ? "#a1a1aa" : "#71717a";
+  const gridColor = isDark.value ? "#3f3f46" : "#e4e4e7";
+  const tooltipBg = isDark.value ? "#000000" : "#ffffff";
+  const tooltipBorder = isDark.value
+    ? "rgba(255, 255, 255, 0.2)"
+    : "rgba(0, 0, 0, 0.12)";
+  const modulo = Math.max(1, Math.ceil(labels.length / 12));
 
   return {
-    tooltip: {
-      trigger: "axis",
-      backgroundColor:
-        colorMode.value === "dark"
-          ? "rgba(0, 0, 0, 0.9)"
-          : "rgba(255, 255, 255, 0.9)",
-      borderColor: colorMode.value === "dark" ? "#666" : "#ccc",
-      textStyle: {
-        color: colorMode.value === "dark" ? "#fff" : "#000",
-      },
-      formatter: (params: any) => {
-        // Separar bandas y proveedores primero para detectar si hay proveedores
-        const bandas: any[] = [];
-        const vendesA: any[] = [];
-        const comprasA: any[] = [];
-
-        params.forEach((item: any) => {
-          if (
-            item.seriesName === "Banda superior" ||
-            item.seriesName === "Banda inferior"
-          ) {
-            bandas.push(item);
-          } else if (item.seriesName?.includes(RATE_LABELS.bid)) {
-            vendesA.push(item);
-          } else if (item.seriesName?.includes(RATE_LABELS.ask)) {
-            comprasA.push(item);
-          }
-        });
-
-        // Si hay proveedores en el hover, siempre usar todayTimestamp
-        const hasProviders = vendesA.length > 0 || comprasA.length > 0;
-        let timestamp = params[0].axisValue || params[0].data[0];
-
-        if (hasProviders) {
-          // Si hay proveedores, siempre usar la fecha de hoy
-          timestamp = todayTimestamp;
-        } else {
-          // Si el hover está cerca de la línea "Hoy" (dentro de 1 día), usar todayTimestamp
-          const hoverTimestamp =
-            typeof timestamp === "number"
-              ? timestamp
-              : new Date(timestamp).getTime();
-          const oneDayInMs = 24 * 60 * 60 * 1000;
-          if (Math.abs(hoverTimestamp - todayTimestamp) < oneDayInMs) {
-            timestamp = todayTimestamp;
-          }
-        }
-
-        const date =
-          typeof timestamp === "number"
-            ? new Date(timestamp)
-            : new Date(timestamp);
-        const timeString = date.toLocaleDateString("es-AR", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-
-        // Ordenar bandas: superior primero, luego inferior
-        bandas.sort((a: any, b: any) => {
-          if (a.seriesName === "Banda superior") return -1;
-          if (b.seriesName === "Banda superior") return 1;
-          return 0;
-        });
-
-        // Ordenar RATE_LABELS.ask de menor a mayor valor
-        comprasA.sort((a: any, b: any) => {
-          const valueA = a.data?.[1] ?? a.value?.[1] ?? 0;
-          const valueB = b.data?.[1] ?? b.value?.[1] ?? 0;
-          return valueA - valueB; // Menor a mayor
-        });
-
-        // Ordenar RATE_LABELS.bid de mayor a menor valor
-        vendesA.sort((a: any, b: any) => {
-          const valueA = a.data?.[1] || a.value?.[1] || 0;
-          const valueB = b.data?.[1] || b.value?.[1] || 0;
-          return valueB - valueA; // Mayor a menor
-        });
-
-        // Construir el tooltip
-        let tooltip = `<strong>${timeString}</strong><br/>`;
-
-        // Mostrar bandas primero
-        bandas.forEach((item: any) => {
-          tooltip += `${item.marker} ${item.seriesName}: $${formatPrice(
-            item.data[1],
-          )}<br/>`;
-        });
-
-        // Mostrar RATE_LABELS.ask ordenados de menor a mayor
-        if (comprasA.length > 0) {
-          tooltip += `<br/><strong>${RATE_LABELS.ask}:</strong><br/>`;
-          comprasA.forEach((item: any) => {
-            // Obtener el valor del punto scatter (puede estar en data[1] o value[1])
-            const value =
-              item.data?.[1] ??
-              item.value?.[1] ??
-              (Array.isArray(item.data) ? item.data[1] : item.data);
-            const providerName =
-              item.seriesName?.replace(` (${RATE_LABELS.ask})`, "") ||
-              item.seriesName ||
-              "";
-            tooltip += `${item.marker || "•"} ${providerName}: $${formatPrice(value)}<br/>`;
-          });
-        }
-
-        // Mostrar RATE_LABELS.bid ordenados de mayor a menor
-        if (vendesA.length > 0) {
-          tooltip += `<br/><strong>${RATE_LABELS.bid}:</strong><br/>`;
-          vendesA.forEach((item: any) => {
-            // Obtener el valor del punto scatter (puede estar en data[1] o value[1])
-            const value =
-              item.data?.[1] ??
-              item.value?.[1] ??
-              (Array.isArray(item.data) ? item.data[1] : item.data);
-            const providerName =
-              item.seriesName?.replace(` (${RATE_LABELS.bid})`, "") ||
-              item.seriesName ||
-              "";
-            tooltip += `${item.marker || "•"} ${providerName}: $${formatPrice(value)}<br/>`;
-          });
-        }
-
-        return tooltip;
-      },
+    responsive: false,
+    loading: isLoadingHistories.value && labels.length === 0,
+    downsample: {
+      threshold: 2000,
     },
-    legend: {
-      data: legendData,
-      top: 10,
-      textStyle: {
-        color: colorMode.value === "dark" ? "#fff" : "#000",
+    chart: {
+      fontFamily: "inherit",
+      backgroundColor: "transparent",
+      color: textColor,
+      height: 500,
+      width: 1120,
+      padding: {
+        top: 36,
+        right: 280,
+        bottom: 12,
+        left: 8,
       },
-      selectedMode: false,
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "10%",
-      top: "15%",
-      outerBoundsMode: "same",
-      outerBoundsContain: "axisLabel",
-    },
-    xAxis: {
-      type: "time",
-      boundaryGap: false,
-      min: minTimestamp.value,
-      // Extender el max para incluir los logos cuando se hace zoom
-      max: (() => {
-        if (showTodayIndicator && allProviderPoints.length > 0) {
-          const currentRange = visibleRange.value || initialRange.value;
-          const visibleRangeX = currentRange.max - currentRange.min;
-          const todayInRange =
-            todayTimestamp >= currentRange.min &&
-            todayTimestamp <= currentRange.max;
-          const logoXPosition = todayInRange
-            ? todayTimestamp + visibleRangeX * 0.05
-            : currentRange.max - visibleRangeX * 0.1;
-          // Asegurar que el max incluya los logos
-          return Math.max(
-            maxTimestamp.value,
-            logoXPosition + visibleRangeX * 0.1,
-          );
-        }
-        return maxTimestamp.value;
-      })(),
-      nameTextStyle: {
-        color: colorMode.value === "dark" ? "#fff" : "#000",
-      },
-      axisLabel: {
-        color: colorMode.value === "dark" ? "#fff" : "#000",
-        formatter: (value: number | string) => {
-          const date =
-            typeof value === "string" ? new Date(value) : new Date(value);
-
-          // Si tenemos información del rango visible, ajustar la granularidad
-          if (visibleRange.value) {
-            const rangeDiff = visibleRange.value.max - visibleRange.value.min;
-            const daysInRange = rangeDiff / (1000 * 60 * 60 * 24);
-
-            // Si el rango visible es menor a 90 días, mostrar día/mes
-            if (daysInRange < 90) {
-              return date.toLocaleDateString("es-AR", {
-                day: "2-digit",
-                month: "short",
-              });
-            }
-          }
-
-          // Por defecto, mostrar mes/año
-          return date.toLocaleDateString("es-AR", {
-            month: "short",
-            year: "2-digit",
-          });
+      zoom: {
+        show: true,
+        color: mutedColor,
+        highlightColor: textColor,
+        enableRangeHandles: true,
+        enableSelectionDrag: true,
+        minimap: {
+          show: true,
+          selectedColor: "#10b981",
+          selectedColorOpacity: 0.2,
+          indicatorColor: textColor,
+          lineColor: mutedColor,
+          compact: true,
+        },
+        preview: {
+          enable: true,
+        },
+        useDefaultFormat: false,
+        customFormat: ({ absoluteIndex }) => {
+          const ts = labels[absoluteIndex];
+          return ts ? formatDateLabel(ts) : "";
         },
       },
-      axisLine: {
-        lineStyle: {
-          color: colorMode.value === "dark" ? "#666" : "#ccc",
-        },
-      },
-      splitLine: {
-        lineStyle: {
-          color: colorMode.value === "dark" ? "#333" : "#e5e5e5",
-        },
-      },
-    },
-    yAxis: {
-      type: "value",
-      name: "Valores de la banda cambiaria",
-      position: "left",
-      nameTextStyle: {
-        color: colorMode.value === "dark" ? "#fff" : "#000",
-      },
-      axisLabel: {
-        color: colorMode.value === "dark" ? "#fff" : "#000",
-        formatter: (value: number) => `$${formatPrice(value)}`,
-      },
-      axisLine: {
-        lineStyle: {
-          color: colorMode.value === "dark" ? "#666" : "#ccc",
-        },
-      },
-      splitLine: {
-        lineStyle: {
-          color: colorMode.value === "dark" ? "#333" : "#e5e5e5",
-        },
-      },
-      min: "dataMin",
-      max: "dataMax",
-    },
-    dataZoom: [
-      {
-        type: "inside",
-        xAxisIndex: [0],
-        filterMode: "none",
-        // Asegurar que los logos siempre estén visibles
-        zoomLock: false,
-      },
-      {
-        type: "inside",
-        yAxisIndex: [0],
-        filterMode: "none",
-        zoomLock: false,
-      },
-      {
-        type: "slider",
-        xAxisIndex: [0],
-        height: 20,
-        bottom: 10,
-        // Rango completo al cargar; el usuario puede hacer zoom después
-        rangeMode: ["value", "value"],
-        startValue: initialRange.value.min,
-        endValue: initialRange.value.max,
-        filterMode: "none",
-      },
-      {
-        type: "slider",
-        yAxisIndex: [0],
-        width: 20,
-        right: 10,
-        filterMode: "none",
-        rangeMode: ["value", "value"],
-        startValue: minY.value,
-        endValue: maxY.value,
-      },
-    ],
-    series: [
-      {
-        name: "Banda inferior",
-        type: "line",
-        data: lowerBandData.value,
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          color: "#ef4444", // Rojo
-          width: 2,
-        },
-        itemStyle: {
-          color: "#ef4444",
-        },
-        areaStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: "rgba(239, 68, 68, 0.2)" },
-              { offset: 1, color: "rgba(239, 68, 68, 0.05)" },
-            ],
-          },
-        },
-      },
-      {
-        name: "Banda superior",
-        type: "line",
-        data: upperBandData.value,
-        smooth: true,
-        showSymbol: false,
-        lineStyle: {
-          color: "#f59e0b", // Naranja
-          width: 2,
-        },
-        itemStyle: {
-          color: "#f59e0b",
-        },
-        areaStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: "rgba(245, 158, 11, 0.2)" },
-              { offset: 1, color: "rgba(245, 158, 11, 0.05)" },
-            ],
-          },
-        },
-      },
-      // Series de proveedores (líneas de conexión y logos)
-      ...providerSeries,
-      // Serie para el indicador "Hoy" - línea vertical
-      ...(showTodayIndicator
-        ? [
-            {
-              name: "Hoy",
-              type: "line",
-              data: [
-                [todayTimestamp, minY.value],
-                [todayTimestamp, maxY.value],
-              ],
-              lineStyle: {
-                color: "#10b981", // Verde
-                width: 2,
-                type: "dashed",
-              },
-              label: {
-                show: true,
-                position: "top",
-                formatter: "Hoy",
-                color: colorMode.value === "dark" ? "#fff" : "#000",
+      highlightArea:
+        index >= 0
+          ? {
+              show: true,
+              from: index,
+              to: index,
+              color: "#10b981",
+              opacity: 18,
+              caption: {
+                text: "Hoy",
                 fontSize: 12,
-                fontWeight: "bold",
-                backgroundColor:
-                  colorMode.value === "dark"
-                    ? "rgba(0, 0, 0, 0.7)"
-                    : "rgba(255, 255, 255, 0.7)",
-                padding: [2, 4],
-                borderRadius: 3,
-                offset: [0, -5],
+                color: textColor,
+                bold: true,
+                offsetY: -4,
               },
-              symbol: "none",
-              z: 100,
-              tooltip: {
-                show: true,
-                formatter: (_params: any) => {
-                  const todayDate = new Date(todayTimestamp);
-                  const timeString = todayDate.toLocaleDateString("es-AR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  });
-
-                  // Lookup from precomputed band arrays
-                  const lower = lowerBandData.value;
-                  const upper = upperBandData.value;
-
-                  // Find the closest entry to today
-                  let closestLower = lower[0]?.[1] ?? 0;
-                  let closestUpper = upper[0]?.[1] ?? 0;
-                  let minDiff = Infinity;
-
-                  for (let i = 0; i < lower.length; i++) {
-                    const diff = Math.abs(lower[i][0] - todayTimestamp);
-                    if (diff < minDiff) {
-                      minDiff = diff;
-                      closestLower = lower[i][1];
-                      closestUpper = upper[i][1];
-                    }
-                  }
-
-                  return (
-                    `<strong>${timeString}</strong><br/>` +
-                    `Banda inferior: $${formatPrice(closestLower)}<br/>` +
-                    `Banda superior: $${formatPrice(closestUpper)}`
-                  );
-                },
+            }
+          : { show: false },
+      highlighter: {
+        color: textColor,
+        opacity: 6,
+        useLine: true,
+        lineDasharray: 4,
+        lineWidth: 1,
+      },
+      grid: {
+        stroke: gridColor,
+        showHorizontalLines: true,
+        showVerticalLines: false,
+        labels: {
+          show: true,
+          color: textColor,
+          fontSize: 12,
+          axis: {
+            yLabel: "Valores de la banda cambiaria",
+            fontSize: 12,
+          },
+          yAxis: {
+            useNiceScale: false,
+            commonScaleSteps: 6,
+            rounding: 0,
+            scaleMin: yScale.value.min,
+            scaleMax: yScale.value.max,
+            formatter: ({ value }) => `$${formatPrice(value)}`,
+          },
+          xAxisLabels: {
+            show: true,
+            color: mutedColor,
+            values: labels,
+            fontSize: 11,
+            showOnlyAtModulo: true,
+            modulo,
+            datetimeFormatter: {
+              enable: true,
+              locale: "es",
+              options: {
+                year: "yyyy",
+                month: "MMM yy",
+                day: "dd MMM",
               },
             },
-          ]
-        : []),
-    ],
-    backgroundColor: "transparent",
-    // Asegurar que el gráfico reaccione a los cambios de tema
-    textStyle: {
-      color: colorMode.value === "dark" ? "#fff" : "#000",
+            autoRotate: {
+              enable: true,
+              angle: -30,
+            },
+          },
+        },
+      },
+      legend: {
+        show: true,
+        color: textColor,
+        fontSize: 13,
+        position: "top",
+      },
+      title: {
+        show: false,
+      },
+      tooltip: {
+        show: true,
+        color: textColor,
+        backgroundColor: tooltipBg,
+        borderColor: tooltipBorder,
+        borderRadius: 8,
+        backgroundOpacity: 82,
+        backdropFilter: true,
+        roundingValue: 2,
+        showPercentage: false,
+        showTimeLabel: true,
+        useDefaultTimeFormat: false,
+        timeFormat: "dd MMM yyyy",
+      },
+      userOptions: {
+        show: false,
+      },
+    },
+    line: {
+      strokeWidth: 2,
+      useGradient: true,
+      labels: {
+        show: false,
+      },
+      area: {
+        useGradient: true,
+        opacity: 18,
+      },
+      interLine: {
+        pairs: [["Banda inferior", "Banda superior"]],
+        colors: [["rgba(239, 68, 68, 0.25)", "rgba(245, 158, 11, 0.25)"]],
+        fillOpacity: 0.2,
+      },
+      dot: {
+        hideAboveMaxSerieLength: 1,
+        strokeWidth: 0,
+      },
+      tag: {
+        followValue: true,
+        fontSize: 12,
+        formatter: ({ value }) => `$${formatPrice(value)}`,
+      },
+    },
+    plot: {
+      radius: 7,
+      useGradient: false,
+      labels: {
+        show: false,
+      },
+      tag: {
+        followValue: false,
+        fontSize: 12,
+      },
+      dot: {
+        useSerieColor: true,
+        fill: isDark.value ? "#18181b" : "#ffffff",
+        strokeWidth: 2,
+      },
     },
   };
 });
+
+interface TooltipRow {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface TooltipContent {
+  timeString: string;
+  bandas: TooltipRow[];
+  compras: TooltipRow[];
+  ventas: TooltipRow[];
+}
+
+const buildTooltipContent = (payload: {
+  datapoint?: unknown;
+  absoluteIndex?: number;
+  timeLabel?: { text?: string; absoluteIndex?: number };
+}): TooltipContent => {
+  const labels = bandsData.value.labels;
+  const absoluteIndex =
+    typeof payload.absoluteIndex === "number"
+      ? payload.absoluteIndex
+      : payload.timeLabel?.absoluteIndex;
+  const ts =
+    typeof absoluteIndex === "number" ? labels[absoluteIndex] : undefined;
+  const timeString = ts
+    ? formatDateLabel(ts)
+    : payload.timeLabel?.text || formatDateLabel(todayTimestamp);
+
+  const bandas: TooltipRow[] = [];
+  const compras: TooltipRow[] = [];
+  const ventas: TooltipRow[] = [];
+  const items = Array.isArray(payload.datapoint)
+    ? payload.datapoint
+    : payload.datapoint
+      ? [payload.datapoint]
+      : [];
+
+  items.forEach((item: any) => {
+    const name = item?.name ?? "";
+    const value =
+      item?.value ??
+      item?.absoluteValue ??
+      (typeof item?.y === "number" ? item.y : null);
+    if (value == null || Number.isNaN(Number(value))) return;
+
+    const entry = {
+      name,
+      value: Number(value),
+      color: item?.color ?? "#888",
+    };
+
+    if (name === "Banda superior" || name === "Banda inferior") {
+      bandas.push(entry);
+    } else if (name.includes(RATE_LABELS.ask)) {
+      compras.push(entry);
+    } else if (name.includes(RATE_LABELS.bid)) {
+      ventas.push(entry);
+    }
+  });
+
+  bandas.sort((a, b) =>
+    a.name === "Banda superior" ? -1 : b.name === "Banda superior" ? 1 : 0,
+  );
+  compras.sort((a, b) => a.value - b.value);
+  ventas.sort((a, b) => b.value - a.value);
+
+  return { timeString, bandas, compras, ventas };
+};
 </script>
 
 <template>
@@ -1108,15 +791,149 @@ const chartOption = computed(() => {
       </div>
     </template>
 
-    <div class="w-full">
-      <VChart
-        ref="chartRef"
-        :option="chartOption"
-        class="w-full h-[500px]"
-        autoresize
-        @datazoom="handleDataZoom"
-        @ready="setInitialZoom"
-      />
+    <div class="w-full overflow-x-auto">
+      <ClientOnly>
+        <VueUiXy :dataset="chartDataset" :config="chartConfig">
+          <template #tooltip="tooltipProps">
+            <div
+              v-for="content in [buildTooltipContent(tooltipProps)]"
+              :key="content.timeString"
+              class="min-w-[180px] text-sm leading-snug"
+            >
+              <div class="mb-1.5 font-semibold">
+                {{ content.timeString }}
+              </div>
+
+              <div
+                v-for="item in content.bandas"
+                :key="`band-${item.name}`"
+                class="flex items-center gap-1.5"
+              >
+                <span :style="{ color: item.color }">●</span>
+                <span>{{ item.name }}: ${{ formatPrice(item.value) }}</span>
+              </div>
+
+              <template v-if="content.compras.length">
+                <div class="mt-2 font-semibold">{{ RATE_LABELS.ask }}:</div>
+                <div
+                  v-for="item in content.compras"
+                  :key="`ask-${item.name}`"
+                  class="flex items-center gap-1.5"
+                >
+                  <span :style="{ color: item.color }">●</span>
+                  <span
+                    >{{ item.name.replace(` (${RATE_LABELS.ask})`, "") }}: ${{
+                      formatPrice(item.value)
+                    }}</span
+                  >
+                </div>
+              </template>
+
+              <template v-if="content.ventas.length">
+                <div class="mt-2 font-semibold">{{ RATE_LABELS.bid }}:</div>
+                <div
+                  v-for="item in content.ventas"
+                  :key="`bid-${item.name}`"
+                  class="flex items-center gap-1.5"
+                >
+                  <span :style="{ color: item.color }">●</span>
+                  <span
+                    >{{ item.name.replace(` (${RATE_LABELS.bid})`, "") }}: ${{
+                      formatPrice(item.value)
+                    }}</span
+                  >
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <template #svg="{ svg }">
+            <g
+              v-for="marker in buildProviderLogoMarkers(svg)"
+              :key="marker.id"
+              class="pointer-events-none"
+            >
+              <defs>
+                <clipPath :id="`provider-logo-clip-${marker.id}`">
+                  <circle
+                    :cx="marker.x"
+                    :cy="marker.y"
+                    :r="LOGO_SIZE / 2 - 2"
+                  />
+                </clipPath>
+              </defs>
+
+              <line
+                :x1="marker.plotX + 8"
+                :y1="marker.plotY"
+                :x2="marker.x - LOGO_SIZE / 2 - 2"
+                :y2="marker.y"
+                :stroke="marker.color"
+                stroke-width="1.5"
+                stroke-dasharray="3 3"
+                opacity="0.7"
+              />
+
+              <circle
+                :cx="marker.x"
+                :cy="marker.y"
+                :r="LOGO_SIZE / 2"
+                :fill="isDark ? '#18181b' : '#ffffff'"
+                :stroke="marker.color"
+                stroke-width="2.5"
+              />
+
+              <image
+                :href="marker.logoUrl"
+                :x="marker.x - LOGO_SIZE / 2 + 2"
+                :y="marker.y - LOGO_SIZE / 2 + 2"
+                :width="LOGO_SIZE - 4"
+                :height="LOGO_SIZE - 4"
+                :clip-path="`url(#provider-logo-clip-${marker.id})`"
+                preserveAspectRatio="xMidYMid slice"
+              />
+
+              <foreignObject
+                :x="marker.x + LOGO_SIZE / 2 + 6"
+                :y="marker.y - 22"
+                width="120"
+                height="44"
+              >
+                <div
+                  xmlns="http://www.w3.org/1999/xhtml"
+                  class="flex flex-col gap-0.5 leading-tight"
+                >
+                  <span
+                    class="w-fit rounded px-1.5 py-0.5 text-[9px] font-bold text-white"
+                    :style="{ backgroundColor: marker.color }"
+                  >
+                    {{ marker.badgeLabel }}
+                  </span>
+                  <span
+                    class="truncate text-[11px] font-semibold"
+                    :style="{ color: isDark ? '#f4f4f5' : '#18181b' }"
+                  >
+                    {{ marker.displayName }}
+                  </span>
+                  <span
+                    class="text-[11px] font-medium"
+                    :style="{ color: marker.color }"
+                  >
+                    {{ marker.valueLabel }}
+                  </span>
+                </div>
+              </foreignObject>
+            </g>
+          </template>
+        </VueUiXy>
+        <template #fallback>
+          <div
+            class="flex h-[500px] w-full items-center justify-center text-sm text-zinc-500 dark:text-zinc-400"
+          >
+            Cargando gráfico…
+          </div>
+        </template>
+      </ClientOnly>
     </div>
   </UCard>
 </template>
