@@ -20,6 +20,25 @@ export default defineNuxtConfig({
     preset: "cloudflare-pages",
     compressPublicAssets: true,
     minify: true,
+    rollupConfig: {
+      plugins: [
+        {
+          name: "stub-optional-jspdf",
+          resolveId(id: string) {
+            // vue-data-ui optionally dynamic-imports jspdf for PDF export.
+            // Cloudflare Nitro forbids unresolved externals, so stub it.
+            if (id === "jspdf" || id.startsWith("jspdf/")) {
+              return `\0virtual:${id}`;
+            }
+          },
+          load(id: string) {
+            if (id.startsWith("\0virtual:jspdf")) {
+              return "const jsPDF = class {}; export { jsPDF }; export default jsPDF;";
+            }
+          },
+        },
+      ],
+    },
   },
 
   appDir: "app",

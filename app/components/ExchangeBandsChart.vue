@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { VueUiXy } from "vue-data-ui";
 import type { VueUiXyConfig, VueUiXyDatasetItem } from "vue-data-ui";
 import type { ExchangeRate, CurrencyType } from "@/lib/types";
 import { API_ENDPOINTS, API_BASE_URL } from "@/lib/types";
 import { RATE_LABELS } from "@/lib/rate-labels";
+
+const VueUiXy = defineAsyncComponent(() =>
+  import("vue-data-ui/vue-ui-xy").then((m) => m.VueUiXy ?? m.default),
+);
 
 interface Props {
   currency?: CurrencyType;
