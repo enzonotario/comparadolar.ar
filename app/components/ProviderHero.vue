@@ -3,6 +3,7 @@ import { calculateSpread, formatCurrency } from "@/lib/utils";
 import type { ExchangeRate, ProviderInfo } from "@/lib/types";
 import { useAnalytics } from "@/composables/useAnalytics";
 import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
+import { getProviderConditions } from "@/lib/provider-conditions";
 
 const { trackProviderClick } = useAnalytics();
 
@@ -28,6 +29,9 @@ const logo = computed(
     "/placeholder.svg",
 );
 const currencySymbol = computed(() => props.currency.toUpperCase());
+const conditions = computed(() =>
+  props.rateData ? getProviderConditions(props.rateData) : null,
+);
 
 const spread = computed(() => {
   if (props.rateData?.bid && props.rateData?.ask) {
@@ -127,6 +131,15 @@ const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.d
   </div>
 
   <div class="space-y-6">
+    <UAlert
+      v-if="conditions"
+      icon="i-heroicons-information-circle"
+      color="warning"
+      variant="subtle"
+      title="Cotización con condiciones"
+      :description="conditions"
+    />
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <UCard>
         <template #header>

@@ -3,7 +3,7 @@
     "usd-ccl": "usd"
   },
   "providerGroups": {
-    "usdCcl": ["astropay", "global66", "wallbit", "plus-crypto"]
+    "usdCcl": ["astropay", "global66", "wallbit", "wallbit-pro", "plus-crypto"]
   },
   "providerUsdTypes": {
     "fiwind-mep": "MEP",

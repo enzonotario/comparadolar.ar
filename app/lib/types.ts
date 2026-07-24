@@ -4,8 +4,8 @@ export type UsdFilterCategory = UsdProviderType | "CCL";
 export interface ExchangeRate {
   slug: string;
   name: string;
-  bid: number;
-  ask: number;
+  bid: number | null;
+  ask: number | null;
   logo?: string;
   logoUrl?: string;
   is24x7?: boolean;
@@ -16,6 +16,7 @@ export interface ExchangeRate {
   isBank?: boolean;
   isUsdCcl?: boolean;
   usdType?: UsdProviderType;
+  conditions?: string | null;
 }
 
 export interface CryptoRate {

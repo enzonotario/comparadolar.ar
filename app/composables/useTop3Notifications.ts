@@ -6,6 +6,7 @@ import {
 } from "~/lib/market-constants";
 import { API_BASE_URL } from "~/lib/types";
 import { getProviderDisplayName } from "~/lib/provider-display";
+import { isRankableProvider } from "~/lib/provider-conditions";
 
 const STORAGE_KEY = "comparadolar:top3-notifications";
 const LAST_TOP3_KEY = "comparadolar:last-top3";
@@ -23,6 +24,7 @@ interface NormalizedRate {
   name: string;
   ask: number;
   bid: number;
+  conditions: string | null;
 }
 
 interface Top3Entry {
@@ -64,6 +66,7 @@ function normalizeRate(raw: any): NormalizedRate {
     }),
     ask: Number(raw?.ask ?? raw?.totalAsk ?? 0),
     bid: Number(raw?.bid ?? raw?.totalBid ?? 0),
+    conditions: raw?.conditions ?? null,
   };
 }
 
@@ -81,14 +84,18 @@ function asRateList(payload: unknown): NormalizedRate[] {
 }
 
 function top3For(rates: NormalizedRate[]): CurrencyTop3 {
-  const validRates = rates.filter((rate) => rate.slug && rate.ask && rate.bid);
+  const rankableRates = rates.filter(
+    (rate) => rate.slug && isRankableProvider(rate),
+  );
 
   return {
-    buy: [...validRates]
+    buy: rankableRates
+      .filter((rate) => rate.ask > 0)
       .sort((a, b) => a.ask - b.ask)
       .slice(0, 3)
       .map((rate) => ({ slug: rate.slug, name: rate.name, value: rate.ask })),
-    sell: [...validRates]
+    sell: rankableRates
+      .filter((rate) => rate.bid > 0)
       .sort((a, b) => b.bid - a.bid)
       .slice(0, 3)
       .map((rate) => ({ slug: rate.slug, name: rate.name, value: rate.bid })),
@@ -292,7 +299,7 @@ export function useTop3Notifications() {
   ): Promise<CurrencyTop3> => {
     const apiCurrency = toApiCurrency(currency);
     const payload = await $fetch<unknown>(`${API_BASE_URL}/${apiCurrency}`);
-    let rates = asRateList(payload).filter(
+    const rates = asRateList(payload).filter(
       (rate) => !isBlacklistedProviderSlug(rate),
     );
 

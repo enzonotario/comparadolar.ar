@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ExchangeRate } from "@/lib/types";
 import { RATE_DISPLAY } from "@/lib/rate-labels";
+import { isRankableProvider } from "@/lib/provider-conditions";
 
 interface Props {
   data: ExchangeRate[] | null;
@@ -15,10 +16,13 @@ const props = withDefaults(defineProps<Props>(), {
 const { showOnly24x7 } = use24x7Filter();
 const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
 
+const hasPrice = (value: number | null | undefined): value is number =>
+  value != null && value > 0;
+
 const filteredData = computed(() => {
   if (!props.data || !Array.isArray(props.data)) return null;
 
-  let data = props.data;
+  let data = props.data.filter(isRankableProvider);
 
   if (showOnly24x7.value) {
     data = data.filter((item) => item.is24x7 === true);
@@ -32,39 +36,37 @@ const filteredData = computed(() => {
 });
 
 const bestBuy = computed(() => {
-  if (!filteredData.value || filteredData.value.length === 0) return null;
+  if (!filteredData.value) return null;
 
-  const bestAsk = filteredData.value.reduce(
-    (min, current) => (current.ask < min ? current.ask : min),
-    Infinity,
-  );
+  const candidates = filteredData.value.filter((item) => hasPrice(item.ask));
+  if (candidates.length === 0) return null;
 
-  return filteredData.value.filter((item) => item.ask === bestAsk);
+  const bestAsk = Math.min(...candidates.map((item) => item.ask!));
+
+  return candidates.filter((item) => item.ask === bestAsk);
 });
 
 const bestSell = computed(() => {
-  if (!filteredData.value || filteredData.value.length === 0) return null;
+  if (!filteredData.value) return null;
 
-  const bestBid = filteredData.value.reduce(
-    (max, current) => (current.bid > max ? current.bid : max),
-    -Infinity,
-  );
+  const candidates = filteredData.value.filter((item) => hasPrice(item.bid));
+  if (candidates.length === 0) return null;
 
-  return filteredData.value.filter((item) => item.bid === bestBid);
+  const bestBid = Math.max(...candidates.map((item) => item.bid!));
+
+  return candidates.filter((item) => item.bid === bestBid);
 });
 
 const lowestSpread = computed(() => {
-  if (!filteredData.value || filteredData.value.length === 0) return null;
+  if (!filteredData.value) return null;
 
-  const spreads = filteredData.value.map((item) => ({
-    item,
-    spread: item.ask - item.bid,
-  }));
+  const spreads = filteredData.value
+    .filter((item) => hasPrice(item.ask) && hasPrice(item.bid))
+    .map((item) => ({ item, spread: item.ask! - item.bid! }));
 
-  const minSpread = spreads.reduce(
-    (min, current) => (current.spread < min ? current.spread : min),
-    Infinity,
-  );
+  if (spreads.length === 0) return null;
+
+  const minSpread = Math.min(...spreads.map(({ spread }) => spread));
 
   return spreads
     .filter(({ spread }) => spread === minSpread)
@@ -75,7 +77,7 @@ const lowestSpreadAmount = computed(() => {
   if (!lowestSpread.value || lowestSpread.value.length === 0) return 0;
   const first = lowestSpread.value[0];
   if (!first) return 0;
-  return first.ask - first.bid;
+  return (first.ask ?? 0) - (first.bid ?? 0);
 });
 
 const buyIconClass = `w-5 h-5 ${RATE_DISPLAY.ask.textClass}`;

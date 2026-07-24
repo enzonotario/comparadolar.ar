@@ -2,6 +2,7 @@
 import { formatCurrency } from "@/lib/utils";
 import { RATE_LABELS } from "@/lib/rate-labels";
 import type { ExchangeRate } from "@/lib/types";
+import { getProviderConditions } from "@/lib/provider-conditions";
 
 interface Props {
   currency: string;
@@ -25,6 +26,7 @@ const relatedProviders = computed(() => {
       ...provider,
       displayName: provider.prettyName || provider.name,
       logo: provider.logoUrl || provider.logo,
+      conditionsLabel: getProviderConditions(provider),
     }))
     .sort((a, b) => {
       // Sort by best buy rate (highest bid)
@@ -91,6 +93,15 @@ const relatedProviders = computed(() => {
                   class="flex items-center gap-1 text-amber-700 dark:text-amber-300"
                 >
                   Horario comercial
+                </UBadge>
+                <UBadge
+                  v-if="provider.conditionsLabel"
+                  variant="outline"
+                  color="warning"
+                  icon="i-heroicons-information-circle"
+                  class="text-amber-700 dark:text-amber-300"
+                >
+                  {{ provider.conditionsLabel }}
                 </UBadge>
               </div>
             </div>

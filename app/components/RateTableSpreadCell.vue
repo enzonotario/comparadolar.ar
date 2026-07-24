@@ -19,7 +19,7 @@ const hasValidSpread = computed(() => {
 
 const getSpread = computed(() => {
   if (!hasValidSpread.value) return 0;
-  return props.rate.ask - props.rate.bid;
+  return props.rate.ask! - props.rate.bid!;
 });
 </script>
 

@@ -3,6 +3,7 @@ import {
   USD_CCL_PROVIDERS,
   BLACKLISTED_PROVIDERS,
 } from "~/lib/currencies-config";
+import { isRankableProvider } from "~/lib/provider-conditions";
 
 export interface OgItem {
   name: string;
@@ -34,6 +35,14 @@ function isCcl(slug: string): boolean {
   return USD_CCL_PROVIDERS.some((p) => slug.toLowerCase() === p);
 }
 
+function askPrice(item: ExchangeRate): number {
+  return item.ask ?? 0;
+}
+
+function bidPrice(item: ExchangeRate): number {
+  return item.bid ?? 0;
+}
+
 export function shouldOgShowOnly24x7(): boolean {
   const argNow = new Date(
     new Date().toLocaleString("en-US", {
@@ -51,14 +60,15 @@ export function top3BuyUsd(data: ExchangeRate[], only24x7 = false): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
-        item.ask > 0 &&
+        isRankableProvider(item) &&
+        askPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
     )
-    .sort((a, b) => a.ask - b.ask)
+    .sort((a, b) => askPrice(a) - askPrice(b))
     .slice(0, 3)
     .map((item) => ({
       name: item.prettyName || item.name,
-      price: formatARS(item.ask),
+      price: formatARS(askPrice(item)),
     }));
 }
 
@@ -67,14 +77,15 @@ export function top3SellUsd(data: ExchangeRate[], only24x7 = false): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
-        item.bid > 0 &&
+        isRankableProvider(item) &&
+        bidPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
     )
-    .sort((a, b) => b.bid - a.bid)
+    .sort((a, b) => bidPrice(b) - bidPrice(a))
     .slice(0, 3)
     .map((item) => ({
       name: item.prettyName || item.name,
-      price: formatARS(item.bid),
+      price: formatARS(bidPrice(item)),
     }));
 }
 
@@ -83,14 +94,15 @@ export function top3BuyUsdCcl(data: ExchangeRate[]): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        isRankableProvider(item) &&
         isCcl(item.slug ?? "") &&
-        item.ask > 0,
+        askPrice(item) > 0,
     )
-    .sort((a, b) => a.ask - b.ask)
+    .sort((a, b) => askPrice(a) - askPrice(b))
     .slice(0, 3)
     .map((item) => ({
       name: item.prettyName || item.name,
-      price: formatARS(item.ask),
+      price: formatARS(askPrice(item)),
     }));
 }
 
@@ -99,14 +111,15 @@ export function top3SellUsdCcl(data: ExchangeRate[]): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        isRankableProvider(item) &&
         isCcl(item.slug ?? "") &&
-        item.bid > 0,
+        bidPrice(item) > 0,
     )
-    .sort((a, b) => b.bid - a.bid)
+    .sort((a, b) => bidPrice(b) - bidPrice(a))
     .slice(0, 3)
     .map((item) => ({
       name: item.prettyName || item.name,
-      price: formatARS(item.bid),
+      price: formatARS(bidPrice(item)),
     }));
 }
 
@@ -153,12 +166,16 @@ export function top3SlugsForBuyUsd(
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
-        item.ask > 0 &&
+        isRankableProvider(item) &&
+        askPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
     )
-    .sort((a, b) => a.ask - b.ask)
+    .sort((a, b) => askPrice(a) - askPrice(b))
     .slice(0, 3)
-    .map((item) => ({ slug: item.slug ?? "", name: item.prettyName || item.name }));
+    .map((item) => ({
+      slug: item.slug ?? "",
+      name: item.prettyName || item.name,
+    }));
 }
 
 export function top3SlugsForBuyUsdCcl(
@@ -168,12 +185,16 @@ export function top3SlugsForBuyUsdCcl(
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        isRankableProvider(item) &&
         isCcl(item.slug ?? "") &&
-        item.ask > 0,
+        askPrice(item) > 0,
     )
-    .sort((a, b) => a.ask - b.ask)
+    .sort((a, b) => askPrice(a) - askPrice(b))
     .slice(0, 3)
-    .map((item) => ({ slug: item.slug ?? "", name: item.prettyName || item.name }));
+    .map((item) => ({
+      slug: item.slug ?? "",
+      name: item.prettyName || item.name,
+    }));
 }
 
 export function top3SlugsForBuyCrypto(
@@ -189,7 +210,10 @@ export function top3SlugsForBuyCrypto(
 function downsample<T>(arr: T[], maxPoints: number): T[] {
   if (arr.length <= maxPoints) return arr;
   const step = arr.length / maxPoints;
-  return Array.from({ length: maxPoints }, (_, i) => arr[Math.round(i * step)]!);
+  return Array.from(
+    { length: maxPoints },
+    (_, i) => arr[Math.round(i * step)]!,
+  );
 }
 
 export interface OgChartData {
@@ -239,7 +263,10 @@ export function buildOgChartLines(
     const lastPoint = rawPoints[rawPoints.length - 1];
     const withLeading =
       firstPoint && new Date(firstPoint.timestamp).getTime() > minTime
-        ? [{ timestamp: sinceDate.toISOString(), ask: firstPoint.ask }, ...rawPoints]
+        ? [
+            { timestamp: sinceDate.toISOString(), ask: firstPoint.ask },
+            ...rawPoints,
+          ]
         : rawPoints;
     const extendedPoints =
       lastPoint && new Date(lastPoint.timestamp).getTime() < maxTime
@@ -286,16 +313,17 @@ export function top5TerminalUsd(
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
-        item.ask > 0 &&
-        item.bid > 0 &&
+        isRankableProvider(item) &&
+        askPrice(item) > 0 &&
+        bidPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
     )
-    .sort((a, b) => a.ask - a.bid - (b.ask - b.bid))
+    .sort((a, b) => askPrice(a) - bidPrice(a) - (askPrice(b) - bidPrice(b)))
     .slice(0, 5)
     .map((item) => ({
       name: item.prettyName || item.name,
-      buy: formatARS(item.ask),
-      sell: formatARS(item.bid),
+      buy: formatARS(askPrice(item)),
+      sell: formatARS(bidPrice(item)),
     }));
 }
 
@@ -304,16 +332,17 @@ export function top5TerminalUsdCcl(data: ExchangeRate[]): OgTerminalRow[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        isRankableProvider(item) &&
         isCcl(item.slug ?? "") &&
-        item.ask > 0 &&
-        item.bid > 0,
+        askPrice(item) > 0 &&
+        bidPrice(item) > 0,
     )
-    .sort((a, b) => a.ask - a.bid - (b.ask - b.bid))
+    .sort((a, b) => askPrice(a) - bidPrice(a) - (askPrice(b) - bidPrice(b)))
     .slice(0, 5)
     .map((item) => ({
       name: item.prettyName || item.name,
-      buy: formatARS(item.ask),
-      sell: formatARS(item.bid),
+      buy: formatARS(askPrice(item)),
+      sell: formatARS(bidPrice(item)),
     }));
 }
 

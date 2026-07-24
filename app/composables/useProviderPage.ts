@@ -63,8 +63,9 @@ export function useProviderPage() {
       const rateInfo = rates.value.find((rate) => rate.slug === provider.slug);
       return {
         ...provider,
-        bid: rateInfo?.bid,
-        ask: rateInfo?.ask,
+        bid: rateInfo?.bid ?? null,
+        ask: rateInfo?.ask ?? null,
+        conditions: rateInfo?.conditions ?? null,
       };
     });
   });
