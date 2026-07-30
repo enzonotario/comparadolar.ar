@@ -9,6 +9,10 @@ const friendlyPages = [
     to: "https://comparapix.ar",
   },
   {
+    label: "comparatiendas.com.ar",
+    to: "https://www.comparatiendas.com.ar/",
+  },
+  {
     label: "icons.com.ar",
     to: "https://icons.com.ar",
   },
