@@ -15,11 +15,11 @@ const getPrice = computed(() => {
 </script>
 
 <template>
-  <NuxtLink :to="`/${currency}/${rate.slug}`" class="hover:underline">
-    <div class="text-center">
+  <div class="text-center">
+    <template v-if="getPrice">
       <span
-        v-if="getPrice"
-        class="text-lg font-mono font-semibold text-gray-900 dark:text-white"
+        v-if="rate.sponsoredBanner"
+        class="font-mono text-lg font-semibold text-gray-900 dark:text-white"
       >
         ${{
           getPrice.toLocaleString("es-AR", {
@@ -28,6 +28,18 @@ const getPrice = computed(() => {
           })
         }}
       </span>
-    </div>
-  </NuxtLink>
+      <NuxtLink
+        v-else
+        :to="`/${currency}/${rate.slug}`"
+        class="font-mono text-lg font-semibold text-gray-900 hover:underline dark:text-white"
+      >
+        ${{
+          getPrice.toLocaleString("es-AR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        }}
+      </NuxtLink>
+    </template>
+  </div>
 </template>

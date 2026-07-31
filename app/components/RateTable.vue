@@ -92,4 +92,14 @@ const internalSorting = computed({
     width: 40%;
   }
 }
+
+/* Sponsored Voii: precio alineado arriba (no centrado a la altura del banner) */
+.rate-table-wrapper :deep(tbody tr:has(.voii-banner) > td) {
+  vertical-align: top;
+}
+
+.rate-table-wrapper :deep(tbody tr:has(.voii-banner) > td:nth-child(2)),
+.rate-table-wrapper :deep(tbody tr:has(.voii-banner) > td:nth-child(3)) {
+  padding-top: 1.15rem;
+}
 </style>

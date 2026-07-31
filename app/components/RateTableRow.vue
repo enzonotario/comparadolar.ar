@@ -106,8 +106,8 @@ const handleImageError = (event: Event) => {
           class="h-8 w-8 rounded-full"
           @error="handleImageError"
         />
-        <div>
-          <div class="flex flex-wrap items-center gap-2">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-1.5">
             <h3 class="text-sm font-medium text-gray-900 dark:text-white">
               {{ getProviderDisplayName(rate) }}
             </h3>
@@ -139,9 +139,8 @@ const handleImageError = (event: Event) => {
         href="https://voii.com.ar/"
         target="_blank"
         rel="noopener noreferrer"
-        class="voii-banner group relative mx-auto block w-full max-w-[468px] overflow-hidden rounded-md shadow-sm ring-1 ring-amber-300/70 transition hover:ring-amber-400 dark:ring-amber-600/50 sm:mx-0"
-        style="aspect-ratio: 468 / 60"
-        aria-label="Banner Banco Voii 468x60 (mockup)"
+        class="voii-banner group relative mt-2 block w-full overflow-hidden rounded-md shadow-sm ring-1 ring-amber-300/70 transition hover:ring-amber-400 dark:ring-amber-600/50"
+        aria-label="Banner Banco Voii (mockup)"
         @click.stop
       >
         <div
@@ -159,13 +158,13 @@ const handleImageError = (event: Event) => {
           "
         />
         <div
-          class="relative flex h-full items-center justify-between gap-3 px-3 sm:px-4"
+          class="relative flex h-full items-center justify-between gap-2 px-2.5 sm:gap-3 sm:px-4"
         >
-          <div class="flex min-w-0 items-center gap-2.5">
+          <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-2.5">
             <img
               src="https://api.argentinadatos.com/static/logos/banco-voii.jpg"
               alt="Banco Voii"
-              class="h-8 w-8 shrink-0 rounded-full object-cover"
+              class="h-7 w-7 shrink-0 rounded-full object-cover sm:h-8 sm:w-8"
             />
             <div class="min-w-0 leading-tight">
               <p
@@ -176,14 +175,18 @@ const handleImageError = (event: Event) => {
               <p
                 class="truncate text-[10px] font-medium text-zinc-800/80 sm:text-[11px]"
               >
-                Operá dólares al mejor precio
+                <span class="sm:hidden">Mejor precio en USD</span>
+                <span class="hidden sm:inline"
+                  >Operá dólares al mejor precio</span
+                >
               </p>
             </div>
           </div>
           <span
-            class="shrink-0 rounded-full bg-zinc-900 px-2.5 py-1 text-[10px] font-bold text-[#FFD100] transition group-hover:bg-zinc-800 sm:text-[11px]"
+            class="shrink-0 rounded-full bg-zinc-900 px-2 py-1 text-[10px] font-bold text-[#FFD100] transition group-hover:bg-zinc-800 sm:px-2.5 sm:text-[11px]"
           >
-            Conocer más →
+            <span class="sm:hidden">Más →</span>
+            <span class="hidden sm:inline">Conocer más →</span>
           </span>
         </div>
       </a>
@@ -192,16 +195,18 @@ const handleImageError = (event: Event) => {
 </template>
 
 <style scoped>
+/* Mobile: alto fijo usable; no forzar ratio 468/60 (aplana el contenido) */
 .voii-banner {
-  height: auto;
-  max-height: 60px;
+  width: 100%;
+  height: 52px;
+  max-width: 100%;
 }
-@media (min-width: 468px) {
+
+@media (min-width: 640px) {
   .voii-banner {
     width: 468px;
     height: 60px;
-    max-height: none;
-    aspect-ratio: auto;
+    max-width: 468px;
   }
 }
 </style>
