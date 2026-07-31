@@ -5,7 +5,7 @@ const {
   terminalTableRef,
   providerCount,
   isLoading,
-} = useTerminalPage();
+} = await useTerminalPage();
 </script>
 
 <template>

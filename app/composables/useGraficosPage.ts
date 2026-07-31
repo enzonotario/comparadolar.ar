@@ -9,6 +9,7 @@ import {
   ogUpdatedAtDate,
   shouldOgShowOnly24x7,
 } from "~/utils/og-data";
+import { defineOgImageWithContext } from "~/utils/reactive-og-image";
 
 export function getGraficosTop3Slugs(options: {
   currency: CurrencyType;
@@ -49,7 +50,9 @@ export function buildGraficosOgImage(options: {
   };
 }
 
-export function useGraficosPage() {
+export async function useGraficosPage() {
+  const nuxtApp = useNuxtApp();
+
   definePageMeta({
     layout: "minimal",
   });
@@ -68,8 +71,11 @@ export function useGraficosPage() {
     ),
   });
 
-  const { data: ogBundle } = useAsyncData(
-    computed(() => `og-graficos-${currency.value}`),
+  const showExchangeBands = computed(() => currency.value === "usd");
+  const chart = useChartData(computed(() => currency.value as CurrencyType));
+
+  const { data: ogBundle } = await useAsyncData(
+    () => `og-graficos-${currency.value}`,
     async () => {
       const rates = await $fetch<any[]>(
         `${API_BASE_URL}/${apiCurrency.value}`,
@@ -94,22 +100,15 @@ export function useGraficosPage() {
     },
   );
 
-  const ogProps = computed(() =>
+  defineOgImageWithContext(
+    nuxtApp,
+    "Graficos",
     buildGraficosOgImage({
       currency: currency.value,
       currencyConfig: currencyConfig.value,
       histories: ogBundle.value?.histories ?? [],
     }),
   );
-
-  defineReactiveOgImage(
-    "Graficos",
-    ["title", "lines", "yTicks", "accentColor", "updatedAt", "priceLabel"],
-    ogProps,
-  );
-
-  const showExchangeBands = computed(() => currency.value === "usd");
-  const chart = useChartData(computed(() => currency.value as CurrencyType));
 
   return {
     currency,

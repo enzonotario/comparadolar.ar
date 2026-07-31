@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { currency } = useCompareFiatPage({
+const { currency } = await useCompareFiatPage({
   currency: "usd",
   title: getCompareHomeTitle(),
   show24x7Filter: true,

@@ -11,7 +11,7 @@ const {
   isLoading,
   error,
   resetState,
-} = useGraficosPage();
+} = await useGraficosPage();
 </script>
 
 <template>

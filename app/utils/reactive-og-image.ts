@@ -1,16 +1,14 @@
-import type { ComputedRef } from "vue";
-
-export function defineReactiveOgImage<T extends Record<string, unknown>>(
+/**
+ * defineOgImage hace toValue() eager de las props al momento del call.
+ * Tras un await en setup se pierde el contexto Nuxt: capturar useNuxtApp()
+ * ANTES del await y registrar la imagen con runWithContext.
+ */
+export function defineOgImageWithContext(
+  nuxtApp: ReturnType<typeof useNuxtApp>,
   component: string,
-  propKeys: (keyof T)[],
-  propsSource: ComputedRef<T>,
+  props: Record<string, unknown>,
 ) {
-  const reactiveProps = Object.fromEntries(
-    propKeys.map((key) => [
-      key,
-      computed(() => propsSource.value[key]),
-    ]),
-  ) as { [K in keyof T]: ComputedRef<T[K]> };
-
-  defineOgImage(component, reactiveProps);
+  nuxtApp.runWithContext(() => {
+    defineOgImage(component, props);
+  });
 }

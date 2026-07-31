@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { currency } = useCompareCryptoPage();
+const { currency } = await useCompareCryptoPage();
 </script>
 
 <template>

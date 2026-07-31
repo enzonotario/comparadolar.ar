@@ -7,6 +7,7 @@ import {
   ogUpdatedAtDate,
   shouldOgShowOnly24x7,
 } from "~/utils/og-data";
+import { defineOgImageWithContext } from "~/utils/reactive-og-image";
 
 export function buildTerminalOgImage(options: {
   currency: CurrencyType;
@@ -32,7 +33,9 @@ export function buildTerminalOgImage(options: {
   };
 }
 
-export function useTerminalPage(notFoundMessage = "Moneda no encontrada") {
+export async function useTerminalPage(notFoundMessage = "Moneda no encontrada") {
+  const nuxtApp = useNuxtApp();
+
   definePageMeta({
     layout: "minimal",
   });
@@ -50,8 +53,17 @@ export function useTerminalPage(notFoundMessage = "Moneda no encontrada") {
     ),
   });
 
-  const { data: ogData } = useAsyncData(
-    computed(() => `og-terminal-${currency.value}`),
+  const { terminalColors } = useTerminalColors(currency);
+  const terminalTableRef = ref();
+  const providerCount = computed(
+    () => terminalTableRef.value?.filteredRates?.length || 0,
+  );
+  const isLoading = computed(
+    () => terminalTableRef.value?.isLoading ?? true,
+  );
+
+  const { data: ogData } = await useAsyncData(
+    () => `og-terminal-${currency.value}`,
     () => {
       if (isFiat.value) {
         return $fetch(`${API_BASE_URL}/usd`);
@@ -60,29 +72,16 @@ export function useTerminalPage(notFoundMessage = "Moneda no encontrada") {
     },
   );
 
-  const ogProps = computed(() =>
+  defineOgImageWithContext(
+    nuxtApp,
+    "Terminal",
     buildTerminalOgImage({
       currency: currency.value,
       currencyConfig: currencyConfig.value,
       isCcl: isCcl.value,
       isFiat: isFiat.value,
-      data: ogData.value ?? [],
+      data: (ogData.value as unknown[]) ?? [],
     }),
-  );
-
-  defineReactiveOgImage(
-    "Terminal",
-    ["title", "rows", "updatedAt", "accentColor"],
-    ogProps,
-  );
-
-  const { terminalColors } = useTerminalColors(currency);
-  const terminalTableRef = ref();
-  const providerCount = computed(
-    () => terminalTableRef.value?.filteredRates?.length || 0,
-  );
-  const isLoading = computed(
-    () => terminalTableRef.value?.isLoading ?? true,
   );
 
   return {

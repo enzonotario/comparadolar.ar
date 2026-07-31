@@ -1,7 +1,7 @@
 import { writeFileSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
 
-const BASE_URL = process.env.OG_BASE_URL ?? "http://localhost:3001";
+const BASE_URL = process.env.OG_BASE_URL ?? "http://localhost:3000";
 const OUT_DIR = "preview-og";
 const OG_DEFAULT_PNG = join(process.cwd(), "public/assets/og-image.png");
 

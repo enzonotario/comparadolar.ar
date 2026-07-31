@@ -16,6 +16,7 @@ import {
   ogUpdatedAtDate,
   shouldOgShowOnly24x7,
 } from "~/utils/og-data";
+import { defineOgImageWithContext } from "~/utils/reactive-og-image";
 
 type CompareOgRates = ExchangeRate[] | Array<{
   slug: string;
@@ -91,29 +92,26 @@ function useComparePageSeo({
   });
 }
 
-function useCompareOgImage(currency: MaybeRef<CurrencyType>) {
+async function useCompareOgImage(currency: MaybeRef<CurrencyType>) {
+  const nuxtApp = useNuxtApp();
   const resolvedCurrency = computed(() => toValue(currency));
 
-  const { data: ogData } = useAsyncData(
-    computed(() => `og-${resolvedCurrency.value}`),
+  const { data: ogData } = await useAsyncData(
+    () => `og-${resolvedCurrency.value}`,
     () =>
       $fetch<CompareOgRates>(
         `${API_BASE_URL}/${toApiCurrency(resolvedCurrency.value)}`,
       ),
   );
 
-  const ogProps = computed(() =>
-    buildCompareOgImage(resolvedCurrency.value, ogData.value ?? []),
-  );
-
-  defineReactiveOgImage(
+  defineOgImageWithContext(
+    nuxtApp,
     "ComparaDolar",
-    ["title", "buy", "sell", "updatedAt", "accentColor"],
-    ogProps,
+    buildCompareOgImage(resolvedCurrency.value, ogData.value ?? []),
   );
 }
 
-export function useCompareFiatPage(options: {
+export async function useCompareFiatPage(options: {
   currency: CurrencyType;
   title?: string;
   show24x7Filter?: boolean;
@@ -123,11 +121,12 @@ export function useCompareFiatPage(options: {
     title: options.title,
     structuredDataType: "WebPage",
   });
-  useCompareOgImage(options.currency);
 
   const showOnly24x7 = options.show24x7Filter
     ? use24x7Filter().showOnly24x7
     : undefined;
+
+  await useCompareOgImage(options.currency);
 
   return {
     currency: options.currency,
@@ -135,14 +134,14 @@ export function useCompareFiatPage(options: {
   };
 }
 
-export function useCompareCryptoPage() {
+export async function useCompareCryptoPage() {
   const { currency, apiCurrency } = useValidatedRouteCurrency();
 
   useComparePageSeo({
     currency: currency.value,
     structuredDataType: "FinancialProduct",
   });
-  useCompareOgImage(currency);
+  await useCompareOgImage(currency);
 
   return { currency, apiCurrency };
 }
