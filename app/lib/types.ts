@@ -17,6 +17,8 @@ export interface ExchangeRate {
   isUsdCcl?: boolean;
   usdType?: UsdProviderType;
   conditions?: string | null;
+  /** Solo mockups/demos de anuncio sponsored */
+  sponsoredBanner?: boolean;
 }
 
 export interface CryptoRate {
