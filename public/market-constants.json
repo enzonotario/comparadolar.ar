@@ -21,7 +21,8 @@
     "plus-inversiones": "MEP",
     "tiendadolar": "Oficial",
     "ripio": "Cripto",
-    "nexo": "Cripto"
+    "nexo": "Cripto",
+    "takenos": "Cripto"
   },
   "blacklistedProviders": ["brubank", "bbva"],
   "currencyGroups": {
