@@ -10,23 +10,18 @@ const cardClasses = computed(() => {
   const map: Record<string, { bg: string; border: string }> = {
     green: {
       bg: "bg-green-50/60 dark:bg-green-950/20",
-      border: "border-s-4 border-s-green-400 dark:border-s-green-600",
     },
     cyan: {
       bg: "bg-cyan-50/60 dark:bg-cyan-950/20",
-      border: "border-s-4 border-s-cyan-400 dark:border-s-cyan-600",
     },
     teal: {
       bg: "bg-teal-50/60 dark:bg-teal-950/20",
-      border: "border-s-4 border-s-teal-400 dark:border-s-teal-600",
     },
     orange: {
       bg: "bg-orange-50/60 dark:bg-orange-950/20",
-      border: "border-s-4 border-s-orange-400 dark:border-s-orange-600",
     },
     violet: {
       bg: "bg-violet-50/60 dark:bg-violet-950/20",
-      border: "border-s-4 border-s-violet-400 dark:border-s-violet-600",
     },
   };
   return map[colorScheme.value] || map.green;
@@ -45,7 +40,7 @@ const linkClass = computed(() => {
 </script>
 
 <template>
-  <UCard :class="[cardClasses.bg, cardClasses.border]" class="mx-auto">
+  <UCard :class="[cardClasses.bg]" class="mx-auto">
     <div
       class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
     >
