@@ -22,6 +22,11 @@ export async function getSitemapUrls() {
     priority: 0.8,
   });
   urls.push({
+    loc: "/remesas",
+    changefreq: "daily",
+    priority: 0.8,
+  });
+  urls.push({
     loc: "/sumarse",
     changefreq: "monthly",
     priority: 0.5,

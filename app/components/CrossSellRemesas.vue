@@ -7,7 +7,7 @@ const colorScheme = computed(() =>
 );
 
 const cardClasses = computed(() => {
-  const map: Record<string, { bg: string; border: string }> = {
+  const map: Record<string, { bg: string }> = {
     green: {
       bg: "bg-green-50/60 dark:bg-green-950/20",
     },
@@ -48,24 +48,17 @@ const linkClass = computed(() => {
         <p class="text-sm font-semibold">¿Cobrás del exterior?</p>
         <p class="text-sm text-muted">
           Mirá la comparativa de remesas en
-          <NuxtLink
-            to="https://comparatasas.ar/remesas"
-            external
-            target="_blank"
-            rel="noopener noreferrer"
-            :class="[linkClass, 'hover:underline']"
-          >
-            comparatasas.ar/remesas </NuxtLink
-          >.
+          <NuxtLink to="/remesas" :class="[linkClass, 'hover:underline']">
+            comparadolar.ar/remesas
+          </NuxtLink>
+          , con el precio de venta del dólar en vivo.
         </p>
       </div>
 
       <UButton
-        to="https://comparatasas.ar/remesas"
-        external
-        target="_blank"
-        rel="noopener noreferrer"
-        icon="i-lucide-arrow-up-right"
+        to="/remesas"
+        icon="i-lucide-arrow-right"
+        trailing
         :color="colorScheme"
       >
         Ver remesas

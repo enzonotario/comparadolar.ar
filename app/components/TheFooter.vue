@@ -99,6 +99,12 @@ const friendlyPages = [
                   Terminal
                 </NuxtLink>
                 <NuxtLink
+                  to="/remesas"
+                  class="text-sm text-zinc-600 dark:text-white/60 hover:underline"
+                >
+                  Remesas
+                </NuxtLink>
+                <NuxtLink
                   to="/sumarse"
                   class="text-sm text-zinc-600 dark:text-white/60 hover:underline"
                 >

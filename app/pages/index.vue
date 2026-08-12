@@ -1,9 +1,19 @@
 <script setup lang="ts">
-const { currency } = await useCompareFiatPage({
+// Invocar ambos antes de await para no perder el contexto Nuxt.
+const comparePagePromise = useCompareFiatPage({
   currency: "usd",
   title: getCompareHomeTitle(),
   show24x7Filter: true,
 });
+const remesasPromise = useRemesasRows();
+
+const [{ currency }, remesasState] = await Promise.all([
+  comparePagePromise,
+  remesasPromise,
+]);
+
+const remesasTop3 = remesasState.top3;
+const remesasLoading = remesasState.loading;
 </script>
 
 <template>
@@ -18,7 +28,7 @@ const { currency } = await useCompareFiatPage({
 
     <ExchangeBandsChart :currency="currency" />
 
-    <CrossSellRemesas />
+    <RemesasTop3 :rows="remesasTop3" :loading="remesasLoading" />
 
     <Only24x7Switch />
 
