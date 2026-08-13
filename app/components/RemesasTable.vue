@@ -4,13 +4,24 @@ import type { TableColumn } from "@nuxt/ui";
 import { useMediaQuery } from "@vueuse/core";
 import { useRouteQuery } from "@vueuse/router";
 import { RATE_DISPLAY } from "~/lib/rate-labels";
-import { hasPositiveNumericValue, isZeroLike } from "~/lib/remesas";
+import {
+  formatArsAmount,
+  hasPositiveNumericValue,
+  isZeroLike,
+  simulateRemesaPayout,
+} from "~/lib/remesas";
 import { getDetail, type RemesaRow } from "~/composables/useRemesasRows";
+
+interface SimulatedRemesaRow extends RemesaRow {
+  arsFinal: number | null;
+  arsFinalSort: number;
+}
 
 const props = defineProps<{
   rows: RemesaRow[];
 }>();
 
+const { usdAmount, isSimulating } = useRemesasSimulator();
 const UBadge = resolveComponent("UBadge");
 const UButton = resolveComponent("UButton");
 const UIcon = resolveComponent("UIcon");
@@ -156,6 +167,46 @@ function renderVendesACell(row: RemesaRow) {
   ]);
 }
 
+function renderArsFinalCell(row: SimulatedRemesaRow) {
+  if (row.arsFinal == null) {
+    return h("span", { class: "text-muted" }, "—");
+  }
+
+  return h(
+    "span",
+    {
+      class:
+        "font-mono text-sm font-semibold tabular-nums text-green-700 dark:text-green-400",
+    },
+    formatArsAmount(row.arsFinal),
+  );
+}
+
+const simulatedRows = computed<SimulatedRemesaRow[]>(() => {
+  return props.rows.map((row) => {
+    if (!isSimulating.value || row.vendesA == null) {
+      return {
+        ...row,
+        arsFinal: null,
+        arsFinalSort: Number.NEGATIVE_INFINITY,
+      };
+    }
+
+    const payout = simulateRemesaPayout({
+      usdAmount: usdAmount.value ?? 0,
+      bid: row.vendesA,
+      costoRecibirPagos: row.costoRecibirPagos,
+      retiroArs: row.retiroArs,
+    });
+
+    return {
+      ...row,
+      arsFinal: payout?.arsFinal ?? null,
+      arsFinalSort: payout?.arsFinal ?? Number.NEGATIVE_INFINITY,
+    };
+  });
+});
+
 function renderProviderCell(row: RemesaRow) {
   const avatar = row.logo
     ? h("img", {
@@ -178,12 +229,11 @@ function renderProviderCell(row: RemesaRow) {
       "p",
       {
         class: row.providerUrl
-          ? "font-medium text-primary-600 group-hover:underline dark:text-primary-400"
+          ? "font-medium text-neutral-600 group-hover:underline dark:text-neutral-400"
           : "font-medium",
       },
       row.displayName,
     ),
-    h("p", { class: "mt-1 text-xs text-muted" }, row.monedaLabel),
   ]);
 
   if (row.providerUrl) {
@@ -227,26 +277,43 @@ const monedaFilter = useRouteQuery("moneda", "all");
 const cuentaPropiaFilter = useRouteQuery("propia", "all");
 const inversionesFilter = useRouteQuery("inv", "all");
 const tarjetaFilter = useRouteQuery("tarjeta", "all");
-const sortQuery = useRouteQuery(
-  "sort",
-  '[{"id":"vendesASort","desc":true}]',
-);
+const sortQuery = useRouteQuery("sort", '[{"id":"vendesASort","desc":true}]');
 
 type SortingState = Array<{ id: string; desc: boolean }>;
+
+const DEFAULT_SORT: SortingState = [{ id: "vendesASort", desc: true }];
 
 function parseSorting(value: string): SortingState {
   try {
     const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed : DEFAULT_SORT;
   } catch {
-    return [{ id: "vendesASort", desc: true }];
+    return DEFAULT_SORT;
   }
 }
 
-const sorting = ref<SortingState>(parseSorting(sortQuery.value));
+function sanitizeSorting(
+  value: SortingState,
+  simulating: boolean,
+): SortingState {
+  const next = value.filter((item) => {
+    if (!item?.id) return false;
+    if (item.id === "arsFinalSort") return simulating;
+    return true;
+  });
+  return next.length ? next : DEFAULT_SORT;
+}
+
+const sorting = ref<SortingState>(
+  sanitizeSorting(parseSorting(sortQuery.value), isSimulating.value),
+);
+
+const columnVisibility = computed(() => ({
+  arsFinalSort: isSimulating.value,
+}));
 
 watch(sortQuery, (value) => {
-  const next = parseSorting(value);
+  const next = sanitizeSorting(parseSorting(value), isSimulating.value);
   if (JSON.stringify(next) !== JSON.stringify(sorting.value)) {
     sorting.value = next;
   }
@@ -283,7 +350,7 @@ function normalizeText(value: string | null): string {
 const filteredRows = computed(() => {
   const query = normalizeText(searchQuery.value);
 
-  return props.rows.filter((row) => {
+  return simulatedRows.value.filter((row) => {
     if (monedaFilter.value !== "all" && row.moneda !== monedaFilter.value) {
       return false;
     }
@@ -338,7 +405,8 @@ const sortedFilteredRows = computed(() => {
   });
 });
 
-const sortableColumns = [
+const sortableColumns = computed(() => [
+  ...(isSimulating.value ? [{ id: "arsFinalSort", label: "Te quedan" }] : []),
   { id: "vendesASort", label: RATE_DISPLAY.bid.label },
   { id: "retiroArsSort", label: "Retiro ARS" },
   { id: "costoRecibirPagosSort", label: "Recibir pagos" },
@@ -346,12 +414,12 @@ const sortableColumns = [
   { id: "costoTarjetaSort", label: "Uso tarjeta" },
   { id: "averageRating", label: "Rating" },
   { id: "displayName", label: "Nombre" },
-];
+]);
 
 const activeSortColumn = ref(
-  sortableColumns.find(
+  sortableColumns.value.find(
     (c) => c.id === (sorting.value[0]?.id ?? "vendesASort"),
-  ) ?? sortableColumns[0]!,
+  ) ?? sortableColumns.value[0]!,
 );
 const activeSortDesc = ref(sorting.value[0]?.desc ?? true);
 
@@ -368,13 +436,23 @@ watch(activeSortDesc, (desc) => {
 watch(sorting, (value) => {
   const col = value[0];
   if (col) {
-    const found = sortableColumns.find((c) => c.id === col.id);
+    const found = sortableColumns.value.find((c) => c.id === col.id);
     if (found) activeSortColumn.value = found;
     activeSortDesc.value = col.desc;
   }
 });
 
-const columns: TableColumn<RemesaRow>[] = [
+watch(isSimulating, (simulating) => {
+  if (simulating) {
+    sorting.value = [{ id: "arsFinalSort", desc: true }];
+    return;
+  }
+  if (sorting.value[0]?.id === "arsFinalSort") {
+    sorting.value = [{ id: "vendesASort", desc: true }];
+  }
+});
+
+const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   {
     accessorKey: "displayName",
     header: createSortableHeader("Plataforma"),
@@ -431,6 +509,11 @@ const columns: TableColumn<RemesaRow>[] = [
     cell: ({ row }) => renderVendesACell(row.original),
   },
   {
+    accessorKey: "arsFinalSort",
+    header: createSortableHeader("Te quedan"),
+    cell: ({ row }) => renderArsFinalCell(row.original),
+  },
+  {
     accessorKey: "costoMantenimientoTarjetaSort",
     header: createSortableHeader("Mant. tarjeta"),
     cell: ({ row }) =>
@@ -453,7 +536,7 @@ const columns: TableColumn<RemesaRow>[] = [
     header: createSortableHeader("Rating promedio"),
     cell: ({ row }) => row.original.averageRatingLabel,
   },
-];
+]);
 </script>
 
 <template>
@@ -480,7 +563,7 @@ const columns: TableColumn<RemesaRow>[] = [
                   v-for="option in ['all', 'FIAT', 'CRIPTO']"
                   :key="option"
                   size="sm"
-                  :color="monedaFilter === option ? 'primary' : 'neutral'"
+                  :color="monedaFilter === option ? 'neutral' : 'neutral'"
                   :variant="monedaFilter === option ? 'soft' : 'outline'"
                   @click="monedaFilter = option"
                 >
@@ -504,7 +587,7 @@ const columns: TableColumn<RemesaRow>[] = [
                   v-for="option in ['all', 'si', 'no']"
                   :key="`propia-${option}`"
                   size="sm"
-                  :color="cuentaPropiaFilter === option ? 'primary' : 'neutral'"
+                  :color="cuentaPropiaFilter === option ? 'neutral' : 'neutral'"
                   :variant="cuentaPropiaFilter === option ? 'soft' : 'outline'"
                   @click="cuentaPropiaFilter = option"
                 >
@@ -524,7 +607,7 @@ const columns: TableColumn<RemesaRow>[] = [
                   v-for="option in ['all', 'si', 'no']"
                   :key="`inv-${option}`"
                   size="sm"
-                  :color="inversionesFilter === option ? 'primary' : 'neutral'"
+                  color="neutral"
                   :variant="inversionesFilter === option ? 'soft' : 'outline'"
                   @click="inversionesFilter = option"
                 >
@@ -544,7 +627,7 @@ const columns: TableColumn<RemesaRow>[] = [
                   v-for="option in ['all', 'si', 'no']"
                   :key="`tarjeta-${option}`"
                   size="sm"
-                  :color="tarjetaFilter === option ? 'primary' : 'neutral'"
+                  :color="tarjetaFilter === option ? 'neutral' : 'neutral'"
                   :variant="tarjetaFilter === option ? 'soft' : 'outline'"
                   @click="tarjetaFilter = option"
                 >
@@ -561,6 +644,7 @@ const columns: TableColumn<RemesaRow>[] = [
           del dólar en vivo. Si hay aclaraciones, aparecen como
           <strong>Detalle</strong> en la celda.
         </p>
+        <RemesasSimulator />
       </div>
     </template>
 
@@ -574,7 +658,12 @@ const columns: TableColumn<RemesaRow>[] = [
     />
 
     <div class="hidden lg:block overflow-x-auto">
-      <UTable v-model:sorting="sorting" :data="filteredRows" :columns="columns">
+      <UTable
+        v-model:sorting="sorting"
+        :data="filteredRows"
+        :columns="columns"
+        :column-visibility="columnVisibility"
+      >
         <template #empty>
           <div class="py-10 text-center text-sm text-muted">
             No hay plataformas que coincidan con los filtros actuales.
@@ -637,11 +726,10 @@ const columns: TableColumn<RemesaRow>[] = [
               </div>
               <div class="min-w-0">
                 <p
-                  class="font-medium text-primary-600 group-hover:underline dark:text-primary-400"
+                  class="font-medium text-neutral-600 group-hover:underline dark:text-neutral-400"
                 >
                   {{ row.displayName }}
                 </p>
-                <p class="text-xs text-muted">{{ row.monedaLabel }}</p>
               </div>
             </a>
             <template v-else>
@@ -660,7 +748,6 @@ const columns: TableColumn<RemesaRow>[] = [
               </div>
               <div>
                 <p class="font-medium">{{ row.displayName }}</p>
-                <p class="text-xs text-muted">{{ row.monedaLabel }}</p>
               </div>
             </template>
             <div class="ml-auto shrink-0">
@@ -753,6 +840,18 @@ const columns: TableColumn<RemesaRow>[] = [
                 "
               >
                 {{ row.vendesALabel }}
+              </span>
+            </div>
+            <div
+              v-if="isSimulating"
+              class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
+            >
+              <span class="text-muted">Te quedan</span>
+              <span class="ml-auto" />
+              <span
+                class="font-mono text-xs font-semibold tabular-nums text-green-700 dark:text-green-400"
+              >
+                {{ row.arsFinal != null ? formatArsAmount(row.arsFinal) : "—" }}
               </span>
             </div>
             <div class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5">

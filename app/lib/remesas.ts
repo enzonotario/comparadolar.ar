@@ -61,7 +61,7 @@ const COMPANY_DISPLAY_NAMES: Record<string, string> = {
 export const REMESA_QUOTE_MAP: Record<string, RemesaQuoteMapping> = {
   wallbit: { asset: "usd", slug: "wallbit" },
   astropay: { asset: "usd", slug: "astropay" },
-  cocos: { asset: "usd", slug: "cocos" },
+  cocos: { asset: "usdc", slug: "cocoscrypto" },
   global66: { asset: "usd", slug: "global66" },
   takenos: { asset: "usd", slug: "takenos" },
   arq: { asset: "usdc", slug: "arq" },
@@ -240,4 +240,166 @@ export function averageRemesaRating(item: RemesaOption): number {
     (item.calificacionAndroid !== null ? 1 : 0) +
     (item.calificacionIos !== null ? 1 : 0);
   return ratingCount > 0 ? (androidRating + iosRating) / ratingCount : 0;
+}
+
+export type RemesaFeeUnit = "percent" | "usd" | "ars";
+
+export interface RemesaFee {
+  value: number;
+  unit: RemesaFeeUnit;
+  approximate: boolean;
+  raw: string;
+}
+
+export interface RemesaPayoutInput {
+  usdAmount: number;
+  bid: number;
+  costoRecibirPagos: string | null;
+  retiroArs: string | null;
+}
+
+export interface RemesaPayout {
+  usdAmount: number;
+  usdAfterReceive: number;
+  receiveFeeUsd: number;
+  receiveFee: RemesaFee | null;
+  bid: number;
+  arsGross: number;
+  withdrawFeeArs: number;
+  withdrawFee: RemesaFee | null;
+  arsFinal: number;
+  approximate: boolean;
+}
+
+function parseEsNumber(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  if (trimmed.includes(",") && trimmed.includes(".")) {
+    const lastComma = trimmed.lastIndexOf(",");
+    const lastDot = trimmed.lastIndexOf(".");
+    const normalized =
+      lastComma > lastDot
+        ? trimmed.replace(/\./g, "").replace(",", ".")
+        : trimmed.replace(/,/g, "");
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  const parsed = Number(trimmed.replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+export function parseRemesaFee(value: string | null): RemesaFee | null {
+  if (!value) return null;
+  if (isZeroLike(value)) {
+    return { value: 0, unit: "percent", approximate: false, raw: value };
+  }
+
+  const normalized = value.trim().toLowerCase().replace(/\s+/g, " ");
+
+  const rangePct = normalized.match(
+    /(-?\d+(?:[.,]\d+)?)\s*%\s*(?:a|-|–|—)\s*(-?\d+(?:[.,]\d+)?)\s*%/,
+  );
+  if (rangePct) {
+    const first = parseEsNumber(rangePct[1]!);
+    const second = parseEsNumber(rangePct[2]!);
+    if (first == null || second == null) return null;
+    return {
+      value: Math.max(first, second),
+      unit: "percent",
+      approximate: true,
+      raw: value,
+    };
+  }
+
+  const pct = normalized.match(/(-?\d+(?:[.,]\d+)?)\s*%/);
+  if (pct) {
+    const parsed = parseEsNumber(pct[1]!);
+    if (parsed == null) return null;
+    return { value: parsed, unit: "percent", approximate: false, raw: value };
+  }
+
+  const usd = normalized.match(/(-?\d+(?:[.,]\d+)?)\s*(?:usd|u\$s|us\$|\$)/);
+  if (usd) {
+    const parsed = parseEsNumber(usd[1]!);
+    if (parsed == null) return null;
+    return { value: parsed, unit: "usd", approximate: false, raw: value };
+  }
+
+  const ars = normalized.match(/(-?\d+(?:[.,]\d+)?)\s*ars/);
+  if (ars) {
+    const parsed = parseEsNumber(ars[1]!);
+    if (parsed == null) return null;
+    return { value: parsed, unit: "ars", approximate: false, raw: value };
+  }
+
+  return null;
+}
+
+function feeInUsd(
+  fee: RemesaFee | null,
+  usdAmount: number,
+  bid: number,
+): number {
+  if (!fee || fee.value === 0) return 0;
+  if (fee.unit === "percent") return (usdAmount * fee.value) / 100;
+  if (fee.unit === "usd") return fee.value;
+  return bid > 0 ? fee.value / bid : 0;
+}
+
+function feeInArs(
+  fee: RemesaFee | null,
+  arsAmount: number,
+  bid: number,
+): number {
+  if (!fee || fee.value === 0) return 0;
+  if (fee.unit === "percent") return (arsAmount * fee.value) / 100;
+  if (fee.unit === "usd") return fee.value * bid;
+  return fee.value;
+}
+
+export function simulateRemesaPayout(
+  input: RemesaPayoutInput,
+): RemesaPayout | null {
+  if (!Number.isFinite(input.usdAmount) || input.usdAmount <= 0) return null;
+  if (!Number.isFinite(input.bid) || input.bid <= 0) return null;
+
+  const receiveFee = parseRemesaFee(input.costoRecibirPagos);
+  const withdrawFee = parseRemesaFee(input.retiroArs);
+  const receiveFeeUsd = feeInUsd(receiveFee, input.usdAmount, input.bid);
+  const usdAfterReceive = Math.max(0, input.usdAmount - receiveFeeUsd);
+  const arsGross = usdAfterReceive * input.bid;
+  const withdrawFeeArs = feeInArs(withdrawFee, arsGross, input.bid);
+  const arsFinal = Math.max(0, arsGross - withdrawFeeArs);
+
+  return {
+    usdAmount: input.usdAmount,
+    usdAfterReceive,
+    receiveFeeUsd,
+    receiveFee,
+    bid: input.bid,
+    arsGross,
+    withdrawFeeArs,
+    withdrawFee,
+    arsFinal,
+    approximate: Boolean(receiveFee?.approximate || withdrawFee?.approximate),
+  };
+}
+
+export function formatArsAmount(value: number): string {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 0,
+  }).format(Math.round(value));
+}
+
+export function formatUsdAmount(value: number): string {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "USD",
+    currencyDisplay: "narrowSymbol",
+    maximumFractionDigits: value % 1 === 0 ? 0 : 2,
+  }).format(value);
 }

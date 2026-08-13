@@ -72,7 +72,6 @@ defineProps<{
                 </div>
                 <div class="min-w-0">
                   <p class="font-medium truncate">{{ row.displayName }}</p>
-                  <p class="text-xs text-muted">{{ row.monedaLabel }}</p>
                 </div>
               </div>
             </td>
@@ -114,8 +113,7 @@ defineProps<{
         </p>
         <UButton
           to="/remesas"
-          color="primary"
-          variant="soft"
+          color="neutral"
           icon="i-lucide-arrow-right"
           trailing
         >
