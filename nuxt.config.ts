@@ -185,7 +185,7 @@ export default defineNuxtConfig({
     },
   },
 
-  gtag: { id: "G-60ZETC472S" },
+  gtag: { id: "G-YY8KZ56EWT" },
 
   echarts: {
     charts: ["LineChart", "BarChart", "ScatterChart"],
