@@ -30,7 +30,6 @@ const internalSorting = computed({
       :data="rates"
       :columns="columns"
       :loading="isLoading"
-      role="table"
       :ui="{
         root: 'table-fixed',
       }"

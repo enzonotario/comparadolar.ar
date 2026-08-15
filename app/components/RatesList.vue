@@ -221,65 +221,65 @@ const handleRetry = () => {
       <UTabs
         v-model="activeTab"
         :items="items"
+        :content="false"
         variant="link"
         color="neutral"
         :ui="{
           trigger: 'grow',
           label: 'cursor-pointer',
         }"
-        class="gap-0 w-full"
+        class="gap-0 w-full p-4 pb-0"
+      />
+
+      <div
+        v-if="isLoading"
+        class="divide-y divide-zinc-200 dark:divide-zinc-700"
       >
-        <template #content>
-          <div
-            v-if="isLoading"
-            class="divide-y divide-zinc-200 dark:divide-zinc-700"
-          >
-            <div
-              v-for="i in 8"
-              :key="i"
-              class="px-4 py-4 flex items-center justify-between"
-            >
-              <div class="flex items-center gap-3 flex-1">
-                <USkeleton class="h-8 w-8 rounded-full" />
-                <div class="space-y-1 flex-1">
-                  <USkeleton class="h-4 w-24" />
-                  <USkeleton class="h-3 w-16" />
-                </div>
-              </div>
-              <div class="flex items-center gap-6">
-                <USkeleton class="h-5 w-20" />
-                <USkeleton v-if="!isMobile" class="h-5 w-16" />
-              </div>
+        <div
+          v-for="i in 8"
+          :key="i"
+          class="px-4 py-4 flex items-center justify-between"
+        >
+          <div class="flex items-center gap-3 flex-1">
+            <USkeleton class="h-8 w-8 rounded-full" />
+            <div class="space-y-1 flex-1">
+              <USkeleton class="h-4 w-24" />
+              <USkeleton class="h-3 w-16" />
             </div>
           </div>
-
-          <RateTable
-            v-else
-            v-model:sorting="sorting"
-            :rates="realTimeRates"
-            :columns="columns"
-            :currency="props.currency"
-            :active-tab="activeTab"
-            :is-loading="isLoading"
-          />
-
-          <div
-            v-if="!isLoading && slowChangeRates.length > 0"
-            class="bg-zinc-50 dark:bg-zinc-800 px-4 py-2 border-t border-b border-zinc-200 dark:border-zinc-700 text-sm text-zinc-800 dark:text-zinc-200 font-medium"
-          >
-            Actualizado en 30+ minutos
+          <div class="flex items-center gap-6">
+            <USkeleton class="h-5 w-20" />
+            <USkeleton v-if="!isMobile" class="h-5 w-16" />
           </div>
-          <RateTable
-            v-if="!isLoading && slowChangeRates.length > 0"
-            v-model:sorting="sorting"
-            :rates="slowChangeRates"
-            :columns="columns"
-            :currency="props.currency"
-            :active-tab="activeTab"
-            :is-loading="isLoading"
-          />
-        </template>
-      </UTabs>
+        </div>
+      </div>
+
+      <template v-else>
+        <RateTable
+          v-model:sorting="sorting"
+          :rates="realTimeRates"
+          :columns="columns"
+          :currency="props.currency"
+          :active-tab="activeTab"
+          :is-loading="isLoading"
+        />
+
+        <div
+          v-if="slowChangeRates.length > 0"
+          class="bg-zinc-50 dark:bg-zinc-800 px-4 py-2 border-t border-b border-zinc-200 dark:border-zinc-700 text-sm text-zinc-800 dark:text-zinc-200 font-medium"
+        >
+          Actualizado en 30+ minutos
+        </div>
+        <RateTable
+          v-if="slowChangeRates.length > 0"
+          v-model:sorting="sorting"
+          :rates="slowChangeRates"
+          :columns="columns"
+          :currency="props.currency"
+          :active-tab="activeTab"
+          :is-loading="isLoading"
+        />
+      </template>
     </UCard>
 
     <div v-else class="text-center py-12">

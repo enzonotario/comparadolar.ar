@@ -561,7 +561,6 @@ defineExpose({
         :data="filteredRates"
         :columns="columns"
         :get-row-id="(row) => row.slug"
-        role="table"
         :ui="{
           root: `border rounded ${terminalColors.tableBorder}`,
           tr: `${terminalColors.tableBorder} ${terminalColors.tableHover} data-[selected=true]:bg-zinc-200/50    dark:data-[selected=true]:bg-zinc-700/50`,
@@ -586,11 +585,7 @@ defineExpose({
               :slug="row.original.slug"
               :name="row.original.name"
             />
-            <UBadge
-              v-if="row.original.isUsdCcl"
-              color="info"
-              size="xs"
-            >
+            <UBadge v-if="row.original.isUsdCcl" color="info" size="xs">
               CCL
             </UBadge>
             <UIcon
