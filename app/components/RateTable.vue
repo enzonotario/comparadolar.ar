@@ -32,6 +32,7 @@ const internalSorting = computed({
       :loading="isLoading"
       :ui="{
         root: 'table-fixed',
+        separator: 'hidden',
       }"
     >
       <template #name-cell="{ row }">

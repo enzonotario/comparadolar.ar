@@ -17,6 +17,7 @@ import { use24x7Filter } from "@/composables/use24x7Filter";
 import { useTerminalColors } from "@/composables/useTerminalColors";
 import { useRouteQuery } from "@vueuse/router";
 import { getProviderDisplayName } from "@/lib/provider-display";
+import { getResizedImageUrl } from "@/lib/image-url";
 
 interface Props {
   currency: CurrencyType;
@@ -563,6 +564,7 @@ defineExpose({
         :get-row-id="(row) => row.slug"
         :ui="{
           root: `border rounded ${terminalColors.tableBorder}`,
+          separator: 'hidden',
           tr: `${terminalColors.tableBorder} ${terminalColors.tableHover} data-[selected=true]:bg-zinc-200/50    dark:data-[selected=true]:bg-zinc-700/50`,
         }"
       >
@@ -573,9 +575,13 @@ defineExpose({
           >
             <img
               v-if="row.original.logoUrl"
-              :src="row.original.logoUrl"
+              :src="getResizedImageUrl(row.original.logoUrl, 16)"
               :alt="getProviderDisplayName(row.original)"
+              width="16"
+              height="16"
               class="w-4 h-4"
+              loading="lazy"
+              decoding="async"
             />
             <span :class="terminalColors.cellText">
               {{ getProviderDisplayName(row.original) }}

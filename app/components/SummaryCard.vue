@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getProviderDisplayName } from "@/lib/provider-display";
+import { getResizedImageUrl } from "@/lib/image-url";
 import { resolveComponent } from "vue";
 import type { ExchangeRate } from "@/lib/types";
 
@@ -93,9 +94,18 @@ const singleProviderPath = computed(() => {
             class="flex items-center space-x-2 p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
           >
             <img
-              :src="provider.logoUrl || provider.logo || '/placeholder.svg'"
+              :src="
+                getResizedImageUrl(
+                  provider.logoUrl || provider.logo || '/placeholder.svg',
+                  24,
+                )
+              "
               :alt="getProviderDisplayName(provider)"
+              width="24"
+              height="24"
               class="w-6 h-6 rounded-full flex-shrink-0"
+              loading="lazy"
+              decoding="async"
               @error="handleImageError"
             />
             <span
@@ -128,10 +138,17 @@ const singleProviderPath = computed(() => {
         >
           <img
             :src="
-              providers[0].logoUrl || providers[0].logo || '/placeholder.svg'
+              getResizedImageUrl(
+                providers[0].logoUrl || providers[0].logo || '/placeholder.svg',
+                24,
+              )
             "
             :alt="getProviderDisplayName(providers[0])"
+            width="24"
+            height="24"
             class="w-6 h-6 rounded-full"
+            loading="lazy"
+            decoding="async"
             @error="handleImageError"
           />
           <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">

@@ -57,7 +57,7 @@ const friendlyPages = [
         <UContainer class="w-full max-w-3xl mx-auto space-y-12 !py-0">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8">
             <div class="flex flex-col items-start gap-2">
-              <h3 class="text-xl font-bold">Apoyá el proyecto</h3>
+              <h2 class="text-xl font-bold">Apoyá el proyecto</h2>
               <p class="text-sm text-muted">
                 Ayudame a mantener y mejorar este proyecto con una donación.
               </p>
@@ -78,7 +78,7 @@ const friendlyPages = [
             </div>
 
             <div class="space-y-4">
-              <h3 class="text-xl font-bold">Mapa del Sitio</h3>
+              <h2 class="text-xl font-bold">Mapa del Sitio</h2>
               <div class="flex flex-col gap-2">
                 <NuxtLink
                   to="/"
@@ -117,7 +117,7 @@ const friendlyPages = [
           <div
             class="flex flex-col items-start gap-2 rounded-xl border border-zinc-200/80 p-4 dark:border-zinc-800"
           >
-            <h3 class="text-xl font-bold">Instalá ComparaDólar</h3>
+            <h2 class="text-xl font-bold">Instalá ComparaDólar</h2>
             <p class="text-sm text-muted">
               Usá la app como PWA para acceder más rápido y recibir alertas del
               Top 3 configuradas.
@@ -126,7 +126,7 @@ const friendlyPages = [
           </div>
 
           <div class="flex flex-col items-start gap-2">
-            <h3 class="text-xl font-bold">Open Source</h3>
+            <h2 class="text-xl font-bold">Open Source</h2>
             <p class="text-sm text-muted">
               Este proyecto es de código abierto. La API pública también está
               documentada para integraciones.
@@ -158,7 +158,7 @@ const friendlyPages = [
           </div>
 
           <div class="space-y-4">
-            <h3 class="text-xl font-bold">Páginas amigas</h3>
+            <h2 class="text-xl font-bold">Páginas amigas</h2>
             <div class="flex flex-wrap gap-4">
               <a
                 v-for="page in friendlyPages"

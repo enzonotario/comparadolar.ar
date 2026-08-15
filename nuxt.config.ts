@@ -178,6 +178,8 @@ export default defineNuxtConfig({
         { rel: "preconnect", href: "https://api.argentinadatos.com" },
         { rel: "dns-prefetch", href: "https://api.argentinadatos.com" },
         { rel: "dns-prefetch", href: "https://dolarapi.com" },
+        { rel: "preconnect", href: "https://wsrv.nl" },
+        { rel: "dns-prefetch", href: "https://wsrv.nl" },
       ],
     },
   },

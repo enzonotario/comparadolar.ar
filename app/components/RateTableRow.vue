@@ -2,6 +2,7 @@
 import type { ExchangeRate } from "@/lib/types";
 import { getProviderDisplayName } from "@/lib/provider-display";
 import { getProviderConditions } from "@/lib/provider-conditions";
+import { getResizedImageUrl } from "@/lib/image-url";
 
 interface Props {
   rate: ExchangeRate;
@@ -49,7 +50,12 @@ const handleImageError = (event: Event) => {
     >
       <div class="flex items-center gap-3">
         <img
-          :src="rate.logoUrl || rate.logo || '/assets/placeholder.svg'"
+          :src="
+            getResizedImageUrl(
+              rate.logoUrl || rate.logo || '/assets/placeholder.svg',
+              32,
+            )
+          "
           :alt="getProviderDisplayName(rate)"
           width="32"
           height="32"
@@ -105,7 +111,12 @@ const handleImageError = (event: Event) => {
     <template v-else>
       <div class="flex items-center gap-3">
         <img
-          :src="rate.logoUrl || rate.logo || '/assets/placeholder.svg'"
+          :src="
+            getResizedImageUrl(
+              rate.logoUrl || rate.logo || '/assets/placeholder.svg',
+              32,
+            )
+          "
           :alt="getProviderDisplayName(rate)"
           width="32"
           height="32"

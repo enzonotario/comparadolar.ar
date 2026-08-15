@@ -29,11 +29,11 @@ const cardClasses = computed(() => {
 
 const linkClass = computed(() => {
   const map: Record<string, string> = {
-    green: "text-green-600 dark:text-green-400",
-    cyan: "text-cyan-600 dark:text-cyan-400",
-    teal: "text-teal-600 dark:text-teal-400",
-    orange: "text-orange-600 dark:text-orange-400",
-    violet: "text-violet-600 dark:text-violet-400",
+    green: "text-green-800 dark:text-green-300 underline underline-offset-2",
+    cyan: "text-cyan-800 dark:text-cyan-300 underline underline-offset-2",
+    teal: "text-teal-800 dark:text-teal-300 underline underline-offset-2",
+    orange: "text-orange-800 dark:text-orange-300 underline underline-offset-2",
+    violet: "text-violet-800 dark:text-violet-300 underline underline-offset-2",
   };
   return map[colorScheme.value] || map.green;
 });
@@ -46,9 +46,9 @@ const linkClass = computed(() => {
     >
       <div class="space-y-1">
         <p class="text-sm font-semibold">¿Cobrás del exterior?</p>
-        <p class="text-sm text-muted">
+        <p class="text-sm text-zinc-700 dark:text-zinc-300">
           Mirá la comparativa de remesas en
-          <NuxtLink to="/remesas" :class="[linkClass, 'hover:underline']">
+          <NuxtLink to="/remesas" :class="linkClass">
             comparadolar.ar/remesas
           </NuxtLink>
           , con el precio de venta del dólar en vivo.
