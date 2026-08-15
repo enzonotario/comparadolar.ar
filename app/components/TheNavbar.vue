@@ -17,6 +17,7 @@ function toggleProviderSearch() {
 <template>
   <div class="shrink-0">
     <UHeader
+      title="ComparaDolar.ar"
       to="/"
       :ui="{
         container: 'max-w-7xl mx-auto',
@@ -24,20 +25,28 @@ function toggleProviderSearch() {
         root: 'fixed inset-x-0 top-0 z-50 h-(--ui-header-height) border-b border-default bg-default/75 backdrop-blur',
       }"
     >
-      <template #title>
-        <div class="flex flex-row gap-1">
-          <img
-            :src="getFaviconUrl()"
-            alt="ComparaDólar"
-            class="w-7 h-7 rounded-full"
-            loading="eager"
-            fetchpriority="high"
-          />
-          <span
-            class="text-lg sm:text-xl font-bold text-zinc-900 dark:text-white block md:hidden lg:block"
+      <template #left>
+        <div class="flex flex-row items-center gap-1">
+          <NuxtLink
+            to="/"
+            class="flex flex-row items-center gap-1 focus-visible:outline-primary"
+            aria-label="ComparaDolar.ar"
           >
-            ComparaDolar.ar
-          </span>
+            <img
+              :src="getFaviconUrl()"
+              alt=""
+              width="28"
+              height="28"
+              class="w-7 h-7 rounded-full"
+              loading="eager"
+              fetchpriority="high"
+            />
+            <span
+              class="text-lg sm:text-xl font-bold text-zinc-900 dark:text-white block md:hidden lg:block"
+            >
+              ComparaDolar.ar
+            </span>
+          </NuxtLink>
 
           <ClientOnly>
             <AutoRefreshIndicator v-if="!isSumarsePage" />

@@ -66,9 +66,6 @@ export default defineNuxtConfig({
       cssMinify: true,
       minify: "esbuild",
     },
-    optimizeDeps: {
-      include: ["echarts", "vue-echarts"],
-    },
   },
 
   sitemap: {
@@ -96,7 +93,12 @@ export default defineNuxtConfig({
   css: ["@/assets/css/main.css"],
 
   image: {
-    domains: ["v0.blob.com", "ik.imagekit.io", "images.compara.ar"],
+    domains: [
+      "v0.blob.com",
+      "ik.imagekit.io",
+      "images.compara.ar",
+      "api.argentinadatos.com",
+    ],
     format: ["avif", "webp"],
     quality: 80,
   },
@@ -185,7 +187,11 @@ export default defineNuxtConfig({
     },
   },
 
-  gtag: { id: "G-YY8KZ56EWT" },
+  gtag: {
+    id: "G-YY8KZ56EWT",
+    initMode: "manual",
+    loadingStrategy: "defer",
+  },
 
   echarts: {
     charts: ["LineChart", "BarChart", "ScatterChart"],

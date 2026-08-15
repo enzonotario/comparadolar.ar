@@ -51,7 +51,11 @@ const handleImageError = (event: Event) => {
         <img
           :src="rate.logoUrl || rate.logo || '/assets/placeholder.svg'"
           :alt="getProviderDisplayName(rate)"
+          width="32"
+          height="32"
           class="h-8 w-8 rounded-full"
+          loading="lazy"
+          decoding="async"
           @error="handleImageError"
         />
         <div>
@@ -103,7 +107,11 @@ const handleImageError = (event: Event) => {
         <img
           :src="rate.logoUrl || rate.logo || '/assets/placeholder.svg'"
           :alt="getProviderDisplayName(rate)"
+          width="32"
+          height="32"
           class="h-8 w-8 rounded-full"
+          loading="lazy"
+          decoding="async"
           @error="handleImageError"
         />
         <div class="min-w-0">

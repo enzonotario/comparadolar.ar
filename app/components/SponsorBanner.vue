@@ -173,6 +173,8 @@ const handleSponsorClick = () => {
       <img
         :src="bannerImageUrl"
         :alt="currentBanner.altText"
+        width="1280"
+        height="480"
         class="w-full h-auto object-cover duration-300"
         loading="lazy"
         decoding="async"
@@ -183,6 +185,8 @@ const handleSponsorClick = () => {
       v-else
       :src="bannerImageUrl"
       :alt="currentBanner.altText"
+      width="1280"
+      height="480"
       class="w-full h-auto object-cover duration-300"
       loading="lazy"
       decoding="async"

@@ -20,7 +20,7 @@ useSeoMeta({
 
     <ExchangeRates :currency="currency" inject-voii-mock />
 
-    <ExchangeBandsChart :currency="currency" />
+    <LazyExchangeBandsChart :currency="currency" hydrate-on-visible />
 
     <CrossSellRemesas />
 

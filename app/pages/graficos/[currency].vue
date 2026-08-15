@@ -42,7 +42,11 @@ const {
       @update:selected-providers="selectedProviders = $event"
     />
 
-    <ExchangeBandsChart v-if="showExchangeBands" :currency="currency" />
+    <LazyExchangeBandsChart
+      v-if="showExchangeBands"
+      :currency="currency"
+      hydrate-on-visible
+    />
 
     <PageFooter />
   </div>

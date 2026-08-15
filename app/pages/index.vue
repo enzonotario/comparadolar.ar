@@ -26,7 +26,7 @@ const remesasLoading = remesasState.loading;
 
     <ExchangeRates :currency="currency" />
 
-    <ExchangeBandsChart :currency="currency" />
+    <LazyExchangeBandsChart :currency="currency" hydrate-on-visible />
 
     <RemesasTop3 :rows="remesasTop3" :loading="remesasLoading" />
 

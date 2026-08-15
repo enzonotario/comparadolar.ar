@@ -18,12 +18,18 @@ withDefaults(defineProps<Props>(), {
     <slot name="before-nav" />
 
     <div>
-      <img
-        v-if="showLogo"
-        src="/assets/logo.png"
-        alt="ComparaDólar"
-        class="w-full max-w-[10rem] mx-auto"
-      />
+      <picture v-if="showLogo">
+        <source srcset="/assets/logo.webp" type="image/webp" />
+        <img
+          src="/assets/logo.png"
+          alt="ComparaDólar"
+          width="320"
+          height="305"
+          class="w-full max-w-[10rem] mx-auto"
+          loading="lazy"
+          decoding="async"
+        />
+      </picture>
 
       <LazyLegalDisclaimer v-if="legalDisclaimer === 'lazy'" />
       <LegalDisclaimer v-else-if="legalDisclaimer === 'eager'" />
