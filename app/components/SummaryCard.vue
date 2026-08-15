@@ -59,9 +59,9 @@ const singleProviderPath = computed(() => {
       >
         <div class="flex items-center space-x-2">
           <UIcon :name="icon" :class="iconClass" />
-          <h3 class="text-sm font-medium text-zinc-900 dark:text-white">
+          <h2 class="text-sm font-medium text-zinc-900 dark:text-white">
             {{ title }}
-          </h3>
+          </h2>
         </div>
         <UIcon
           v-if="!hasMultipleProviders"
@@ -106,11 +106,7 @@ const singleProviderPath = computed(() => {
             <UBadge v-if="provider?.is24x7" color="success" size="xs">
               24/7
             </UBadge>
-            <UBadge
-              v-if="provider?.isUsdCcl"
-              color="info"
-              size="xs"
-            >
+            <UBadge v-if="provider?.isUsdCcl" color="info" size="xs">
               CCL
             </UBadge>
             <UsdTypeBadge
@@ -144,11 +140,7 @@ const singleProviderPath = computed(() => {
           <UBadge v-if="providers[0]?.is24x7" color="success" size="xs">
             24/7
           </UBadge>
-          <UBadge
-            v-if="providers[0]?.isUsdCcl"
-            color="info"
-            size="xs"
-          >
+          <UBadge v-if="providers[0]?.isUsdCcl" color="info" size="xs">
             CCL
           </UBadge>
           <UsdTypeBadge

@@ -65,19 +65,14 @@ const playlist: PlaylistEntry[] = [
   { bannerId: 40, duration: 3000 },
 ];
 
-const isMobile = ref(false);
-const isDarkMode = ref(false);
 const imageError = ref(false);
 const currentPlaylistIndex = ref(0);
+const prefersDark = ref(false);
 let timeoutId: ReturnType<typeof setTimeout> | undefined;
 let darkModeQuery: MediaQueryList | undefined;
 
-const checkMobile = () => {
-  isMobile.value = window.innerWidth < 768;
-};
-
 const handleDarkModeChange = (e: MediaQueryListEvent) => {
-  isDarkMode.value = e.matches;
+  prefersDark.value = e.matches;
 };
 
 const scheduleNext = () => {
@@ -100,41 +95,31 @@ const currentBanner = computed(() => {
   return defaultBanners.find((b) => b.id === entry.bannerId) || null;
 });
 
-const bannerImageUrl = computed(() => {
+const mobileSrc = computed(() => {
   if (!currentBanner.value) return "";
+  return prefersDark.value && currentBanner.value.mobileDarkUrl
+    ? currentBanner.value.mobileDarkUrl
+    : currentBanner.value.mobileUrl;
+});
 
-  if (isMobile.value) {
-    return isDarkMode.value && currentBanner.value.mobileDarkUrl
-      ? currentBanner.value.mobileDarkUrl
-      : currentBanner.value.mobileUrl;
-  } else {
-    return isDarkMode.value && currentBanner.value.desktopDarkUrl
-      ? currentBanner.value.desktopDarkUrl
-      : currentBanner.value.desktopUrl;
-  }
+const desktopSrc = computed(() => {
+  if (!currentBanner.value) return "";
+  return prefersDark.value && currentBanner.value.desktopDarkUrl
+    ? currentBanner.value.desktopDarkUrl
+    : currentBanner.value.desktopUrl;
 });
 
 onMounted(() => {
-  const defer =
-    window.requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1));
+  darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  prefersDark.value = darkModeQuery.matches;
+  darkModeQuery.addEventListener("change", handleDarkModeChange);
 
-  defer(() => {
-    checkMobile();
-
-    window.addEventListener("resize", checkMobile, { passive: true });
-
-    darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    isDarkMode.value = darkModeQuery.matches;
-    darkModeQuery.addEventListener("change", handleDarkModeChange);
-
-    if (props.bannerId === undefined) {
-      scheduleNext();
-    }
-  });
+  if (props.bannerId === undefined) {
+    scheduleNext();
+  }
 });
 
 onUnmounted(() => {
-  window.removeEventListener("resize", checkMobile);
   darkModeQuery?.removeEventListener("change", handleDarkModeChange);
   if (timeoutId) {
     clearTimeout(timeoutId);
@@ -170,8 +155,24 @@ const handleSponsorClick = () => {
       class="block w-full h-full"
       @click="handleSponsorClick"
     >
+      <picture>
+        <source media="(max-width: 767px)" :srcset="mobileSrc" />
+        <img
+          :src="desktopSrc"
+          :alt="currentBanner.altText"
+          width="1280"
+          height="480"
+          class="w-full h-auto object-cover duration-300"
+          loading="lazy"
+          decoding="async"
+          @error="handleImageError"
+        />
+      </picture>
+    </NuxtLink>
+    <picture v-else>
+      <source media="(max-width: 767px)" :srcset="mobileSrc" />
       <img
-        :src="bannerImageUrl"
+        :src="desktopSrc"
         :alt="currentBanner.altText"
         width="1280"
         height="480"
@@ -180,17 +181,6 @@ const handleSponsorClick = () => {
         decoding="async"
         @error="handleImageError"
       />
-    </NuxtLink>
-    <img
-      v-else
-      :src="bannerImageUrl"
-      :alt="currentBanner.altText"
-      width="1280"
-      height="480"
-      class="w-full h-auto object-cover duration-300"
-      loading="lazy"
-      decoding="async"
-      @error="handleImageError"
-    />
+    </picture>
   </div>
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ExchangeRate } from "@/lib/types";
+import { getProviderDisplayName } from "@/lib/provider-display";
 
 interface Props {
   rate: ExchangeRate;
@@ -11,6 +12,12 @@ const props = defineProps<Props>();
 
 const getPrice = computed(() => {
   return props.activeTab === "buy" ? props.rate.ask : props.rate.bid;
+});
+
+const priceLabel = computed(() => {
+  const name = getProviderDisplayName(props.rate);
+  const side = props.activeTab === "buy" ? "Compras a" : "Vendes a";
+  return `${side} ${name}`;
 });
 </script>
 
@@ -31,6 +38,7 @@ const getPrice = computed(() => {
       <NuxtLink
         v-else
         :to="`/${currency}/${rate.slug}`"
+        :aria-label="priceLabel"
         class="font-mono text-lg font-semibold text-gray-900 hover:underline dark:text-white"
       >
         ${{
