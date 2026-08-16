@@ -547,7 +547,31 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   >
     <template #header>
       <div class="space-y-3">
-        <h2 class="text-lg font-semibold">Tabla comparativa</h2>
+        <div
+          class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
+        >
+          <h2 class="text-lg font-semibold">Tabla comparativa</h2>
+          <p class="text-xs text-muted sm:text-right">
+            Fuente:
+            <a
+              href="https://www.dolarito.ar/remotito"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-medium text-primary-600 hover:underline dark:text-primary-400"
+            >
+              Dolarito
+            </a>
+            vía
+            <a
+              href="https://argentinadatos.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-medium text-primary-600 hover:underline dark:text-primary-400"
+            >
+              ArgentinaDatos
+            </a>
+          </p>
+        </div>
         <div class="grid gap-4 xl:grid-cols-[minmax(0,320px)_1fr]">
           <UFormField label="Buscar plataforma">
             <UInput

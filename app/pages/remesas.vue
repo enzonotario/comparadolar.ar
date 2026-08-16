@@ -37,9 +37,11 @@ defineOgImageWithContext(nuxtApp, "Remesas.takumi", {
 
 <template>
   <div class="space-y-6">
-    <header class="space-y-3 text-center md:text-left">
-      <h1 class="text-4xl font-bold md:text-5xl">Remesas</h1>
-      <p class="max-w-3xl text-lg text-muted">
+    <header class="space-y-6 text-center">
+      <h1 class="text-5xl font-bold md:text-7xl">Remesas</h1>
+      <p
+        class="mx-auto max-w-2xl text-lg text-zinc-600 md:text-xl dark:text-white/60"
+      >
         Compará plataformas para cobrar del exterior: cuenta propia, moneda,
         costos, tarjeta y el
         <span
@@ -51,27 +53,6 @@ defineOgImageWithContext(nuxtApp, "Remesas.takumi", {
         del dólar en vivo.
       </p>
     </header>
-
-    <p class="text-sm text-muted">
-      Fuente:
-      <a
-        href="https://www.dolarito.ar/remotito"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="font-medium text-primary-600 hover:underline dark:text-primary-400"
-      >
-        Dolarito
-      </a>
-      vía
-      <a
-        href="https://argentinadatos.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="font-medium text-primary-600 hover:underline dark:text-primary-400"
-      >
-        ArgentinaDatos
-      </a>
-    </p>
 
     <SponsorBanner />
 
