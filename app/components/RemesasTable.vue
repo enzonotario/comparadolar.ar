@@ -273,7 +273,6 @@ function createSortableHeader(label: string) {
 }
 
 const searchQuery = useRouteQuery("q", "");
-const monedaFilter = useRouteQuery("moneda", "all");
 const cuentaPropiaFilter = useRouteQuery("propia", "all");
 const inversionesFilter = useRouteQuery("inv", "all");
 const tarjetaFilter = useRouteQuery("tarjeta", "all");
@@ -351,9 +350,6 @@ const filteredRows = computed(() => {
   const query = normalizeText(searchQuery.value);
 
   return simulatedRows.value.filter((row) => {
-    if (monedaFilter.value !== "all" && row.moneda !== monedaFilter.value) {
-      return false;
-    }
     if (!matchBooleanFilter(cuentaPropiaFilter.value, row.cuentaPropia)) {
       return false;
     }
@@ -581,31 +577,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
             />
           </UFormField>
 
-          <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <div class="space-y-2">
-              <p class="text-xs font-medium uppercase tracking-wide text-muted">
-                Moneda
-              </p>
-              <div class="flex flex-wrap gap-2">
-                <UButton
-                  v-for="option in ['all', 'FIAT', 'CRIPTO']"
-                  :key="option"
-                  size="sm"
-                  :color="monedaFilter === option ? 'neutral' : 'neutral'"
-                  :variant="monedaFilter === option ? 'soft' : 'outline'"
-                  @click="monedaFilter = option"
-                >
-                  {{
-                    option === "all"
-                      ? "Todas"
-                      : option === "FIAT"
-                        ? "Fiat"
-                        : "Cripto"
-                  }}
-                </UButton>
-              </div>
-            </div>
-
+          <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             <div class="space-y-2">
               <p class="text-xs font-medium uppercase tracking-wide text-muted">
                 Cuenta propia
