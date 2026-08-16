@@ -118,7 +118,7 @@ function renderCostCell(value: string | null, detail?: string) {
           color: badgeColor,
           variant: badgeColor === "neutral" ? "outline" : "soft",
           size: "md",
-          class: "font-semibold",
+          class: "font-semibold whitespace-pre-wrap",
         },
         { default: () => displayValue },
       ),
@@ -540,7 +540,11 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
 </script>
 
 <template>
-  <UCard>
+  <UCard
+    :ui="{
+      body: 'p-0!',
+    }"
+  >
     <template #header>
       <div class="space-y-3">
         <h2 class="text-lg font-semibold">Tabla comparativa</h2>
