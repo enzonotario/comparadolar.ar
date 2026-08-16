@@ -10,6 +10,6 @@ const { currency } = await useCompareCryptoPage();
 
     <CryptoRates :currency="currency" />
 
-    <PageFooter cross-sell legal-disclaimer="eager" />
+    <PageFooter remesas-top legal-disclaimer="eager" />
   </div>
 </template>

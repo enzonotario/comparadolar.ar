@@ -1,19 +1,19 @@
 <script setup lang="ts">
 interface Props {
   showLogo?: boolean;
-  crossSell?: boolean;
+  remesasTop?: boolean;
   legalDisclaimer?: "lazy" | "eager";
 }
 
 withDefaults(defineProps<Props>(), {
   showLogo: true,
-  crossSell: false,
+  remesasTop: false,
 });
 </script>
 
 <template>
   <footer class="w-full flex flex-col gap-8">
-    <CrossSellRemesas v-if="crossSell" />
+    <RemesasTop3 v-if="remesasTop" />
 
     <slot name="before-nav" />
 

@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { RATE_DISPLAY } from "~/lib/rate-labels";
-import type { RemesaRow } from "~/composables/useRemesasRows";
 
-defineProps<{
-  rows: RemesaRow[];
-  loading?: boolean;
-}>();
+const { top3: rows, loading } = await useRemesasRows();
 </script>
 
 <template>
@@ -117,7 +113,7 @@ defineProps<{
           icon="i-lucide-arrow-right"
           trailing
         >
-          Ver todas las remesas
+          Remesas
         </UButton>
       </div>
     </template>

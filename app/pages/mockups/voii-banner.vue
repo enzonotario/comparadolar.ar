@@ -22,7 +22,7 @@ useSeoMeta({
 
     <LazyExchangeBandsChart :currency="currency" hydrate-on-visible />
 
-    <CrossSellRemesas />
+    <RemesasTop3 />
 
     <Only24x7Switch />
 

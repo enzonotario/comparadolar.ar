@@ -1,19 +1,9 @@
 <script setup lang="ts">
-// Invocar ambos antes de await para no perder el contexto Nuxt.
-const comparePagePromise = useCompareFiatPage({
+const { currency } = await useCompareFiatPage({
   currency: "usd",
   title: getCompareHomeTitle(),
   show24x7Filter: true,
 });
-const remesasPromise = useRemesasRows();
-
-const [{ currency }, remesasState] = await Promise.all([
-  comparePagePromise,
-  remesasPromise,
-]);
-
-const remesasTop3 = remesasState.top3;
-const remesasLoading = remesasState.loading;
 </script>
 
 <template>
@@ -28,7 +18,7 @@ const remesasLoading = remesasState.loading;
 
     <LazyExchangeBandsChart :currency="currency" hydrate-on-visible />
 
-    <RemesasTop3 :rows="remesasTop3" :loading="remesasLoading" />
+    <RemesasTop3 />
 
     <Only24x7Switch />
 

@@ -25,7 +25,7 @@ const {
       <template #before-nav>
         <SponsorBanner />
       </template>
-      <CrossSellRemesas />
+      <RemesasTop3 />
     </PageFooter>
   </div>
 </template>
