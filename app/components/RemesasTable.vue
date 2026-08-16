@@ -672,7 +672,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
       </UTable>
     </div>
 
-    <div v-if="isMobile" class="space-y-4 lg:hidden">
+    <div v-if="isMobile" class="space-y-4 lg:hidden p-2">
       <div class="flex items-center gap-3">
         <USelect
           v-model="activeSortColumn"
