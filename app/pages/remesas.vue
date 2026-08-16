@@ -80,5 +80,7 @@ defineOgImageWithContext(nuxtApp, "Remesas.takumi", {
     </div>
 
     <RemesasTable v-else :rows="rows" />
+
+    <PageFooter />
   </div>
 </template>
