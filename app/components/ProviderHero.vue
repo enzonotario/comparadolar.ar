@@ -4,6 +4,7 @@ import type { ExchangeRate, ProviderInfo } from "@/lib/types";
 import { useAnalytics } from "@/composables/useAnalytics";
 import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
 import { getProviderConditions } from "@/lib/provider-conditions";
+import { getResizedImageUrl } from "@/lib/image-url";
 
 const { trackProviderClick } = useAnalytics();
 
@@ -21,13 +22,14 @@ const displayName = computed(
   () => props.provider.prettyName || props.rateData?.prettyName || props.entity,
 );
 const providerUrl = computed(() => props.provider.url || "#");
-const logo = computed(
-  () =>
+const logo = computed(() => {
+  const raw =
     props.rateData?.logoUrl ||
     props.rateData?.logo ||
     props.provider.logoUrl ||
-    "/placeholder.svg",
-);
+    "/placeholder.svg";
+  return getResizedImageUrl(raw, 64);
+});
 const currencySymbol = computed(() => props.currency.toUpperCase());
 const conditions = computed(() =>
   props.rateData ? getProviderConditions(props.rateData) : null,
@@ -39,8 +41,6 @@ const spread = computed(() => {
   }
   return null;
 });
-
-const colorMode = computed(() => useColorMode().value);
 
 const handleImageError = (event: Event) => {
   const target = event.target as HTMLImageElement;
@@ -147,9 +147,9 @@ const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.d
             <div class="flex items-center gap-2">
               <UIcon :name="RATE_DISPLAY.ask.icon" :class="askIconClass" />
               <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">
+                <h2 class="font-semibold text-gray-900 dark:text-white">
                   {{ RATE_LABELS.ask }}
-                </h3>
+                </h2>
               </div>
             </div>
           </div>
@@ -162,7 +162,7 @@ const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.d
         </div>
         <p
           v-if="rateData?.ask"
-          class="text-sm text-gray-600 dark:text-white/60 mt-2"
+          class="text-sm text-zinc-700 dark:text-zinc-300 mt-2"
         >
           Al comprar {{ currencySymbol }}, pagarás este precio por unidad
         </p>
@@ -174,9 +174,9 @@ const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.d
             <div class="flex items-center gap-2">
               <UIcon :name="RATE_DISPLAY.bid.icon" :class="bidIconClass" />
               <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">
+                <h2 class="font-semibold text-gray-900 dark:text-white">
                   {{ RATE_LABELS.bid }}
-                </h3>
+                </h2>
               </div>
             </div>
           </div>
@@ -189,7 +189,7 @@ const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.d
         </div>
         <p
           v-if="rateData?.bid"
-          class="text-sm text-gray-600 dark:text-white/60 mt-2"
+          class="text-sm text-zinc-700 dark:text-zinc-300 mt-2"
         >
           Al vender {{ currencySymbol }}, recibirás este precio por unidad
         </p>
@@ -224,11 +224,5 @@ const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.d
         </div>
       </div>
     </UCard>
-
-    <ProviderHistoryChart
-      :key="colorMode"
-      :provider="entity"
-      :currency="currency"
-    />
   </div>
 </template>

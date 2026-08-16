@@ -12,6 +12,8 @@ const {
   comparisonTablePath,
   categoryFullName,
 } = useProviderPage();
+
+const colorMode = useColorMode();
 </script>
 
 <template>
@@ -49,13 +51,19 @@ const {
 
     <div v-else-if="data">
       <div v-if="currentProvider" class="space-y-12">
-        <section v-if="rateData">
+        <section v-if="rateData" class="space-y-6">
           <ProviderHero
             :entity="entity"
             :currency="currency"
             :provider="currentProvider"
             :rate-data="rateData"
             :is-loading="isLoading"
+          />
+          <LazyProviderHistoryChart
+            :key="String(colorMode)"
+            :provider="entity"
+            :currency="currency"
+            hydrate-on-visible
           />
         </section>
 

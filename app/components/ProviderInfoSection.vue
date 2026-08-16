@@ -40,7 +40,11 @@ const features = computed(() => [
       ? `Opera todos los días del año, las 24 horas. Perfecta para operar ${currencySymbol.value} cuando otros están cerrados.`
       : `Opera en horario comercial bancario. Ideal para operaciones planificadas de ${currencySymbol.value}.`,
     badge: props.provider?.is24x7 ? "24/7" : "Horario comercial",
-    badgeColor: props.provider?.is24x7 ? "success" : "warning",
+    badgeColor: (props.provider?.is24x7 ? "success" : "warning") as
+      | "success"
+      | "warning"
+      | "info"
+      | "secondary",
   },
   {
     icon: isBank.value ? "i-heroicons-shield-check" : "i-heroicons-chart-bar",
@@ -49,14 +53,18 @@ const features = computed(() => [
       ? `${displayName.value} es una entidad bancaria regulada con respaldo institucional para tus operaciones de ${currencySymbol.value}.`
       : `${displayName.value} es una plataforma fintech moderna especializada en operaciones digitales de ${currencySymbol.value}.`,
     badge: isBank.value ? "Banco" : "Fintech",
-    badgeColor: isBank.value ? "secondary" : "info",
+    badgeColor: (isBank.value ? "secondary" : "info") as
+      | "success"
+      | "warning"
+      | "info"
+      | "secondary",
   },
   {
     icon: "i-heroicons-trophy",
     title: "Cotización Competitiva",
     description: `${displayName.value} ofrece precios competitivos para ${currencySymbol.value} con spread transparente y sin comisiones ocultas.`,
     badge: "Competitivo",
-    badgeColor: "info",
+    badgeColor: "info" as "success" | "warning" | "info" | "secondary",
   },
 ]);
 </script>
@@ -85,8 +93,17 @@ const features = computed(() => [
                 class="w-6 h-6 text-indigo-600 dark:text-indigo-400"
               />
               <UBadge
-                :color="feature.badgeColor.split(' ')[0].replace('bg-', '')"
-                variant="soft"
+                :color="feature.badgeColor"
+                variant="outline"
+                :class="{
+                  'text-emerald-800 dark:text-emerald-200 ring-emerald-600/40':
+                    feature.badgeColor === 'success',
+                  'text-amber-800 dark:text-amber-200 ring-amber-600/40':
+                    feature.badgeColor === 'warning',
+                  'text-sky-800 dark:text-sky-200 ring-sky-600/40':
+                    feature.badgeColor === 'info' ||
+                    feature.badgeColor === 'secondary',
+                }"
               >
                 {{ feature.badge }}
               </UBadge>

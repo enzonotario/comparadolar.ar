@@ -19,7 +19,10 @@ const props = defineProps<{
 
 const colorMode = computed(() => useColorMode().value);
 
-provide(THEME_KEY, colorMode.value);
+provide(
+  THEME_KEY,
+  computed(() => colorMode.value),
+);
 
 const selectedRange = ref("7d");
 
@@ -38,7 +41,7 @@ const {
   pending: isLoading,
   error,
   refresh: refetch,
-} = await useFetch<HistoryData[]>(
+} = useFetch<HistoryData[]>(
   `https://api.comparadolar.ar/${apiCurrency}/providers/${props.provider}/history`,
 );
 
