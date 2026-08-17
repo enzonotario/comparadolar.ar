@@ -215,6 +215,7 @@ const handleRetry = () => {
     <UCard
       v-if="isLoading || (data && data.length > 0)"
       :ui="{
+        header: '!p-0',
         body: '!p-0',
       }"
     >
@@ -228,7 +229,7 @@ const handleRetry = () => {
           trigger: 'grow',
           label: 'cursor-pointer',
         }"
-        class="gap-0 w-full p-4 pb-0"
+        class="gap-0 w-full"
       />
 
       <div
