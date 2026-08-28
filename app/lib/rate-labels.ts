@@ -2,11 +2,11 @@ export const RATE_DISPLAY = {
   ask: {
     label: "Compras a",
     icon: "i-heroicons-arrow-down",
-    textClass: "text-green-700",
-    darkTextClass: "dark:text-green-400",
-    chartColor: "#15803d",
-    chartAreaStart: "rgba(21, 128, 61, 0.3)",
-    chartAreaEnd: "rgba(21, 128, 61, 0.05)",
+    textClass: "text-green-800",
+    darkTextClass: "dark:text-green-300",
+    chartColor: "#166534",
+    chartAreaStart: "rgba(22, 101, 52, 0.3)",
+    chartAreaEnd: "rgba(22, 101, 52, 0.05)",
   },
   bid: {
     label: "Vendes a",
@@ -20,8 +20,8 @@ export const RATE_DISPLAY = {
   spread: {
     label: "Spread",
     icon: "i-heroicons-arrows-pointing-out",
-    textClass: "text-blue-700",
-    darkTextClass: "dark:text-blue-400",
+    textClass: "text-blue-800",
+    darkTextClass: "dark:text-blue-300",
   },
 } as const;
 

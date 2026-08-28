@@ -29,7 +29,6 @@ const UPopover = resolveComponent("UPopover");
 
 const { trackProviderClick } = useAnalytics();
 const hasHover = useMediaQuery("(hover: hover)");
-const isMobile = useMediaQuery("(max-width: 1023px)");
 
 function handleProviderClick(row: RemesaRow) {
   if (!row.providerUrl) return;
@@ -178,7 +177,7 @@ function renderArsFinalCell(row: SimulatedRemesaRow) {
     "span",
     {
       class:
-        "font-mono text-sm font-semibold tabular-nums text-green-700 dark:text-green-400",
+        "font-mono text-sm font-semibold tabular-nums text-green-800 dark:text-green-300",
     },
     formatArsAmount(row.arsFinal),
   );
@@ -278,11 +277,12 @@ const searchQuery = useRouteQuery("q", "");
 const cuentaPropiaFilter = useRouteQuery("propia", "all");
 const inversionesFilter = useRouteQuery("inv", "all");
 const tarjetaFilter = useRouteQuery("tarjeta", "all");
-const sortQuery = useRouteQuery("sort", '[{"id":"vendesASort","desc":true}]');
+const sortQuery = useRouteQuery("sort", '[{"id":"arsFinalSort","desc":true}]');
 
 type SortingState = Array<{ id: string; desc: boolean }>;
 
 const DEFAULT_SORT: SortingState = [{ id: "vendesASort", desc: true }];
+const DEFAULT_SIM_SORT: SortingState = [{ id: "arsFinalSort", desc: true }];
 
 function parseSorting(value: string): SortingState {
   try {
@@ -302,7 +302,7 @@ function sanitizeSorting(
     if (item.id === "arsFinalSort") return simulating;
     return true;
   });
-  return next.length ? next : DEFAULT_SORT;
+  return next.length ? next : simulating ? DEFAULT_SIM_SORT : DEFAULT_SORT;
 }
 
 const sorting = ref<SortingState>(
@@ -674,7 +674,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
       </UTable>
     </div>
 
-    <div v-if="isMobile" class="space-y-4 lg:hidden p-2">
+    <div class="space-y-4 p-2 lg:hidden">
       <div class="flex items-center gap-3">
         <USelect
           v-model="activeSortColumn"
@@ -857,7 +857,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
               <span class="text-muted">Te quedan</span>
               <span class="ml-auto" />
               <span
-                class="font-mono text-xs font-semibold tabular-nums text-green-700 dark:text-green-400"
+                class="font-mono text-xs font-semibold tabular-nums text-green-800 dark:text-green-300"
               >
                 {{ row.arsFinal != null ? formatArsAmount(row.arsFinal) : "—" }}
               </span>
