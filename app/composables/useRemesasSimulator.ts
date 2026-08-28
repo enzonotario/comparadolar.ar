@@ -1,7 +1,7 @@
 export function useRemesasSimulator() {
   const usdAmount = useState<number | null>(
     "remesas-simulator-amount",
-    () => null,
+    () => 1000,
   );
 
   const isSimulating = computed(
