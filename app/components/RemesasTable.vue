@@ -60,10 +60,12 @@ function renderDetailPopover(
         h(
           "span",
           {
+            role: "img",
+            "aria-label": title,
             class:
-              "inline-flex cursor-help items-center gap-1 rounded-full border border-neutral-200 p-0.5 text-[11px] font-medium text-neutral-500 dark:border-neutral-800 dark:text-neutral-400",
+              "inline-flex cursor-help items-center gap-1 rounded-full border border-neutral-200 p-0.5 text-[11px] font-medium text-neutral-600 dark:border-neutral-800 dark:text-neutral-300",
           },
-          [h(UIcon, { name: "i-lucide-info", class: "size-3" })],
+          [h(UIcon, { name: "i-lucide-info", class: "size-3", "aria-hidden": true })],
         ),
       content: () =>
         h("div", { class: "space-y-1" }, [
@@ -680,6 +682,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
           value-key="id"
           label-key="label"
           placeholder="Ordenar por"
+          aria-label="Ordenar por"
           size="sm"
           class="min-w-0 flex-1"
         />
@@ -691,6 +694,11 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
             activeSortDesc
               ? 'i-lucide-arrow-down-narrow-wide'
               : 'i-lucide-arrow-up-narrow-wide'
+          "
+          :aria-label="
+            activeSortDesc
+              ? 'Orden descendente, cambiar a ascendente'
+              : 'Orden ascendente, cambiar a descendente'
           "
           @click="activeSortDesc = !activeSortDesc"
         />

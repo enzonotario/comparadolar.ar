@@ -11,8 +11,8 @@ export function useTerminalColors(currency: Ref<CurrencyType> | CurrencyType) {
 
     const colorMap = {
       green: {
-        text: isDark ? "text-green-400" : "text-green-600",
-        textSecondary: isDark ? "text-green-500" : "text-green-700",
+        text: isDark ? "text-green-400" : "text-green-700",
+        textSecondary: isDark ? "text-green-500" : "text-green-800",
         tableBorder: isDark ? "border-green-800" : "border-green-300",
         tableHover: isDark ? "hover:bg-green-900/10" : "hover:bg-green-50",
         cellText: isDark ? "text-green-100" : "text-gray-800",

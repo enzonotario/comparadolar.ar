@@ -7,11 +7,11 @@ test("Compras a usa la semántica visual del index", () => {
   assert.deepEqual(RATE_DISPLAY.ask, {
     label: "Compras a",
     icon: "i-heroicons-arrow-down",
-    textClass: "text-green-600",
+    textClass: "text-green-700",
     darkTextClass: "dark:text-green-400",
-    chartColor: "#16a34a",
-    chartAreaStart: "rgba(22, 163, 74, 0.3)",
-    chartAreaEnd: "rgba(22, 163, 74, 0.05)",
+    chartColor: "#15803d",
+    chartAreaStart: "rgba(21, 128, 61, 0.3)",
+    chartAreaEnd: "rgba(21, 128, 61, 0.05)",
   });
 });
 
@@ -19,11 +19,11 @@ test("Vendes a usa la semántica visual del index", () => {
   assert.deepEqual(RATE_DISPLAY.bid, {
     label: "Vendes a",
     icon: "i-heroicons-arrow-up",
-    textClass: "text-red-600",
+    textClass: "text-red-700",
     darkTextClass: "dark:text-red-400",
-    chartColor: "#dc2626",
-    chartAreaStart: "rgba(220, 38, 38, 0.3)",
-    chartAreaEnd: "rgba(220, 38, 38, 0.05)",
+    chartColor: "#b91c1c",
+    chartAreaStart: "rgba(185, 28, 28, 0.3)",
+    chartAreaEnd: "rgba(185, 28, 28, 0.05)",
   });
 });
 

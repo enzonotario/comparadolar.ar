@@ -14,6 +14,24 @@ export default defineAppConfig({
             "!bg-teal-100 !text-teal-800 dark:!bg-teal-900 dark:!text-teal-200",
         },
         {
+          color: "success",
+          variant: "soft",
+          class:
+            "!bg-teal-100/60 !text-teal-800 dark:!bg-teal-900/50 dark:!text-teal-200",
+        },
+        {
+          color: "error",
+          variant: "soft",
+          class:
+            "!bg-red-100/60 !text-red-800 dark:!bg-red-900/50 dark:!text-red-200",
+        },
+        {
+          color: "neutral",
+          variant: "soft",
+          class:
+            "!bg-zinc-200/70 !text-zinc-800 dark:!bg-zinc-700/60 dark:!text-zinc-200",
+        },
+        {
           color: "warning",
           variant: "soft",
           class:
