@@ -4,6 +4,10 @@ import {
   BLACKLISTED_PROVIDERS,
 } from "~/lib/currencies-config";
 import { isRankableProvider } from "~/lib/provider-conditions";
+import {
+  compareExchangeRatesForBuy,
+  compareExchangeRatesForSell,
+} from "~/lib/exchange-rate-sort";
 
 export interface OgItem {
   name: string;
@@ -64,7 +68,7 @@ export function top3BuyUsd(data: ExchangeRate[], only24x7 = false): OgItem[] {
         askPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
     )
-    .sort((a, b) => askPrice(a) - askPrice(b))
+    .sort(compareExchangeRatesForBuy)
     .slice(0, 3)
     .map((item) => ({
       name: item.prettyName || item.name,
@@ -81,7 +85,7 @@ export function top3SellUsd(data: ExchangeRate[], only24x7 = false): OgItem[] {
         bidPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
     )
-    .sort((a, b) => bidPrice(b) - bidPrice(a))
+    .sort(compareExchangeRatesForSell)
     .slice(0, 3)
     .map((item) => ({
       name: item.prettyName || item.name,
@@ -98,7 +102,7 @@ export function top3BuyUsdCcl(data: ExchangeRate[]): OgItem[] {
         isCcl(item.slug ?? "") &&
         askPrice(item) > 0,
     )
-    .sort((a, b) => askPrice(a) - askPrice(b))
+    .sort(compareExchangeRatesForBuy)
     .slice(0, 3)
     .map((item) => ({
       name: item.prettyName || item.name,
@@ -115,7 +119,7 @@ export function top3SellUsdCcl(data: ExchangeRate[]): OgItem[] {
         isCcl(item.slug ?? "") &&
         bidPrice(item) > 0,
     )
-    .sort((a, b) => bidPrice(b) - bidPrice(a))
+    .sort(compareExchangeRatesForSell)
     .slice(0, 3)
     .map((item) => ({
       name: item.prettyName || item.name,
@@ -170,7 +174,7 @@ export function top3SlugsForBuyUsd(
         askPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
     )
-    .sort((a, b) => askPrice(a) - askPrice(b))
+    .sort(compareExchangeRatesForBuy)
     .slice(0, 3)
     .map((item) => ({
       slug: item.slug ?? "",
@@ -189,7 +193,7 @@ export function top3SlugsForBuyUsdCcl(
         isCcl(item.slug ?? "") &&
         askPrice(item) > 0,
     )
-    .sort((a, b) => askPrice(a) - askPrice(b))
+    .sort(compareExchangeRatesForBuy)
     .slice(0, 3)
     .map((item) => ({
       slug: item.slug ?? "",

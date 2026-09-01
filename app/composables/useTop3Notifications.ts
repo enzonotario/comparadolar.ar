@@ -7,6 +7,10 @@ import {
 import { API_BASE_URL } from "~/lib/types";
 import { getProviderDisplayName } from "~/lib/provider-display";
 import { isRankableProvider } from "~/lib/provider-conditions";
+import {
+  compareExchangeRatesForBuy,
+  compareExchangeRatesForSell,
+} from "~/lib/exchange-rate-sort";
 
 const STORAGE_KEY = "comparadolar:top3-notifications";
 const LAST_TOP3_KEY = "comparadolar:last-top3";
@@ -91,12 +95,12 @@ function top3For(rates: NormalizedRate[]): CurrencyTop3 {
   return {
     buy: rankableRates
       .filter((rate) => rate.ask > 0)
-      .sort((a, b) => a.ask - b.ask)
+      .sort(compareExchangeRatesForBuy)
       .slice(0, 3)
       .map((rate) => ({ slug: rate.slug, name: rate.name, value: rate.ask })),
     sell: rankableRates
       .filter((rate) => rate.bid > 0)
-      .sort((a, b) => b.bid - a.bid)
+      .sort(compareExchangeRatesForSell)
       .slice(0, 3)
       .map((rate) => ({ slug: rate.slug, name: rate.name, value: rate.bid })),
   };

@@ -2,6 +2,10 @@
 import type { ExchangeRate } from "@/lib/types";
 import { RATE_DISPLAY } from "@/lib/rate-labels";
 import { isRankableProvider } from "@/lib/provider-conditions";
+import {
+  compareExchangeRatesForBuy,
+  compareExchangeRatesForSell,
+} from "@/lib/exchange-rate-sort";
 
 interface Props {
   data: ExchangeRate[] | null;
@@ -43,7 +47,9 @@ const bestBuy = computed(() => {
 
   const bestAsk = Math.min(...candidates.map((item) => item.ask!));
 
-  return candidates.filter((item) => item.ask === bestAsk);
+  return [...candidates]
+    .filter((item) => item.ask === bestAsk)
+    .sort(compareExchangeRatesForBuy);
 });
 
 const bestSell = computed(() => {
@@ -54,7 +60,9 @@ const bestSell = computed(() => {
 
   const bestBid = Math.max(...candidates.map((item) => item.bid!));
 
-  return candidates.filter((item) => item.bid === bestBid);
+  return [...candidates]
+    .filter((item) => item.bid === bestBid)
+    .sort(compareExchangeRatesForSell);
 });
 
 const lowestSpread = computed(() => {

@@ -3,6 +3,13 @@ import { h, resolveComponent } from "vue";
 import type { ExchangeRate } from "@/lib/types";
 import type { TableColumn, TabsItem } from "@nuxt/ui";
 import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
+import {
+  compareExchangeRatesByPrice,
+  compareExchangeRatesBySpread,
+  compareExchangeRatesForBuy,
+  getExchangeSpreadAbs,
+} from "@/lib/exchange-rate-sort";
+import { getProviderDisplayName } from "@/lib/provider-display";
 
 const items = [
   {
@@ -18,6 +25,8 @@ const items = [
 ] satisfies TabsItem[];
 
 const UButton = resolveComponent("UButton");
+
+type RatedExchangeRate = ExchangeRate & { price: number };
 
 interface Props {
   data: ExchangeRate[] | null;
@@ -61,6 +70,36 @@ watch(
   },
   { immediate: true },
 );
+
+function sortRates(rates: RatedExchangeRate[]) {
+  const items = [...rates];
+  const sortDef = sorting.value[0];
+
+  if (!sortDef || sortDef.id === "price") {
+    const desc = sortDef?.desc ?? activeTab.value === "sell";
+    const side = activeTab.value === "buy" ? "ask" : "bid";
+    return items.sort((a, b) => compareExchangeRatesByPrice(a, b, side, desc));
+  }
+
+  if (sortDef.id === "spread") {
+    return items.sort((a, b) =>
+      compareExchangeRatesBySpread(a, b, sortDef.desc),
+    );
+  }
+
+  if (sortDef.id === "name") {
+    return items.sort((a, b) => {
+      const nameCmp = getProviderDisplayName(a).localeCompare(
+        getProviderDisplayName(b),
+        "es",
+        { sensitivity: "base" },
+      );
+      return sortDef.desc ? -nameCmp : nameCmp;
+    });
+  }
+
+  return items.sort((a, b) => compareExchangeRatesForBuy(a, b));
+}
 
 const columns = computed<TableColumn<ExchangeRate>[]>(() => {
   const baseColumns: TableColumn<ExchangeRate>[] = [
@@ -112,17 +151,7 @@ const columns = computed<TableColumn<ExchangeRate>[]>(() => {
   if (!isMobile.value) {
     baseColumns.push({
       id: "spread",
-      accessorFn: (row) => {
-        if (
-          row.ask == null ||
-          row.ask <= 0 ||
-          row.bid == null ||
-          row.bid <= 0
-        ) {
-          return Infinity;
-        }
-        return row.ask - row.bid;
-      },
+      accessorFn: (row) => getExchangeSpreadAbs(row),
       header: ({ column }) => {
         const isSorted = column.getIsSorted();
 
@@ -171,21 +200,25 @@ const filteredRates = computed(() => {
 });
 
 const realTimeRates = computed(() => {
-  return filteredRates.value
-    .filter((rate) => !rate.slowChange)
-    .map((rate) => ({
-      ...rate,
-      price: activeTab.value === "buy" ? rate.ask : rate.bid,
-    }));
+  return sortRates(
+    filteredRates.value
+      .filter((rate) => !rate.slowChange)
+      .map((rate) => ({
+        ...rate,
+        price: activeTab.value === "buy" ? rate.ask! : rate.bid!,
+      })),
+  );
 });
 
 const slowChangeRates = computed(() => {
-  return filteredRates.value
-    .filter((rate) => rate.slowChange === true)
-    .map((rate) => ({
-      ...rate,
-      price: activeTab.value === "buy" ? rate.ask : rate.bid,
-    }));
+  return sortRates(
+    filteredRates.value
+      .filter((rate) => rate.slowChange === true)
+      .map((rate) => ({
+        ...rate,
+        price: activeTab.value === "buy" ? rate.ask! : rate.bid!,
+      })),
+  );
 });
 
 const handleRetry = () => {
@@ -258,6 +291,7 @@ const handleRetry = () => {
       <template v-else>
         <RateTable
           v-model:sorting="sorting"
+          manual-sorting
           :rates="realTimeRates"
           :columns="columns"
           :currency="props.currency"
@@ -274,6 +308,7 @@ const handleRetry = () => {
         <RateTable
           v-if="slowChangeRates.length > 0"
           v-model:sorting="sorting"
+          manual-sorting
           :rates="slowChangeRates"
           :columns="columns"
           :currency="props.currency"

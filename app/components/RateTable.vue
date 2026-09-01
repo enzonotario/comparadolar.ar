@@ -9,6 +9,7 @@ interface Props {
   activeTab: "buy" | "sell";
   isLoading?: boolean;
   sorting?: Array<{ id: string; desc: boolean }>;
+  manualSorting?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -30,6 +31,7 @@ const internalSorting = computed({
       :data="rates"
       :columns="columns"
       :loading="isLoading"
+      :sorting-options="manualSorting ? { manualSorting: true } : undefined"
       :ui="{
         root: 'table-fixed',
         separator: 'hidden',
