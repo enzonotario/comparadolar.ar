@@ -23,6 +23,45 @@ const PROVIDER_SEARCH_ALIASES: Record<string, string> = {
   "fiwind-mep": "fiwind",
 };
 
+/** Páginas estáticas del sitio (mapa del sitio / navegación adicional). */
+const SITE_PAGES = [
+  {
+    id: "inicio",
+    label: "Inicio",
+    description: "home / comparar cotizaciones",
+    to: "/",
+    icon: "i-heroicons-home",
+  },
+  {
+    id: "graficos",
+    label: "Gráficos",
+    description: "charts / histórico",
+    to: "/graficos",
+    icon: "i-heroicons-chart-bar",
+  },
+  {
+    id: "terminal",
+    label: "Terminal",
+    description: "vista densa / tabla",
+    to: "/terminal",
+    icon: "i-heroicons-computer-desktop",
+  },
+  {
+    id: "remesas",
+    label: "Remesas",
+    description: "cobrar del exterior / envíos",
+    to: "/remesas",
+    icon: "i-heroicons-banknotes",
+  },
+  {
+    id: "sumarse",
+    label: "Sumarse",
+    description: "integrar / API / listado gratuito",
+    to: "/sumarse",
+    icon: "i-heroicons-plus-circle",
+  },
+] as const;
+
 const open = ref(false);
 const bootstrapping = ref(false);
 
@@ -40,13 +79,27 @@ const paletteGroups = computed(() => {
   type Item = {
     id: string;
     label: string;
-    suffix: string;
+    suffix?: string;
     description: string;
     to: string;
+    icon?: string;
     avatar?: { src: string };
   };
 
-  const groups: { id: string; label: string; items: Item[] }[] = [];
+  const groups: { id: string; label: string; items: Item[] }[] = [
+    {
+      id: "pages",
+      label: "Páginas",
+      items: SITE_PAGES.map((page) => ({
+        id: `page-${page.id}`,
+        label: page.label,
+        suffix: "Página",
+        description: page.description,
+        to: page.to,
+        icon: page.icon,
+      })),
+    },
+  ];
 
   for (const currency of validCurrencies) {
     const c = currency as CurrencyType;
@@ -100,7 +153,7 @@ const providerItemCount = computed(() =>
       resultLimit: 128,
     }"
     :color-mode="false"
-    placeholder="Buscar proveedor…"
+    placeholder="Buscar proveedor o página…"
     :virtualize="providerItemCount > 48"
   />
 </template>
