@@ -44,6 +44,7 @@ function trendFor(slug: string) {
       :ui="{
         root: 'table-fixed',
         separator: 'hidden',
+        th: 'py-1',
       }"
     >
       <template #name-cell="{ row }">
