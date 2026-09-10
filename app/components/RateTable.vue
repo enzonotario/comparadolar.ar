@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ExchangeRate } from "@/lib/types";
+import type { ExchangeRate, TrendSeries } from "@/lib/types";
 import type { TableColumn } from "@nuxt/ui";
 
 interface Props {
@@ -10,9 +10,12 @@ interface Props {
   isLoading?: boolean;
   sorting?: Array<{ id: string; desc: boolean }>;
   manualSorting?: boolean;
+  trends?: Record<string, TrendSeries>;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  trends: () => ({}),
+});
 
 const emit = defineEmits<{
   "update:sorting": [value: Array<{ id: string; desc: boolean }>];
@@ -22,6 +25,12 @@ const internalSorting = computed({
   get: () => props.sorting ?? [],
   set: (value) => emit("update:sorting", value ?? []),
 });
+
+function trendFor(slug: string) {
+  const series = props.trends[slug];
+  if (!series) return [];
+  return props.activeTab === "buy" ? series.ask : series.bid;
+}
 </script>
 
 <template>
@@ -50,6 +59,7 @@ const internalSorting = computed({
           :rate="row.original"
           :currency="currency"
           :active-tab="activeTab"
+          :trend-values="trendFor(row.original.slug)"
         />
       </template>
 

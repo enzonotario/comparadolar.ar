@@ -42,6 +42,7 @@ const activeTab = ref<"buy" | "sell">("buy");
 const { showOnly24x7 } = use24x7Filter();
 const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
 const sorting: Ref<Array<{ id: string; desc: boolean }>> = ref([]);
+const { providers: trendProviders } = useProviderTrends(() => props.currency);
 
 const isMobile = ref(false);
 
@@ -297,6 +298,7 @@ const handleRetry = () => {
           :currency="props.currency"
           :active-tab="activeTab"
           :is-loading="isLoading"
+          :trends="trendProviders"
         />
 
         <div
@@ -314,6 +316,7 @@ const handleRetry = () => {
           :currency="props.currency"
           :active-tab="activeTab"
           :is-loading="isLoading"
+          :trends="trendProviders"
         />
       </template>
     </UCard>

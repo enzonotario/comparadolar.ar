@@ -73,6 +73,24 @@ export const API_ENDPOINTS = {
   eth: `${API_BASE_URL}/eth`,
 } as const;
 
+/** Short-window trends for list sparklines (7d hourly). Separate from 90d history. */
+export type TrendSeries = {
+  bid: number[];
+  ask: number[];
+};
+
+export type TrendsPayload = {
+  range: "7d";
+  bucket: "1h";
+  providers: Record<string, TrendSeries>;
+};
+
+export function getTrendsEndpoint(currency: string): string {
+  const key = currency === "usd-ccl" ? "usd" : currency;
+  return `${API_BASE_URL}/${key}/trends`;
+}
+
+
 export const ASSET_CONFIG = {
   defaultOgImage: "https://i.imgur.com/MSynIzj.png",
   ogImageWidth: 1200,

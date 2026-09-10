@@ -107,6 +107,9 @@ const resetState = () => {
 const table = useTemplateRef("table");
 
 const { terminalColors } = useTerminalColors(computed(() => props.currency));
+const { getSeries: getTrendSeries } = useProviderTrends(
+  () => props.currency,
+);
 
 const UButton = resolveComponent("UButton");
 const UIcon = resolveComponent("UIcon");
@@ -604,24 +607,38 @@ defineExpose({
         </template>
 
         <template #bid-cell="{ row }">
-          <div :class="`text-right font-mono ${terminalColors.cellText}`">
-            ${{
-              (row.original.bid || 0).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })
-            }}
+          <div class="flex flex-col items-end gap-1">
+            <div :class="`text-right font-mono ${terminalColors.cellText}`">
+              ${{
+                (row.original.bid || 0).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+              }}
+            </div>
+            <ClientOnly>
+              <RateSparkline
+                :values="getTrendSeries(row.original.slug, 'sell')"
+              />
+            </ClientOnly>
           </div>
         </template>
 
         <template #ask-cell="{ row }">
-          <div :class="`text-right font-mono ${terminalColors.cellText}`">
-            ${{
-              (row.original.ask || 0).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })
-            }}
+          <div class="flex flex-col items-end gap-1">
+            <div :class="`text-right font-mono ${terminalColors.cellText}`">
+              ${{
+                (row.original.ask || 0).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+              }}
+            </div>
+            <ClientOnly>
+              <RateSparkline
+                :values="getTrendSeries(row.original.slug, 'buy')"
+              />
+            </ClientOnly>
           </div>
         </template>
 
