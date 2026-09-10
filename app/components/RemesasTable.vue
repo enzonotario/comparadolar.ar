@@ -64,7 +64,13 @@ function renderDetailPopover(
             class:
               "inline-flex cursor-help items-center gap-1 rounded-full border border-neutral-200 p-0.5 text-[11px] font-medium text-neutral-600 dark:border-neutral-800 dark:text-neutral-300",
           },
-          [h(UIcon, { name: "i-lucide-info", class: "size-3", "aria-hidden": true })],
+          [
+            h(UIcon, {
+              name: "i-lucide-info",
+              class: "size-3",
+              "aria-hidden": true,
+            }),
+          ],
         ),
       content: () =>
         h("div", { class: "space-y-1" }, [
@@ -76,33 +82,32 @@ function renderDetailPopover(
 }
 
 function renderBooleanCell(value: boolean, detail?: string) {
-  return h("div", { class: "min-w-0" }, [
-    h("div", { class: "flex items-center gap-2" }, [
-      h(
-        UBadge,
-        {
-          color: value ? "success" : "error",
-          variant: "soft",
-          size: "md",
-          class: "gap-1.5",
-        },
-        {
-          default: () => [
-            h(UIcon, {
-              name: value ? "i-lucide-check" : "i-lucide-x",
-              class: "size-3.5",
-            }),
-            value ? "Sí" : "No",
-          ],
-        },
-      ),
-      detail ? renderDetailPopover(detail) : null,
-    ]),
+  return h("div", { class: "flex items-center gap-1" }, [
+    h(
+      UBadge,
+      {
+        color: value ? "success" : "error",
+        variant: "soft",
+        size: "sm",
+        class: "px-1.5",
+      },
+      {
+        default: () => [
+          h(UIcon, {
+            name: value ? "i-lucide-check" : "i-lucide-x",
+            class: "size-3.5",
+            "aria-hidden": true,
+          }),
+          h("span", { class: "sr-only" }, value ? "Sí" : "No"),
+        ],
+      },
+    ),
+    detail ? renderDetailPopover(detail) : null,
   ]);
 }
 
 function renderCostCell(value: string | null, detail?: string) {
-  const displayValue = value ?? "N/A";
+  const raw = value ?? "N/A";
   const badgeColor = !value
     ? "neutral"
     : isZeroLike(value)
@@ -111,20 +116,27 @@ function renderCostCell(value: string | null, detail?: string) {
         ? "error"
         : "neutral";
 
-  return h("div", { class: "min-w-0" }, [
-    h("div", { class: "flex items-center gap-2" }, [
-      h(
-        UBadge,
-        {
-          color: badgeColor,
-          variant: badgeColor === "neutral" ? "outline" : "soft",
-          size: "md",
-          class: "font-semibold whitespace-pre-wrap",
-        },
-        { default: () => displayValue },
-      ),
-      detail ? renderDetailPopover(detail) : null,
-    ]),
+  // Textos largos (ej. “No tiene tarjeta…”) van truncados; el detalle queda en el popover.
+  const displayValue =
+    raw.length > 14 && !hasPositiveNumericValue(raw) && !isZeroLike(raw)
+      ? `${raw.slice(0, 12)}…`
+      : raw;
+
+  return h("div", { class: "flex items-center gap-1" }, [
+    h(
+      UBadge,
+      {
+        color: badgeColor,
+        variant: badgeColor === "neutral" ? "outline" : "soft",
+        size: "sm",
+        class: "max-w-24 truncate font-semibold",
+        title: raw,
+      },
+      { default: () => displayValue },
+    ),
+    detail || (raw !== displayValue)
+      ? renderDetailPopover(detail || raw)
+      : null,
   ]);
 }
 
@@ -136,7 +148,7 @@ function renderVendesACell(row: RemesaRow) {
           {
             to: row.vendesAPath,
             class: [
-              "font-mono text-sm font-semibold hover:underline",
+              "font-mono text-xs font-semibold hover:underline",
               RATE_DISPLAY.bid.textClass,
               RATE_DISPLAY.bid.darkTextClass,
             ].join(" "),
@@ -148,9 +160,9 @@ function renderVendesACell(row: RemesaRow) {
           {
             class:
               row.vendesA == null
-                ? "text-sm text-muted"
+                ? "text-xs text-muted"
                 : [
-                    "font-mono text-sm font-semibold",
+                    "font-mono text-xs font-semibold",
                     RATE_DISPLAY.bid.textClass,
                     RATE_DISPLAY.bid.darkTextClass,
                   ].join(" "),
@@ -158,26 +170,24 @@ function renderVendesACell(row: RemesaRow) {
           row.vendesALabel,
         );
 
-  return h("div", { class: "min-w-0" }, [
-    h("div", { class: "flex items-center gap-2" }, [
-      priceNode,
-      row.vendesADetail
-        ? renderDetailPopover(row.vendesADetail, RATE_DISPLAY.bid.label)
-        : null,
-    ]),
+  return h("div", { class: "flex items-center gap-1" }, [
+    priceNode,
+    row.vendesADetail
+      ? renderDetailPopover(row.vendesADetail, RATE_DISPLAY.bid.label)
+      : null,
   ]);
 }
 
 function renderArsFinalCell(row: SimulatedRemesaRow) {
   if (row.arsFinal == null) {
-    return h("span", { class: "text-muted" }, "—");
+    return h("span", { class: "text-xs text-muted" }, "—");
   }
 
   return h(
     "span",
     {
       class:
-        "font-mono text-sm font-semibold tabular-nums text-green-800 dark:text-green-300",
+        "font-mono text-xs font-semibold tabular-nums text-green-800 dark:text-green-300",
     },
     formatArsAmount(row.arsFinal),
   );
@@ -213,14 +223,14 @@ function renderProviderCell(row: RemesaRow) {
     ? h("img", {
         src: row.logo,
         alt: `${row.displayName} logo`,
-        class: "size-9 rounded-full object-contain",
+        class: "size-7 shrink-0 rounded-full object-contain",
         loading: "lazy",
       })
     : h(
         "div",
         {
           class:
-            "flex size-9 items-center justify-center rounded-full bg-neutral-100 text-xs font-bold text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200",
+            "flex size-7 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-[10px] font-bold text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200",
         },
         row.initials,
       );
@@ -229,9 +239,12 @@ function renderProviderCell(row: RemesaRow) {
     h(
       "p",
       {
-        class: row.providerUrl
-          ? "font-medium text-neutral-600 group-hover:underline dark:text-neutral-400"
-          : "font-medium",
+        class: [
+          "truncate text-sm",
+          row.providerUrl
+            ? "font-medium text-neutral-600 group-hover:underline dark:text-neutral-400"
+            : "font-medium",
+        ].join(" "),
       },
       row.displayName,
     ),
@@ -245,29 +258,34 @@ function renderProviderCell(row: RemesaRow) {
         target: "_blank",
         rel: "noopener noreferrer",
         class:
-          "group -m-1 flex items-center gap-3 rounded-lg p-1 transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/50",
+          "group -m-1 flex max-w-40 items-center gap-2 rounded-lg p-1 transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/50 xl:max-w-52",
         onClick: () => handleProviderClick(row),
       },
       [avatar, content],
     );
   }
 
-  return h("div", { class: "flex items-center gap-3" }, [avatar, content]);
+  return h("div", { class: "flex max-w-40 items-center gap-2 xl:max-w-52" }, [
+    avatar,
+    content,
+  ]);
 }
 
-function createSortableHeader(label: string) {
+function createSortableHeader(label: string, shortLabel = label) {
   return ({ column }: { column: any }) => {
     const isSorted = column.getIsSorted();
     return h(UButton, {
       color: "neutral",
       variant: "ghost",
-      label,
+      size: "sm",
+      label: shortLabel,
+      title: label,
       icon: isSorted
         ? isSorted === "asc"
           ? "i-lucide-arrow-up-narrow-wide"
           : "i-lucide-arrow-down-wide-narrow"
         : "i-lucide-arrow-up-down",
-      class: "-mx-2.5 font-semibold",
+      class: "-mx-1 px-1 text-xs font-semibold",
       onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
     });
   };
@@ -309,8 +327,14 @@ const sorting = ref<SortingState>(
   sanitizeSorting(parseSorting(sortQuery.value), isSimulating.value),
 );
 
+const isXl = useMediaQuery("(min-width: 1280px)");
+
 const columnVisibility = computed(() => ({
   arsFinalSort: isSimulating.value,
+  // En lg las columnas secundarias se ocultan para que la tabla entre sin aplastarse.
+  costoMantenimientoTarjetaSort: isXl.value,
+  costoTarjetaSort: isXl.value,
+  averageRating: isXl.value,
 }));
 
 watch(sortQuery, (value) => {
@@ -458,7 +482,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "cuentaPropia",
-    header: createSortableHeader("Cuenta propia"),
+    header: createSortableHeader("Cuenta propia", "Propia"),
     cell: ({ row }) =>
       renderBooleanCell(
         row.original.cuentaPropia,
@@ -467,7 +491,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "inversiones",
-    header: createSortableHeader("Inversiones"),
+    header: createSortableHeader("Inversiones", "Invers."),
     cell: ({ row }) =>
       renderBooleanCell(
         row.original.inversiones,
@@ -476,7 +500,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "tarjetaUsa",
-    header: createSortableHeader("Tarjeta EEUU"),
+    header: createSortableHeader("Tarjeta EEUU", "Tarjeta"),
     cell: ({ row }) =>
       renderBooleanCell(
         row.original.tarjetaUsa,
@@ -485,7 +509,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "costoRecibirPagosSort",
-    header: createSortableHeader("Recibir pagos"),
+    header: createSortableHeader("Recibir pagos", "Recibir"),
     cell: ({ row }) =>
       renderCostCell(
         row.original.costoRecibirPagos,
@@ -494,7 +518,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "retiroArsSort",
-    header: createSortableHeader("Retiro ARS"),
+    header: createSortableHeader("Retiro ARS", "Retiro"),
     cell: ({ row }) =>
       renderCostCell(
         row.original.retiroArs,
@@ -513,7 +537,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "costoMantenimientoTarjetaSort",
-    header: createSortableHeader("Mant. tarjeta"),
+    header: createSortableHeader("Mant. tarjeta", "Mant."),
     cell: ({ row }) =>
       renderCostCell(
         row.original.costoMantenimientoTarjeta,
@@ -522,7 +546,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "costoTarjetaSort",
-    header: createSortableHeader("Uso tarjeta"),
+    header: createSortableHeader("Uso tarjeta", "Uso"),
     cell: ({ row }) =>
       renderCostCell(
         row.original.costoTarjeta,
@@ -531,19 +555,25 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "averageRating",
-    header: createSortableHeader("Rating promedio"),
-    cell: ({ row }) => row.original.averageRatingLabel,
+    header: createSortableHeader("Rating promedio", "Rating"),
+    cell: ({ row }) =>
+      h(
+        "span",
+        { class: "text-xs tabular-nums text-muted" },
+        row.original.averageRatingLabel,
+      ),
   },
 ]);
 </script>
 
 <template>
-  <UCard
-    :ui="{
-      body: 'p-0!',
-    }"
-  >
-    <template #header>
+  <div class="space-y-4">
+    <UCard
+      :ui="{
+        body: 'p-0!',
+      }"
+    >
+      <template #header>
       <div class="space-y-3">
         <div
           class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
@@ -650,31 +680,16 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
       </div>
     </template>
 
-    <UAlert
-      v-if="filteredRows.length === 0"
-      color="warning"
-      variant="soft"
-      title="Sin resultados"
-      description="Probá aflojar algún filtro o limpiar la búsqueda."
-      class="mb-4"
-    />
+      <UAlert
+        v-if="filteredRows.length === 0"
+        color="warning"
+        variant="soft"
+        title="Sin resultados"
+        description="Probá aflojar algún filtro o limpiar la búsqueda."
+        class="m-4"
+      />
 
-    <div class="hidden lg:block overflow-x-auto">
-      <UTable
-        v-model:sorting="sorting"
-        :data="filteredRows"
-        :columns="columns"
-        :column-visibility="columnVisibility"
-      >
-        <template #empty>
-          <div class="py-10 text-center text-sm text-muted">
-            No hay plataformas que coincidan con los filtros actuales.
-          </div>
-        </template>
-      </UTable>
-    </div>
-
-    <div class="space-y-4 p-2 lg:hidden">
+      <div class="space-y-4 p-2 lg:hidden">
       <div class="flex items-center gap-3">
         <USelect
           v-model="activeSortColumn"
@@ -880,12 +895,37 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
         </div>
       </div>
 
-      <div
-        v-if="sortedFilteredRows.length === 0"
-        class="py-10 text-center text-sm text-muted"
-      >
-        No hay plataformas que coincidan con los filtros actuales.
+        <div
+          v-if="sortedFilteredRows.length === 0"
+          class="py-10 text-center text-sm text-muted"
+        >
+          No hay plataformas que coincidan con los filtros actuales.
+        </div>
       </div>
+    </UCard>
+
+    <div class="hidden max-w-full lg:block">
+      <UTable
+        v-model:sorting="sorting"
+        sticky="header"
+        :data="filteredRows"
+        :columns="columns"
+        :column-visibility="columnVisibility"
+        :ui="{
+          root: 'overflow-visible ring ring-default rounded-lg',
+          base: 'w-full min-w-0',
+          thead:
+            'sticky top-(--ui-header-height) z-20 border-b border-default bg-default/75 backdrop-blur',
+          th: 'px-1.5 py-1 text-xs',
+          td: 'px-1.5 py-2 text-xs whitespace-nowrap',
+        }"
+      >
+        <template #empty>
+          <div class="py-10 text-center text-sm text-muted">
+            No hay plataformas que coincidan con los filtros actuales.
+          </div>
+        </template>
+      </UTable>
     </div>
-  </UCard>
+  </div>
 </template>
