@@ -904,7 +904,9 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
       </div>
     </UCard>
 
-    <div class="hidden max-w-full lg:block">
+    <div
+      class="hidden max-w-full overflow-clip rounded-lg bg-default ring ring-default lg:block"
+    >
       <UTable
         v-model:sorting="sorting"
         sticky="header"
@@ -912,7 +914,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
         :columns="columns"
         :column-visibility="columnVisibility"
         :ui="{
-          root: 'overflow-visible ring ring-default rounded-lg',
+          root: 'overflow-visible',
           base: 'w-full min-w-0',
           thead:
             'sticky top-(--ui-header-height) z-20 border-b border-default bg-default/75 backdrop-blur',
