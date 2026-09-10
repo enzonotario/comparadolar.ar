@@ -67,7 +67,7 @@ function toggleProviderSearch() {
           <template v-if="!isSumarsePage">
             <UTooltip text="Buscar proveedor" :content="{ side: 'bottom' }">
               <UButton
-                class="inline-flex h-7 sm:hidden"
+                class="inline-flex h-7 md:hidden"
                 color="neutral"
                 variant="ghost"
                 square
@@ -77,7 +77,7 @@ function toggleProviderSearch() {
               />
             </UTooltip>
             <UButton
-              class="hidden h-7 sm:inline-flex"
+              class="hidden h-7 md:inline-flex"
               color="neutral"
               variant="outline"
               :icon="appConfig.ui.icons.search"
