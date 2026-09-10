@@ -8,9 +8,12 @@ interface Props {
   rate: ExchangeRate;
   currency: string;
   activeTab: "buy" | "sell";
+  trendValues?: number[];
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  trendValues: () => [],
+});
 
 const conditions = computed(() => getProviderConditions(props.rate));
 
@@ -43,115 +46,139 @@ const handleImageError = (event: Event) => {
 
 <template>
   <div :class="rate.sponsoredBanner ? 'space-y-3' : undefined">
-    <NuxtLink
+    <div
       v-if="!rate.sponsoredBanner"
-      :to="`/${currency}/${rate.slug}`"
-      class="hover:underline"
+      class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3"
     >
-      <div class="flex items-center gap-3">
-        <img
-          :src="
-            getResizedImageUrl(
-              rate.logoUrl || rate.logo || '/assets/placeholder.svg',
-              32,
-            )
-          "
-          :alt="getProviderDisplayName(rate)"
-          width="32"
-          height="32"
-          class="h-8 w-8 rounded-full"
-          loading="lazy"
-          decoding="async"
-          @error="handleImageError"
-        />
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="text-sm font-medium text-gray-900 dark:text-white">
-              {{ getProviderDisplayName(rate) }}
-            </h3>
-            <UBadge v-if="rate.is24x7" color="success" size="xs"> 24/7 </UBadge>
-            <UBadge v-if="rate.isUsdCcl" color="info" size="xs"> CCL </UBadge>
-            <UsdTypeBadge
-              :usd-type="rate.usdType"
-              :slug="rate.slug"
-              :name="rate.name"
-            />
-            <UBadge
-              v-if="conditions"
-              color="warning"
-              variant="subtle"
-              size="xs"
+      <NuxtLink
+        :to="`/${currency}/${rate.slug}`"
+        class="min-w-0 hover:underline"
+      >
+        <div class="flex items-center gap-3">
+          <img
+            :src="
+              getResizedImageUrl(
+                rate.logoUrl || rate.logo || '/assets/placeholder.svg',
+                32,
+              )
+            "
+            :alt="getProviderDisplayName(rate)"
+            width="32"
+            height="32"
+            class="h-8 w-8 shrink-0 rounded-full"
+            loading="lazy"
+            decoding="async"
+            @error="handleImageError"
+          />
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ getProviderDisplayName(rate) }}
+              </h3>
+              <UBadge v-if="rate.is24x7" color="success" size="xs">
+                24/7
+              </UBadge>
+              <UBadge v-if="rate.isUsdCcl" color="info" size="xs"> CCL </UBadge>
+              <UsdTypeBadge
+                :usd-type="rate.usdType"
+                :slug="rate.slug"
+                :name="rate.name"
+              />
+              <UBadge
+                v-if="conditions"
+                color="warning"
+                variant="subtle"
+                size="xs"
+              >
+                Con condiciones
+              </UBadge>
+            </div>
+            <p
+              v-if="hasValidSpread"
+              class="text-xs text-gray-500 dark:text-gray-400"
             >
-              Con condiciones
-            </UBadge>
+              Spread: {{ getSpreadPercentage }}%
+            </p>
+            <p v-else class="text-xs text-gray-500 dark:text-gray-400">
+              Spread: N/A
+            </p>
+            <p
+              v-if="conditions"
+              class="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
+            >
+              <UIcon
+                name="i-heroicons-information-circle"
+                class="h-3.5 w-3.5 shrink-0"
+              />
+              {{ conditions }}
+            </p>
           </div>
-          <p
-            v-if="hasValidSpread"
-            class="text-xs text-gray-500 dark:text-gray-400"
-          >
-            Spread: {{ getSpreadPercentage }}%
-          </p>
-          <p v-else class="text-xs text-gray-500 dark:text-gray-400">
-            Spread: N/A
-          </p>
-          <p
-            v-if="conditions"
-            class="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
-          >
-            <UIcon
-              name="i-heroicons-information-circle"
-              class="h-3.5 w-3.5 shrink-0"
-            />
-            {{ conditions }}
-          </p>
         </div>
-      </div>
-    </NuxtLink>
+      </NuxtLink>
+      <ClientOnly>
+        <RateSparkline
+          class="shrink-0 self-start pl-11 md:pl-0"
+          :values="trendValues"
+        />
+      </ClientOnly>
+    </div>
 
     <template v-else>
-      <div class="flex items-center gap-3">
-        <img
-          :src="
-            getResizedImageUrl(
-              rate.logoUrl || rate.logo || '/assets/placeholder.svg',
-              32,
-            )
-          "
-          :alt="getProviderDisplayName(rate)"
-          width="32"
-          height="32"
-          class="h-8 w-8 rounded-full"
-          loading="lazy"
-          decoding="async"
-          @error="handleImageError"
-        />
-        <div class="min-w-0">
-          <div class="flex flex-wrap items-center gap-1.5">
-            <h3 class="text-sm font-medium text-gray-900 dark:text-white">
-              {{ getProviderDisplayName(rate) }}
-            </h3>
-            <UBadge v-if="rate.is24x7" color="success" size="xs"> 24/7 </UBadge>
-            <UsdTypeBadge
-              :usd-type="rate.usdType"
-              :slug="rate.slug"
-              :name="rate.name"
-            />
-            <UBadge
-              color="warning"
-              variant="solid"
-              size="xs"
-              class="!font-semibold tracking-wide"
+      <div
+        class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3"
+      >
+        <div class="flex min-w-0 items-center gap-3">
+          <img
+            :src="
+              getResizedImageUrl(
+                rate.logoUrl || rate.logo || '/assets/placeholder.svg',
+                32,
+              )
+            "
+            :alt="getProviderDisplayName(rate)"
+            width="32"
+            height="32"
+            class="h-8 w-8 shrink-0 rounded-full"
+            loading="lazy"
+            decoding="async"
+            @error="handleImageError"
+          />
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <h3 class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ getProviderDisplayName(rate) }}
+              </h3>
+              <UBadge v-if="rate.is24x7" color="success" size="xs">
+                24/7
+              </UBadge>
+              <UsdTypeBadge
+                :usd-type="rate.usdType"
+                :slug="rate.slug"
+                :name="rate.name"
+              />
+              <UBadge
+                color="warning"
+                variant="solid"
+                size="xs"
+                class="!font-semibold tracking-wide"
+              >
+                La mejor cotización
+              </UBadge>
+            </div>
+            <p
+              v-if="hasValidSpread"
+              class="text-xs text-gray-500 dark:text-gray-400"
             >
-              La mejor cotización
-            </UBadge>
+              Spread: {{ getSpreadPercentage }}%
+            </p>
           </div>
-          <p
-            v-if="hasValidSpread"
-            class="text-xs text-gray-500 dark:text-gray-400"
-          >
-            Spread: {{ getSpreadPercentage }}%
-          </p>
         </div>
+        <ClientOnly>
+          <RateSparkline
+            class="shrink-0 self-start pl-11 md:pl-0"
+            :values="trendValues"
+          />
+        </ClientOnly>
       </div>
 
       <a

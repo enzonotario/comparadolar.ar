@@ -3,12 +3,15 @@ interface Props {
   values: number[];
   /** Window label shown next to the sparkline (API default: 7d). */
   rangeLabel?: string;
+  /** Show −7d / hoy under the line. Hide for compact inline layouts. */
+  showRangeLabels?: boolean;
   width?: number;
   height?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   rangeLabel: "7d",
+  showRangeLabels: true,
   width: 72,
   height: 28,
 });
@@ -87,6 +90,7 @@ const ariaLabel = computed(() => {
         />
       </svg>
       <div
+        v-if="showRangeLabels"
         class="flex justify-between px-px text-[9px] leading-none text-zinc-400 dark:text-zinc-500"
         aria-hidden="true"
       >
