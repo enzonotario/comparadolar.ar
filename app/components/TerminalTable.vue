@@ -107,9 +107,7 @@ const resetState = () => {
 const table = useTemplateRef("table");
 
 const { terminalColors } = useTerminalColors(computed(() => props.currency));
-const { getSeries: getTrendSeries } = useProviderTrends(
-  () => props.currency,
-);
+const { getSeries: getTrendSeries } = useProviderTrends(() => props.currency);
 
 const UButton = resolveComponent("UButton");
 const UIcon = resolveComponent("UIcon");
@@ -562,13 +560,17 @@ defineExpose({
         ref="table"
         v-model:sorting="sorting"
         v-model:row-selection="rowSelection"
+        sticky="header"
         :data="filteredRates"
         :columns="columns"
         :get-row-id="(row) => row.slug"
         :ui="{
-          root: `border rounded ${terminalColors.tableBorder}`,
+          root: `border rounded ${terminalColors.tableBorder} overflow-visible`,
+          thead:
+            'sticky top-(--ui-header-height) inset-x-0 z-20 border-b border-default bg-default/75 backdrop-blur',
           separator: 'hidden',
           tr: `${terminalColors.tableBorder} ${terminalColors.tableHover} data-[selected=true]:bg-zinc-200/50    dark:data-[selected=true]:bg-zinc-700/50`,
+          th: 'py-1',
         }"
       >
         <template #name-cell="{ row }">
