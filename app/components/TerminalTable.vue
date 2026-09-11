@@ -567,6 +567,11 @@ const setRowSelected = (slug: string, value: boolean | "indeterminate") => {
   };
 };
 
+const providerDetailTo = (slug: string) => ({
+  path: `/${props.currency}/${slug}`,
+  query: { from: "terminal" },
+});
+
 // Load saved state when currency changes
 watch(
   () => props.currency,
@@ -632,7 +637,7 @@ defineExpose({
 
     <template v-else>
       <!-- Vista mobile: cards con estética terminal -->
-      <div :class="`space-y-3 font-mono lg:hidden ${terminalColors.text}`">
+      <div :class="`space-y-3 font-mono md:hidden ${terminalColors.text}`">
         <div class="flex items-center gap-2">
           <USelect
             v-model="activeSortColumn"
@@ -689,7 +694,7 @@ defineExpose({
                 @update:model-value="setRowSelected(rate.slug, $event)"
               />
               <NuxtLink
-                :to="`/${currency}/${rate.slug}`"
+                :to="providerDetailTo(rate.slug)"
                 class="group -m-1 flex min-w-0 flex-1 items-center gap-2.5 rounded-sm p-1 transition-colors"
                 :class="terminalColors.tableHover"
               >
@@ -752,7 +757,7 @@ defineExpose({
                   ${{ formatPrice(rate.ask) }}
                 </span>
                 <NuxtLink
-                  :to="`/${currency}/${rate.slug}`"
+                  :to="providerDetailTo(rate.slug)"
                   class="self-end"
                   :aria-label="`Ver detalle de ${getProviderDisplayName(rate)}`"
                 >
@@ -781,7 +786,7 @@ defineExpose({
                   ${{ formatPrice(rate.bid) }}
                 </span>
                 <NuxtLink
-                  :to="`/${currency}/${rate.slug}`"
+                  :to="providerDetailTo(rate.slug)"
                   class="self-end"
                   :aria-label="`Ver detalle de ${getProviderDisplayName(rate)}`"
                 >
@@ -832,7 +837,7 @@ defineExpose({
 
       <!-- Vista desktop: tabla actual -->
       <div
-        :class="`hidden w-full overflow-clip rounded border bg-default lg:block ${terminalColors.tableBorder}`"
+        :class="`hidden w-full overflow-clip rounded border bg-default md:block ${terminalColors.tableBorder}`"
       >
         <UTable
           ref="table"
@@ -853,7 +858,7 @@ defineExpose({
         >
           <template #name-cell="{ row }">
             <NuxtLink
-              :to="`/${currency}/${row.original.slug}`"
+              :to="providerDetailTo(row.original.slug)"
               class="flex items-center gap-2 hover:underline"
             >
               <img
@@ -892,7 +897,7 @@ defineExpose({
                 ${{ formatPrice(row.original.bid) }}
               </div>
               <NuxtLink
-                :to="`/${currency}/${row.original.slug}`"
+                :to="providerDetailTo(row.original.slug)"
                 :aria-label="`Ver detalle de ${getProviderDisplayName(row.original)}`"
               >
                 <ClientOnly>
@@ -910,7 +915,7 @@ defineExpose({
                 ${{ formatPrice(row.original.ask) }}
               </div>
               <NuxtLink
-                :to="`/${currency}/${row.original.slug}`"
+                :to="providerDetailTo(row.original.slug)"
                 :aria-label="`Ver detalle de ${getProviderDisplayName(row.original)}`"
               >
                 <ClientOnly>

@@ -12,8 +12,19 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const route = useRoute();
 
 const currencySymbol = computed(() => props.currency.toUpperCase());
+
+const fromQuery = computed(() => {
+  const from = route.query.from;
+  return from === "terminal" || from === "charts" ? { from } : {};
+});
+
+const providerDetailTo = (slug: string) => ({
+  path: `/${props.currency}/${slug}`,
+  query: fromQuery.value,
+});
 
 const relatedProviders = computed(() => {
   if (!props.providers || props.providers.length === 0) {
@@ -56,7 +67,7 @@ const relatedProviders = computed(() => {
         <NuxtLink
           v-for="provider in relatedProviders"
           :key="provider.name"
-          :to="`/${props.currency}/${provider.slug}`"
+          :to="providerDetailTo(provider.slug)"
         >
           <UCard
             class="group h-full bg-white/60 dark:bg-white/5 backdrop-blur-sm cursor-pointer hover:ring-indigo-500 dark:hover:ring-indigo-400"

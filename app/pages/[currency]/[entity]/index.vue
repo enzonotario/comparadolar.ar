@@ -10,6 +10,7 @@ const {
   allProviders,
   currentProvider,
   comparisonTablePath,
+  backLabel,
   categoryFullName,
 } = useProviderPage();
 
@@ -25,9 +26,9 @@ const colorMode = useColorMode();
         variant="ghost"
         color="neutral"
         size="lg"
-        :aria-label="`Volver a la tabla de ${categoryFullName}`"
+        :aria-label="`${backLabel} de ${categoryFullName}`"
       >
-        Volver a la tabla
+        {{ backLabel }}
       </UButton>
     </div>
 
@@ -110,7 +111,7 @@ const colorMode = useColorMode();
         :description="`No se pudo encontrar información para ${entity} en ${currency.toUpperCase()}.`"
         :actions="[
           {
-            label: 'Volver al comparador',
+            label: backLabel,
             to: comparisonTablePath,
             color: 'neutral',
           },

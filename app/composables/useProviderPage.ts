@@ -98,9 +98,27 @@ export function useProviderPage() {
     currency: currency as CurrencyType,
   });
 
-  const comparisonTablePath = computed(() =>
-    getCurrencyRoute(currency as CurrencyType),
-  );
+  const { getFullRoute } = useNavigation();
+
+  const fromSection = computed(() => {
+    const from = route.query.from;
+    if (from === "terminal" || from === "charts") return from;
+    return "compare";
+  });
+
+  const comparisonTablePath = computed(() => {
+    const c = currency as CurrencyType;
+    if (fromSection.value === "terminal" || fromSection.value === "charts") {
+      return getFullRoute(fromSection.value, c);
+    }
+    return getCurrencyRoute(c);
+  });
+
+  const backLabel = computed(() => {
+    if (fromSection.value === "terminal") return "Volver a Terminal";
+    if (fromSection.value === "charts") return "Volver a Gráficos";
+    return "Volver a la tabla";
+  });
 
   const categoryFullName = computed(() => {
     const cfg = getCurrencyConfig(currency as CurrencyType);
@@ -118,6 +136,8 @@ export function useProviderPage() {
     allProviders,
     currentProvider,
     comparisonTablePath,
+    backLabel,
+    fromSection,
     categoryFullName,
   };
 }
