@@ -45,6 +45,7 @@ function trendFor(slug: string) {
         root: 'table-fixed',
         separator: 'hidden',
         th: 'py-1',
+        td: 'py-1 md:py-2',
       }"
     >
       <template #name-cell="{ row }">
