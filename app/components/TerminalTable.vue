@@ -555,7 +555,10 @@ defineExpose({
       <div>No hay datos disponibles para {{ currency.toUpperCase() }}</div>
     </div>
 
-    <div v-else class="w-full">
+    <div
+      v-else
+      :class="`w-full overflow-clip rounded border bg-default ${terminalColors.tableBorder}`"
+    >
       <UTable
         ref="table"
         v-model:sorting="sorting"
@@ -565,9 +568,9 @@ defineExpose({
         :columns="columns"
         :get-row-id="(row) => row.slug"
         :ui="{
-          root: `border rounded ${terminalColors.tableBorder} overflow-visible`,
+          root: 'overflow-visible',
           thead:
-            'sticky top-(--ui-header-height) inset-x-0 z-20 border-b border-default bg-default/75 backdrop-blur',
+            'sticky top-(--ui-header-height) z-20 border-b border-default bg-default/75 backdrop-blur',
           separator: 'hidden',
           tr: `${terminalColors.tableBorder} ${terminalColors.tableHover} data-[selected=true]:bg-zinc-200/50    dark:data-[selected=true]:bg-zinc-700/50`,
           th: 'py-1',
