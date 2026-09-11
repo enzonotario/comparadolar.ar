@@ -621,11 +621,16 @@ defineExpose({
                 })
               }}
             </div>
-            <ClientOnly>
-              <RateSparkline
-                :values="getTrendSeries(row.original.slug, 'sell')"
-              />
-            </ClientOnly>
+            <NuxtLink
+              :to="`/${currency}/${row.original.slug}`"
+              :aria-label="`Ver detalle de ${getProviderDisplayName(row.original)}`"
+            >
+              <ClientOnly>
+                <RateSparkline
+                  :values="getTrendSeries(row.original.slug, 'sell')"
+                />
+              </ClientOnly>
+            </NuxtLink>
           </div>
         </template>
 
@@ -639,11 +644,16 @@ defineExpose({
                 })
               }}
             </div>
-            <ClientOnly>
-              <RateSparkline
-                :values="getTrendSeries(row.original.slug, 'buy')"
-              />
-            </ClientOnly>
+            <NuxtLink
+              :to="`/${currency}/${row.original.slug}`"
+              :aria-label="`Ver detalle de ${getProviderDisplayName(row.original)}`"
+            >
+              <ClientOnly>
+                <RateSparkline
+                  :values="getTrendSeries(row.original.slug, 'buy')"
+                />
+              </ClientOnly>
+            </NuxtLink>
           </div>
         </template>
 

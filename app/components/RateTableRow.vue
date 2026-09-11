@@ -115,12 +115,15 @@ const handleImageError = (event: Event) => {
           </div>
         </div>
       </NuxtLink>
-      <ClientOnly>
-        <RateSparkline
-          class="shrink-0 self-start pl-11 md:pl-0"
-          :values="trendValues"
-        />
-      </ClientOnly>
+      <NuxtLink
+        :to="`/${currency}/${rate.slug}`"
+        class="shrink-0 self-start pl-11 md:pl-0"
+        :aria-label="`Ver detalle de ${getProviderDisplayName(rate)}`"
+      >
+        <ClientOnly>
+          <RateSparkline :values="trendValues" />
+        </ClientOnly>
+      </NuxtLink>
     </div>
 
     <template v-else>
@@ -173,12 +176,15 @@ const handleImageError = (event: Event) => {
             </p>
           </div>
         </div>
-        <ClientOnly>
-          <RateSparkline
-            class="shrink-0 self-start pl-11 md:pl-0"
-            :values="trendValues"
-          />
-        </ClientOnly>
+        <NuxtLink
+          :to="`/${currency}/${rate.slug}`"
+          class="shrink-0 self-start pl-11 md:pl-0"
+          :aria-label="`Ver detalle de ${getProviderDisplayName(rate)}`"
+        >
+          <ClientOnly>
+            <RateSparkline :values="trendValues" />
+          </ClientOnly>
+        </NuxtLink>
       </div>
 
       <a
