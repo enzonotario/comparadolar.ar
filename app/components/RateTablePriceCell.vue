@@ -6,9 +6,12 @@ interface Props {
   rate: ExchangeRate;
   currency: string;
   activeTab: "buy" | "sell";
+  trendValues?: number[];
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  trendValues: () => [],
+});
 
 const getPrice = computed(() => {
   return props.activeTab === "buy" ? props.rate.ask : props.rate.bid;
@@ -22,7 +25,7 @@ const priceLabel = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center">
+  <div class="flex flex-col items-end justify-center gap-1">
     <template v-if="getPrice">
       <span
         v-if="rate.sponsoredBanner"
@@ -49,5 +52,14 @@ const priceLabel = computed(() => {
         }}
       </NuxtLink>
     </template>
+    <NuxtLink
+      :to="`/${currency}/${rate.slug}`"
+      class="md:hidden"
+      :aria-label="`Ver detalle de ${getProviderDisplayName(rate)}`"
+    >
+      <ClientOnly>
+        <RateSparkline :values="trendValues" />
+      </ClientOnly>
+    </NuxtLink>
   </div>
 </template>

@@ -117,7 +117,7 @@ const handleImageError = (event: Event) => {
       </NuxtLink>
       <NuxtLink
         :to="`/${currency}/${rate.slug}`"
-        class="shrink-0 self-start pl-11 md:pl-0"
+        class="hidden shrink-0 self-start pl-11 md:block md:pl-0"
         :aria-label="`Ver detalle de ${getProviderDisplayName(rate)}`"
       >
         <ClientOnly>
@@ -178,7 +178,7 @@ const handleImageError = (event: Event) => {
         </div>
         <NuxtLink
           :to="`/${currency}/${rate.slug}`"
-          class="shrink-0 self-start pl-11 md:pl-0"
+          class="hidden shrink-0 self-start pl-11 md:block md:pl-0"
           :aria-label="`Ver detalle de ${getProviderDisplayName(rate)}`"
         >
           <ClientOnly>

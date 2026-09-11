@@ -62,6 +62,7 @@ function trendFor(slug: string) {
           :rate="row.original"
           :currency="currency"
           :active-tab="activeTab"
+          :trend-values="trendFor(row.original.slug)"
         />
       </template>
 
