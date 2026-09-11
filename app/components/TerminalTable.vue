@@ -11,7 +11,7 @@ import {
 import { useDebounceFn } from "@vueuse/core";
 import type { ExchangeRate, CurrencyType } from "@/lib/types";
 import { API_ENDPOINTS } from "@/lib/types";
-import { RATE_LABELS_UPPER } from "@/lib/rate-labels";
+import { RATE_LABELS, RATE_LABELS_UPPER } from "@/lib/rate-labels";
 import type { TableColumn } from "@nuxt/ui";
 import { use24x7Filter } from "@/composables/use24x7Filter";
 import { useTerminalColors } from "@/composables/useTerminalColors";
@@ -492,6 +492,81 @@ const isLoading = computed(
     ethLoading.value,
 );
 
+const sortableColumns = [
+  { id: "spreadPercentage", label: "Spread %" },
+  { id: "spread", label: RATE_LABELS.spread },
+  { id: "ask", label: RATE_LABELS.ask },
+  { id: "bid", label: RATE_LABELS.bid },
+  { id: "name", label: "Proveedor" },
+] as const;
+
+const activeSortColumn = ref(
+  sortableColumns.find((c) => c.id === (sorting.value[0]?.id ?? "spreadPercentage")) ??
+    sortableColumns[0],
+);
+const activeSortDesc = ref(sorting.value[0]?.desc ?? false);
+
+watch(activeSortColumn, (col) => {
+  sorting.value = [{ id: col.id, desc: activeSortDesc.value }];
+});
+
+watch(activeSortDesc, (desc) => {
+  if (sorting.value[0]) {
+    sorting.value = [{ id: sorting.value[0].id, desc }];
+  }
+});
+
+watch(sorting, (value) => {
+  const col = value[0];
+  if (!col) return;
+  const found = sortableColumns.find((c) => c.id === col.id);
+  if (found) activeSortColumn.value = found;
+  activeSortDesc.value = col.desc;
+});
+
+const sortedFilteredRates = computed(() => {
+  const items = [...filteredRates.value];
+  const sortDef = sorting.value[0];
+  if (!sortDef) return items;
+
+  const { id, desc } = sortDef;
+
+  return items.sort((a, b) => {
+    if (id === "name") {
+      const aName = getProviderDisplayName(a);
+      const bName = getProviderDisplayName(b);
+      return desc ? bName.localeCompare(aName) : aName.localeCompare(bName);
+    }
+
+    let aVal = a[id as keyof typeof a] as number | null | undefined;
+    let bVal = b[id as keyof typeof b] as number | null | undefined;
+
+    if (aVal == null) {
+      aVal = desc ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+    }
+    if (bVal == null) {
+      bVal = desc ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+    }
+
+    return desc ? bVal - aVal : aVal - bVal;
+  });
+});
+
+const formatPrice = (value: number | null | undefined) =>
+  (value || 0).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const isRowSelected = (slug: string) => !!rowSelection.value[slug];
+
+const setRowSelected = (slug: string, value: boolean | "indeterminate") => {
+  rowSelection.value = {
+    ...rowSelection.value,
+    [slug]: !!value,
+  };
+};
+
 // Load saved state when currency changes
 watch(
   () => props.currency,
@@ -555,126 +630,316 @@ defineExpose({
       <div>No hay datos disponibles para {{ currency.toUpperCase() }}</div>
     </div>
 
-    <div
-      v-else
-      :class="`w-full overflow-clip rounded border bg-default ${terminalColors.tableBorder}`"
-    >
-      <UTable
-        ref="table"
-        v-model:sorting="sorting"
-        v-model:row-selection="rowSelection"
-        sticky="header"
-        :data="filteredRates"
-        :columns="columns"
-        :get-row-id="(row) => row.slug"
-        :ui="{
-          root: 'overflow-visible',
-          thead:
-            'sticky top-(--ui-header-height) z-20 border-b border-default bg-default/75 backdrop-blur',
-          separator: 'hidden',
-          tr: `${terminalColors.tableBorder} ${terminalColors.tableHover} data-[selected=true]:bg-zinc-200/50    dark:data-[selected=true]:bg-zinc-700/50`,
-          th: 'py-1',
-        }"
-      >
-        <template #name-cell="{ row }">
-          <NuxtLink
-            :to="`/${currency}/${row.original.slug}`"
-            class="flex items-center gap-2 hover:underline"
+    <template v-else>
+      <!-- Vista mobile: cards con estética terminal -->
+      <div :class="`space-y-3 font-mono lg:hidden ${terminalColors.text}`">
+        <div class="flex items-center gap-2">
+          <USelect
+            v-model="activeSortColumn"
+            :items="[...sortableColumns]"
+            value-key="id"
+            label-key="label"
+            placeholder="SORT BY"
+            aria-label="Ordenar por"
+            size="sm"
+            class="min-w-0 flex-1 font-mono"
+            :ui="{
+              base: `rounded-none ${terminalColors.tableBorder}`,
+            }"
+          />
+          <UButton
+            size="sm"
+            color="neutral"
+            variant="outline"
+            class="rounded-none font-mono"
+            :class="terminalColors.tableBorder"
+            :icon="
+              activeSortDesc
+                ? 'i-lucide-arrow-down-narrow-wide'
+                : 'i-lucide-arrow-up-narrow-wide'
+            "
+            :aria-label="
+              activeSortDesc
+                ? 'Orden descendente, cambiar a ascendente'
+                : 'Orden ascendente, cambiar a descendente'
+            "
+            @click="activeSortDesc = !activeSortDesc"
+          />
+        </div>
+
+        <div class="space-y-2">
+          <div
+            v-for="rate in sortedFilteredRates"
+            :key="rate.slug"
+            class="border bg-default p-3 transition-colors"
+            :class="[
+              terminalColors.tableBorder,
+              terminalColors.tableHover,
+              isRowSelected(rate.slug)
+                ? `ring-1 ${terminalColors.ring}`
+                : undefined,
+            ]"
           >
-            <img
-              v-if="row.original.logoUrl"
-              :src="getResizedImageUrl(row.original.logoUrl, 16)"
-              :alt="getProviderDisplayName(row.original)"
-              width="16"
-              height="16"
-              class="w-4 h-4"
-              loading="lazy"
-              decoding="async"
-            />
-            <span :class="terminalColors.cellText">
-              {{ getProviderDisplayName(row.original) }}
-            </span>
-            <UsdTypeBadge
-              :usd-type="row.original.usdType"
-              :slug="row.original.slug"
-              :name="row.original.name"
-            />
-            <UBadge v-if="row.original.isUsdCcl" color="info" size="xs">
-              CCL
-            </UBadge>
-            <UIcon
-              v-if="!row.original.is24x7 && !marketHours"
-              name="i-heroicons-moon"
-              :class="`w-3 h-3 ${terminalColors.blue}`"
-              title="Mercado cerrado"
-            />
-          </NuxtLink>
-        </template>
-
-        <template #bid-cell="{ row }">
-          <div class="flex flex-col items-end gap-1">
-            <div :class="`text-right font-mono ${terminalColors.cellText}`">
-              ${{
-                (row.original.bid || 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })
-              }}
+            <div class="mb-3 flex items-start gap-2.5">
+              <UCheckbox
+                :model-value="isRowSelected(rate.slug)"
+                color="neutral"
+                aria-label="Seleccionar fila"
+                class="mt-1"
+                @update:model-value="setRowSelected(rate.slug, $event)"
+              />
+              <NuxtLink
+                :to="`/${currency}/${rate.slug}`"
+                class="group -m-1 flex min-w-0 flex-1 items-center gap-2.5 rounded-sm p-1 transition-colors"
+                :class="terminalColors.tableHover"
+              >
+                <img
+                  v-if="rate.logoUrl"
+                  :src="getResizedImageUrl(rate.logoUrl, 32)"
+                  :alt="getProviderDisplayName(rate)"
+                  width="32"
+                  height="32"
+                  class="size-8 shrink-0 object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div
+                  v-else
+                  class="flex size-8 shrink-0 items-center justify-center border text-[10px] font-bold"
+                  :class="[terminalColors.tableBorder, terminalColors.text]"
+                >
+                  {{ getProviderDisplayName(rate).slice(0, 2).toUpperCase() }}
+                </div>
+                <div class="min-w-0">
+                  <p
+                    :class="`truncate text-sm font-semibold uppercase tracking-tight group-hover:underline ${terminalColors.cellText}`"
+                  >
+                    {{ getProviderDisplayName(rate) }}
+                  </p>
+                  <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                    <UsdTypeBadge
+                      :usd-type="rate.usdType"
+                      :slug="rate.slug"
+                      :name="rate.name"
+                    />
+                    <UBadge v-if="rate.isUsdCcl" color="info" size="xs">
+                      CCL
+                    </UBadge>
+                    <UIcon
+                      v-if="!rate.is24x7 && !marketHours"
+                      name="i-heroicons-moon"
+                      :class="`size-3.5 ${terminalColors.blue}`"
+                      title="Mercado cerrado"
+                    />
+                  </div>
+                </div>
+              </NuxtLink>
             </div>
+
+            <div class="grid grid-cols-2 gap-1.5 text-xs">
+              <div
+                class="flex flex-col gap-1 border px-2 py-1.5"
+                :class="terminalColors.tableBorder"
+              >
+                <span
+                  :class="`text-[10px] uppercase tracking-wider ${terminalColors.textSecondary}`"
+                >
+                  {{ RATE_LABELS_UPPER.ask }}
+                </span>
+                <span
+                  :class="`self-end text-sm font-semibold tabular-nums ${terminalColors.cellText}`"
+                >
+                  ${{ formatPrice(rate.ask) }}
+                </span>
+                <NuxtLink
+                  :to="`/${currency}/${rate.slug}`"
+                  class="self-end"
+                  :aria-label="`Ver detalle de ${getProviderDisplayName(rate)}`"
+                >
+                  <ClientOnly>
+                    <RateSparkline
+                      :values="getTrendSeries(rate.slug, 'buy')"
+                      :show-range-labels="false"
+                      :width="64"
+                      :height="22"
+                    />
+                  </ClientOnly>
+                </NuxtLink>
+              </div>
+              <div
+                class="flex flex-col gap-1 border px-2 py-1.5"
+                :class="terminalColors.tableBorder"
+              >
+                <span
+                  :class="`text-[10px] uppercase tracking-wider ${terminalColors.textSecondary}`"
+                >
+                  {{ RATE_LABELS_UPPER.bid }}
+                </span>
+                <span
+                  :class="`self-end text-sm font-semibold tabular-nums ${terminalColors.cellText}`"
+                >
+                  ${{ formatPrice(rate.bid) }}
+                </span>
+                <NuxtLink
+                  :to="`/${currency}/${rate.slug}`"
+                  class="self-end"
+                  :aria-label="`Ver detalle de ${getProviderDisplayName(rate)}`"
+                >
+                  <ClientOnly>
+                    <RateSparkline
+                      :values="getTrendSeries(rate.slug, 'sell')"
+                      :show-range-labels="false"
+                      :width="64"
+                      :height="22"
+                    />
+                  </ClientOnly>
+                </NuxtLink>
+              </div>
+              <div
+                class="flex items-center border px-2 py-1.5"
+                :class="terminalColors.tableBorder"
+              >
+                <span
+                  :class="`text-[10px] uppercase tracking-wider ${terminalColors.textSecondary}`"
+                >
+                  {{ RATE_LABELS_UPPER.spread }}
+                </span>
+                <span
+                  :class="`ml-auto text-xs font-semibold tabular-nums ${terminalColors.cellTextYellow}`"
+                >
+                  ${{ formatPrice(getSpread(rate)) }}
+                </span>
+              </div>
+              <div
+                class="flex items-center border px-2 py-1.5"
+                :class="terminalColors.tableBorder"
+              >
+                <span
+                  :class="`text-[10px] uppercase tracking-wider ${terminalColors.textSecondary}`"
+                >
+                  SPREAD %
+                </span>
+                <span
+                  :class="`ml-auto text-xs font-semibold tabular-nums ${terminalColors.cellTextYellow}`"
+                >
+                  {{ getSpreadPercentage(rate).toFixed(2) }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista desktop: tabla actual -->
+      <div
+        :class="`hidden w-full overflow-clip rounded border bg-default lg:block ${terminalColors.tableBorder}`"
+      >
+        <UTable
+          ref="table"
+          v-model:sorting="sorting"
+          v-model:row-selection="rowSelection"
+          sticky="header"
+          :data="filteredRates"
+          :columns="columns"
+          :get-row-id="(row) => row.slug"
+          :ui="{
+            root: 'overflow-visible',
+            thead:
+              'sticky top-(--ui-header-height) z-20 border-b border-default bg-default/75 backdrop-blur',
+            separator: 'hidden',
+            tr: `${terminalColors.tableBorder} ${terminalColors.tableHover} data-[selected=true]:bg-zinc-200/50    dark:data-[selected=true]:bg-zinc-700/50`,
+            th: 'py-1',
+          }"
+        >
+          <template #name-cell="{ row }">
             <NuxtLink
               :to="`/${currency}/${row.original.slug}`"
-              :aria-label="`Ver detalle de ${getProviderDisplayName(row.original)}`"
+              class="flex items-center gap-2 hover:underline"
             >
-              <ClientOnly>
-                <RateSparkline
-                  :values="getTrendSeries(row.original.slug, 'sell')"
-                />
-              </ClientOnly>
+              <img
+                v-if="row.original.logoUrl"
+                :src="getResizedImageUrl(row.original.logoUrl, 16)"
+                :alt="getProviderDisplayName(row.original)"
+                width="16"
+                height="16"
+                class="w-4 h-4"
+                loading="lazy"
+                decoding="async"
+              />
+              <span :class="terminalColors.cellText">
+                {{ getProviderDisplayName(row.original) }}
+              </span>
+              <UsdTypeBadge
+                :usd-type="row.original.usdType"
+                :slug="row.original.slug"
+                :name="row.original.name"
+              />
+              <UBadge v-if="row.original.isUsdCcl" color="info" size="xs">
+                CCL
+              </UBadge>
+              <UIcon
+                v-if="!row.original.is24x7 && !marketHours"
+                name="i-heroicons-moon"
+                :class="`w-3 h-3 ${terminalColors.blue}`"
+                title="Mercado cerrado"
+              />
             </NuxtLink>
-          </div>
-        </template>
+          </template>
 
-        <template #ask-cell="{ row }">
-          <div class="flex flex-col items-end gap-1">
-            <div :class="`text-right font-mono ${terminalColors.cellText}`">
-              ${{
-                (row.original.ask || 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })
-              }}
+          <template #bid-cell="{ row }">
+            <div class="flex flex-col items-end gap-1">
+              <div :class="`text-right font-mono ${terminalColors.cellText}`">
+                ${{ formatPrice(row.original.bid) }}
+              </div>
+              <NuxtLink
+                :to="`/${currency}/${row.original.slug}`"
+                :aria-label="`Ver detalle de ${getProviderDisplayName(row.original)}`"
+              >
+                <ClientOnly>
+                  <RateSparkline
+                    :values="getTrendSeries(row.original.slug, 'sell')"
+                  />
+                </ClientOnly>
+              </NuxtLink>
             </div>
-            <NuxtLink
-              :to="`/${currency}/${row.original.slug}`"
-              :aria-label="`Ver detalle de ${getProviderDisplayName(row.original)}`"
+          </template>
+
+          <template #ask-cell="{ row }">
+            <div class="flex flex-col items-end gap-1">
+              <div :class="`text-right font-mono ${terminalColors.cellText}`">
+                ${{ formatPrice(row.original.ask) }}
+              </div>
+              <NuxtLink
+                :to="`/${currency}/${row.original.slug}`"
+                :aria-label="`Ver detalle de ${getProviderDisplayName(row.original)}`"
+              >
+                <ClientOnly>
+                  <RateSparkline
+                    :values="getTrendSeries(row.original.slug, 'buy')"
+                  />
+                </ClientOnly>
+              </NuxtLink>
+            </div>
+          </template>
+
+          <template #spread-cell="{ row }">
+            <div
+              :class="`text-right font-mono ${terminalColors.cellTextYellow}`"
             >
-              <ClientOnly>
-                <RateSparkline
-                  :values="getTrendSeries(row.original.slug, 'buy')"
-                />
-              </ClientOnly>
-            </NuxtLink>
-          </div>
-        </template>
+              ${{ formatPrice(getSpread(row.original)) }}
+            </div>
+          </template>
 
-        <template #spread-cell="{ row }">
-          <div :class="`text-right font-mono ${terminalColors.cellTextYellow}`">
-            ${{
-              getSpread(row.original).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })
-            }}
-          </div>
-        </template>
-
-        <template #spreadPercentage-cell="{ row }">
-          <div :class="`text-right font-mono ${terminalColors.cellTextYellow}`">
-            {{ getSpreadPercentage(row.original).toFixed(2) }}%
-          </div>
-        </template>
-      </UTable>
-    </div>
+          <template #spreadPercentage-cell="{ row }">
+            <div
+              :class="`text-right font-mono ${terminalColors.cellTextYellow}`"
+            >
+              {{ getSpreadPercentage(row.original).toFixed(2) }}%
+            </div>
+          </template>
+        </UTable>
+      </div>
+    </template>
 
     <div
       v-if="currency === 'usd'"
