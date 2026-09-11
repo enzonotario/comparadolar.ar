@@ -98,12 +98,15 @@ function toggleProviderSearch() {
       </template>
 
       <template #body>
-        <UNavigationMenu
-          v-if="!isSumarsePage"
-          :items="navigationItems"
-          orientation="vertical"
-          class="-mx-2.5"
-        />
+        <div v-if="!isSumarsePage" class="flex flex-col gap-4">
+          <CurrencySelector :show-usd-type-filters="false" />
+
+          <UNavigationMenu
+            :items="navigationItems"
+            orientation="vertical"
+            class="-mx-2.5"
+          />
+        </div>
       </template>
     </UHeader>
     <!-- Reserva altura: el header es `fixed` y no ocupa flujo -->

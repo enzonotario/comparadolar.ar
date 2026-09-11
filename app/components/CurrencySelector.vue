@@ -2,6 +2,14 @@
 import type { CurrencyType } from "@/lib/types";
 import { currencies } from "@/lib/currencies-config";
 
+const props = withDefaults(
+  defineProps<{
+    /** Filtros Oficial/MEP/… bajo USD. En menú móvil conviene apagarlos. */
+    showUsdTypeFilters?: boolean;
+  }>(),
+  { showUsdTypeFilters: true },
+);
+
 const { getCurrentCurrency, getFullRoute, getCurrentSection } = useNavigation();
 const { buildRouteWithState } = useTerminalState();
 
@@ -20,12 +28,16 @@ const getCurrencyRoute = (currency: CurrencyType) => {
 
   return basePath;
 };
+
+const showUsdFilters = computed(
+  () => props.showUsdTypeFilters && isActive("usd"),
+);
 </script>
 
 <template>
   <div
     class="relative flex flex-wrap items-center justify-center gap-2 overflow-visible"
-    :class="isActive('usd') ? 'pb-9' : undefined"
+    :class="showUsdFilters ? 'pb-9' : undefined"
   >
     <div
       v-for="currency in currencies"
@@ -44,7 +56,7 @@ const getCurrencyRoute = (currency: CurrencyType) => {
       </UButton>
 
       <div
-        v-if="currency.value === 'usd' && isActive('usd')"
+        v-if="currency.value === 'usd' && showUsdFilters"
         class="absolute left-0 top-full z-20 mt-1.5 md:whitespace-nowrap"
       >
         <UsdTypeFilters variant="subtabs" />
