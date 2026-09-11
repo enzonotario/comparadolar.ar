@@ -23,6 +23,9 @@ function toggleProviderSearch() {
         container: 'max-w-7xl mx-auto',
         center: 'hidden md:flex',
         root: 'fixed inset-x-0 top-0 z-50 h-(--ui-header-height) border-b border-default bg-default/75 backdrop-blur',
+        // Menú modal (portal): sin z-index, sticky/overlays de página (p.ej. z-20) quedan encima.
+        overlay: 'z-50',
+        content: 'z-50',
       }"
     >
       <template #left>
@@ -95,22 +98,12 @@ function toggleProviderSearch() {
       </template>
 
       <template #body>
-        <div v-if="!isSumarsePage" class="flex flex-col gap-6">
-          <UNavigationMenu
-            :items="navigationItems"
-            orientation="vertical"
-            class="-mx-2.5"
-          />
-
-          <div class="px-2">
-            <p
-              class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-3 uppercase tracking-wider"
-            >
-              Cambiar Moneda
-            </p>
-            <CurrencySelector />
-          </div>
-        </div>
+        <UNavigationMenu
+          v-if="!isSumarsePage"
+          :items="navigationItems"
+          orientation="vertical"
+          class="-mx-2.5"
+        />
       </template>
     </UHeader>
     <!-- Reserva altura: el header es `fixed` y no ocupa flujo -->
