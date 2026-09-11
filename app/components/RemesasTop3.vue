@@ -112,6 +112,9 @@ const { top3: rows, loading } = await useRemesasRows();
           color="neutral"
           icon="i-lucide-arrow-right"
           trailing
+          :ui="{
+            base: 'justify-center',
+          }"
         >
           Remesas
         </UButton>

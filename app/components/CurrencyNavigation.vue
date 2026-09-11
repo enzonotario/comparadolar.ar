@@ -31,9 +31,11 @@ const nextCurrency = computed<CurrencyType | null>(() => {
 });
 
 const getCurrencyRoute = (currency: CurrencyType) => {
-  const basePath = getFullRoute(currentSection.value, currency);
+  const section =
+    currentSection.value === "remesas" ? "compare" : currentSection.value;
+  const basePath = getFullRoute(section, currency);
 
-  if (currentSection.value === "terminal") {
+  if (section === "terminal") {
     return buildRouteWithState(basePath, currency);
   }
 

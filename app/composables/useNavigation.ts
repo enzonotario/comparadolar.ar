@@ -12,6 +12,8 @@ export function useNavigation() {
         return "/terminal";
       case "charts":
         return "/graficos";
+      case "remesas":
+        return "/remesas";
       default:
         return "";
     }
@@ -28,6 +30,10 @@ export function useNavigation() {
   };
 
   const getFullRoute = (section: string, currency: CurrencyType): string => {
+    if (section === "remesas") {
+      return "/remesas";
+    }
+
     const sectionPrefix = getSectionPrefix(section);
     const currencyRoute = getSectionCurrencyPath(currency);
 
@@ -47,6 +53,9 @@ export function useNavigation() {
     if (currentPath.startsWith("/graficos")) {
       return "charts";
     }
+    if (currentPath.startsWith("/remesas")) {
+      return "remesas";
+    }
     return "compare";
   };
 
@@ -58,6 +67,11 @@ export function useNavigation() {
 
     // Si la ruta es solo "/", es USD
     if (currentPath === "/") {
+      return "usd";
+    }
+
+    // Remesas no tiene moneda en la URL
+    if (pathParts[0] === "remesas") {
       return "usd";
     }
 

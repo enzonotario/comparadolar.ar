@@ -18,7 +18,9 @@ const isActive = (currency: CurrencyType) => {
 };
 
 const getCurrencyRoute = (currency: CurrencyType) => {
-  const currentSection = getCurrentSection();
+  // Remesas no tiene rutas por moneda: el selector vuelve a Comparar.
+  const currentSection =
+    getCurrentSection() === "remesas" ? "compare" : getCurrentSection();
   const basePath = getFullRoute(currentSection, currency);
 
   // Load saved state from localStorage for this currency

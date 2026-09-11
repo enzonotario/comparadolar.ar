@@ -9,7 +9,8 @@ const isActive = (currency: CurrencyType) => {
 };
 
 const getCurrencyRoute = (currency: CurrencyType) => {
-  const currentSection = getCurrentSection();
+  const currentSection =
+    getCurrentSection() === "remesas" ? "compare" : getCurrentSection();
   return getFullRoute(currentSection, currency);
 };
 </script>

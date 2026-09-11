@@ -19,6 +19,11 @@ export const useNavigationItems = () => {
       value: "charts",
       icon: "i-heroicons-chart-bar",
     },
+    {
+      label: "Remesas",
+      value: "remesas",
+      icon: "i-heroicons-banknotes",
+    },
   ];
 
   const getSectionRoute = (section: string) => {
