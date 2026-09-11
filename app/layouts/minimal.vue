@@ -34,8 +34,15 @@ const colorScheme = computed(() => {
             </nav>
           </div>
         </noscript>
-        <UContainer class="px-4 py-8 space-y-8">
-          <slot />
+        <UContainer class="px-4 py-8">
+          <ClientOnly>
+            <div class="mb-4 flex justify-center md:hidden">
+              <AutoRefreshIndicator />
+            </div>
+          </ClientOnly>
+          <div class="space-y-8">
+            <slot />
+          </div>
         </UContainer>
 
         <TheFooter />

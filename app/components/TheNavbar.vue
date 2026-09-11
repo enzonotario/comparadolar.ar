@@ -54,7 +54,9 @@ function toggleProviderSearch() {
           </NuxtLink>
 
           <ClientOnly>
-            <AutoRefreshIndicator v-if="!isSumarsePage" />
+            <div v-if="!isSumarsePage" class="hidden md:block">
+              <AutoRefreshIndicator />
+            </div>
           </ClientOnly>
         </div>
       </template>

@@ -31,8 +31,18 @@ const isSumarsePage = computed(() => route.path === "/sumarse");
       <GlobalProviderSearch />
 
       <UMain role="main" class="flex-1">
-        <div class="relative max-w-7xl mx-auto px-4 py-8 space-y-8">
-          <slot />
+        <div class="relative max-w-7xl mx-auto px-4 py-4">
+          <ClientOnly>
+            <div
+              v-if="!isSumarsePage"
+              class="mb-4 flex justify-center md:hidden"
+            >
+              <AutoRefreshIndicator />
+            </div>
+          </ClientOnly>
+          <div class="space-y-8">
+            <slot />
+          </div>
         </div>
 
         <TheFooter />
