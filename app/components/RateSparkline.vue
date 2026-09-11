@@ -12,8 +12,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   rangeLabel: "7d",
   showRangeLabels: true,
-  width: 72,
-  height: 28,
+  width: 64,
+  height: 14,
 });
 
 const points = computed(() => {
