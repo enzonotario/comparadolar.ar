@@ -501,8 +501,9 @@ const sortableColumns = [
 ] as const;
 
 const activeSortColumn = ref(
-  sortableColumns.find((c) => c.id === (sorting.value[0]?.id ?? "spreadPercentage")) ??
-    sortableColumns[0],
+  sortableColumns.find(
+    (c) => c.id === (sorting.value[0]?.id ?? "spreadPercentage"),
+  ) ?? sortableColumns[0],
 );
 const activeSortDesc = ref(sorting.value[0]?.desc ?? false);
 
@@ -854,6 +855,7 @@ defineExpose({
             separator: 'hidden',
             tr: `${terminalColors.tableBorder} ${terminalColors.tableHover} data-[selected=true]:bg-zinc-200/50    dark:data-[selected=true]:bg-zinc-700/50`,
             th: 'py-1',
+            td: 'py-1 md:py-2',
           }"
         >
           <template #name-cell="{ row }">
