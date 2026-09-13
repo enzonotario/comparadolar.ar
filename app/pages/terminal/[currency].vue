@@ -1,11 +1,6 @@
 <script setup lang="ts">
-const {
-  currency,
-  terminalColors,
-  terminalTableRef,
-  providerCount,
-  isLoading,
-} = await useTerminalPage();
+const { currency, terminalColors, terminalTableRef, providerCount, isLoading } =
+  await useTerminalPage();
 </script>
 
 <template>

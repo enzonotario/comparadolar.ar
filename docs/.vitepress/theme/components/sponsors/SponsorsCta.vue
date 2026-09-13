@@ -6,7 +6,7 @@
         title="Sponsor enzonotario"
         height="32"
         width="114"
-        style="border: 0; border-radius: 6px;"
+        style="border: 0; border-radius: 6px"
       />
       <a
         href="https://cafecito.app/enzonotario"

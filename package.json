@@ -9,8 +9,8 @@
     "generate": "pnpm run pwa:version && pnpm run build:docs && nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "eslint --ext .js,.ts,.vue .",
-    "lint:fix": "eslint --fix --ext .js,.ts,.vue .",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "preview:og": "tsx scripts/preview-og.ts",
     "docs:dev": "pnpm --filter @comparadolar/docs run docs:dev",
     "pwa:version": "node scripts/write-pwa-version.mjs"

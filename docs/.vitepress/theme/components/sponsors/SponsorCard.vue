@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from "vue";
 
 const props = defineProps({
   profile: {
@@ -9,133 +9,122 @@ const props = defineProps({
   // Optional: allow forcing a platform (e.g., 'github') for wrapper components
   type: {
     type: String,
-    default: '',
+    default: "",
   },
-})
+});
 
-const normalizedProfile = computed(() => (props.profile || '').trim())
+const normalizedProfile = computed(() => (props.profile || "").trim());
 
 const isGithub = computed(() => {
-  if (props.type === 'github' || normalizedProfile.value.startsWith('https://github.com'))
-    return true
-  if (props.type)
-    return false
+  if (
+    props.type === "github" ||
+    normalizedProfile.value.startsWith("https://github.com")
+  )
+    return true;
+  if (props.type) return false;
 
-  const p = normalizedProfile.value
-  if (!p)
-    return false
+  const p = normalizedProfile.value;
+  if (!p) return false;
 
-  if (p.startsWith('http://') || p.startsWith('https://')) {
+  if (p.startsWith("http://") || p.startsWith("https://")) {
     try {
-      const u = new URL(p)
-      const host = u.hostname.toLowerCase()
-      if (host.includes('github.com'))
-        return true
-    }
-    catch {}
+      const u = new URL(p);
+      const host = u.hostname.toLowerCase();
+      if (host.includes("github.com")) return true;
+    } catch {}
   }
-  return false
-})
+  return false;
+});
 
 const platform = computed(() => {
-  if (isGithub.value)
-    return 'github'
+  if (isGithub.value) return "github";
 
-  const p = normalizedProfile.value
-  if (!p)
-    return 'cafecito'
+  const p = normalizedProfile.value;
+  if (!p) return "cafecito";
 
-  if (p.startsWith('http://') || p.startsWith('https://')) {
+  if (p.startsWith("http://") || p.startsWith("https://")) {
     try {
-      const u = new URL(p)
-      const host = u.hostname.toLowerCase()
-      if (host.includes('twitter.com') || host.includes('x.com'))
-        return 'twitter'
-      if (host.includes('cafecito.app'))
-        return 'cafecito'
-    }
-    catch {}
+      const u = new URL(p);
+      const host = u.hostname.toLowerCase();
+      if (host.includes("twitter.com") || host.includes("x.com"))
+        return "twitter";
+      if (host.includes("cafecito.app")) return "cafecito";
+    } catch {}
   }
 
-  if (p.startsWith('@'))
-    return 'twitter'
+  if (p.startsWith("@")) return "twitter";
 
-  return 'cafecito'
-})
+  return "cafecito";
+});
 
 const username = computed(() => {
-  const p = normalizedProfile.value
-  if (!p)
-    return ''
+  const p = normalizedProfile.value;
+  if (!p) return "";
 
   try {
-    if (p.startsWith('http://') || p.startsWith('https://')) {
-      const u = new URL(p)
-      const seg = u.pathname.split('/').filter(Boolean)
-      return (seg[0] || '').replace(/^@/, '')
+    if (p.startsWith("http://") || p.startsWith("https://")) {
+      const u = new URL(p);
+      const seg = u.pathname.split("/").filter(Boolean);
+      return (seg[0] || "").replace(/^@/, "");
     }
-  }
-  catch {}
+  } catch {}
 
-  return p.replace(/^@/, '')
-})
+  return p.replace(/^@/, "");
+});
 
 // GitHub data
-const loading = ref(false)
-const error = ref('')
-const data = ref(null)
+const loading = ref(false);
+const error = ref("");
+const data = ref(null);
 
 onMounted(async () => {
-  if (platform.value !== 'github')
-    return
+  if (platform.value !== "github") return;
 
-  const user = username.value
-  loading.value = true
+  const user = username.value;
+  loading.value = true;
   if (!user) {
-    loading.value = false
-    error.value = 'Usuario inválido'
-    return
+    loading.value = false;
+    error.value = "Usuario inválido";
+    return;
   }
 
   try {
-    const res = await fetch(`https://api.github.com/users/${encodeURIComponent(user)}`)
-    if (!res.ok)
-      throw new Error(`HTTP ${res.status}`)
+    const res = await fetch(
+      `https://api.github.com/users/${encodeURIComponent(user)}`,
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-    data.value = await res.json()
+    data.value = await res.json();
+  } catch (err) {
+    error.value = "No se pudo cargar el perfil";
+  } finally {
+    loading.value = false;
   }
-  catch (err) {
-    error.value = 'No se pudo cargar el perfil'
-  }
-  finally {
-    loading.value = false
-  }
-})
+});
 
 const href = computed(() => {
-  const user = username.value
-  if (!user)
-    return '#'
+  const user = username.value;
+  if (!user) return "#";
 
-  if (platform.value === 'github')
-    return data.value?.html_url || `https://github.com/${encodeURIComponent(user)}`
+  if (platform.value === "github")
+    return (
+      data.value?.html_url || `https://github.com/${encodeURIComponent(user)}`
+    );
 
-  return platform.value === 'twitter'
+  return platform.value === "twitter"
     ? `https://twitter.com/${encodeURIComponent(user)}`
-    : `https://cafecito.app/${encodeURIComponent(user)}`
-})
+    : `https://cafecito.app/${encodeURIComponent(user)}`;
+});
 
 const iconClass = computed(() => {
-  if (platform.value === 'github')
-    return ''
-  return platform.value === 'twitter' ? 'i-mdi-twitter' : 'i-mdi-coffee'
-})
+  if (platform.value === "github") return "";
+  return platform.value === "twitter" ? "i-mdi-twitter" : "i-mdi-coffee";
+});
 
 const platformLabel = computed(() => {
-  if (platform.value === 'github')
-    return ''
-  return platform.value === 'twitter' ? 'Twitter' : 'Cafecito'
-})
+  if (platform.value === "github") return "";
+  return platform.value === "twitter" ? "Twitter" : "Cafecito";
+});
 </script>
 
 <template>
@@ -146,9 +135,16 @@ const platformLabel = computed(() => {
     class="sponsor-card-link block rounded-lg border border-[var(--vp-c-divider)] bg-[var(--vp-c-bg-soft)] p-4 transition-colors no-underline hover:border-indigo-500 dark:hover:border-indigo-400"
   >
     <div class="flex items-center gap-3">
-      <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+      <div
+        class="w-12 h-12 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center"
+      >
         <template v-if="platform === 'github'">
-          <img v-if="!loading && !error && data?.avatar_url" :src="data.avatar_url" :alt="data?.login || username" class="w-full h-full object-cover">
+          <img
+            v-if="!loading && !error && data?.avatar_url"
+            :src="data.avatar_url"
+            :alt="data?.login || username"
+            class="w-full h-full object-cover"
+          />
           <span v-else class="i-mdi-account text-gray-400 text-xl" />
         </template>
         <template v-else>
@@ -158,7 +154,9 @@ const platformLabel = computed(() => {
       <div class="min-w-0">
         <div class="sponsor-card-link__title truncate font-medium">
           <template v-if="platform === 'github'">
-            <span v-if="!loading && !error && (data?.name || data?.login)">{{ data?.name || data?.login }}</span>
+            <span v-if="!loading && !error && (data?.name || data?.login)">{{
+              data?.name || data?.login
+            }}</span>
             <span v-else-if="loading">Cargando…</span>
             <span v-else>{{ username }}</span>
           </template>
@@ -169,7 +167,9 @@ const platformLabel = computed(() => {
         </div>
         <div class="sponsor-card-link__meta truncate text-xs">
           <template v-if="platform === 'github'">
-            <span v-if="!loading && !error && data?.login">@{{ data.login }}</span>
+            <span v-if="!loading && !error && data?.login"
+              >@{{ data.login }}</span
+            >
             <span v-else-if="error">{{ error }}</span>
             <span v-else>&nbsp;</span>
           </template>

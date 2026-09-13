@@ -134,9 +134,7 @@ function renderCostCell(value: string | null, detail?: string) {
       },
       { default: () => displayValue },
     ),
-    detail || (raw !== displayValue)
-      ? renderDetailPopover(detail || raw)
-      : null,
+    detail || raw !== displayValue ? renderDetailPopover(detail || raw) : null,
   ]);
 }
 
@@ -574,111 +572,121 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
       }"
     >
       <template #header>
-      <div class="space-y-3">
-        <div
-          class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
-        >
-          <h2 class="text-lg font-semibold">Tabla comparativa</h2>
-          <p class="text-xs text-muted sm:text-right">
-            Fuente:
-            <a
-              href="https://www.dolarito.ar/remotito"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="font-medium text-primary-600 hover:underline dark:text-primary-400"
-            >
-              Dolarito
-            </a>
-            vía
-            <a
-              href="https://argentinadatos.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="font-medium text-primary-600 hover:underline dark:text-primary-400"
-            >
-              ArgentinaDatos
-            </a>
-          </p>
-        </div>
-        <div class="grid gap-4 xl:grid-cols-[minmax(0,320px)_1fr]">
-          <UFormField label="Buscar plataforma">
-            <UInput
-              v-model="searchQuery"
-              icon="i-lucide-search"
-              placeholder="ARQ, Wallbit, AstroPay..."
-            />
-          </UFormField>
+        <div class="space-y-3">
+          <div
+            class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
+          >
+            <h2 class="text-lg font-semibold">Tabla comparativa</h2>
+            <p class="text-xs text-muted sm:text-right">
+              Fuente:
+              <a
+                href="https://www.dolarito.ar/remotito"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-medium text-primary-600 hover:underline dark:text-primary-400"
+              >
+                Dolarito
+              </a>
+              vía
+              <a
+                href="https://argentinadatos.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-medium text-primary-600 hover:underline dark:text-primary-400"
+              >
+                ArgentinaDatos
+              </a>
+            </p>
+          </div>
+          <div class="grid gap-4 xl:grid-cols-[minmax(0,320px)_1fr]">
+            <UFormField label="Buscar plataforma">
+              <UInput
+                v-model="searchQuery"
+                icon="i-lucide-search"
+                placeholder="ARQ, Wallbit, AstroPay..."
+              />
+            </UFormField>
 
-          <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            <div class="space-y-2">
-              <p class="text-xs font-medium uppercase tracking-wide text-muted">
-                Cuenta propia
-              </p>
-              <div class="flex flex-wrap gap-2">
-                <UButton
-                  v-for="option in ['all', 'si', 'no']"
-                  :key="`propia-${option}`"
-                  size="sm"
-                  :color="cuentaPropiaFilter === option ? 'neutral' : 'neutral'"
-                  :variant="cuentaPropiaFilter === option ? 'soft' : 'outline'"
-                  @click="cuentaPropiaFilter = option"
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div class="space-y-2">
+                <p
+                  class="text-xs font-medium uppercase tracking-wide text-muted"
                 >
-                  {{
-                    option === "all" ? "Todas" : option === "si" ? "Sí" : "No"
-                  }}
-                </UButton>
+                  Cuenta propia
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <UButton
+                    v-for="option in ['all', 'si', 'no']"
+                    :key="`propia-${option}`"
+                    size="sm"
+                    :color="
+                      cuentaPropiaFilter === option ? 'neutral' : 'neutral'
+                    "
+                    :variant="
+                      cuentaPropiaFilter === option ? 'soft' : 'outline'
+                    "
+                    @click="cuentaPropiaFilter = option"
+                  >
+                    {{
+                      option === "all" ? "Todas" : option === "si" ? "Sí" : "No"
+                    }}
+                  </UButton>
+                </div>
               </div>
-            </div>
 
-            <div class="space-y-2">
-              <p class="text-xs font-medium uppercase tracking-wide text-muted">
-                Inversiones
-              </p>
-              <div class="flex flex-wrap gap-2">
-                <UButton
-                  v-for="option in ['all', 'si', 'no']"
-                  :key="`inv-${option}`"
-                  size="sm"
-                  color="neutral"
-                  :variant="inversionesFilter === option ? 'soft' : 'outline'"
-                  @click="inversionesFilter = option"
+              <div class="space-y-2">
+                <p
+                  class="text-xs font-medium uppercase tracking-wide text-muted"
                 >
-                  {{
-                    option === "all" ? "Todas" : option === "si" ? "Sí" : "No"
-                  }}
-                </UButton>
+                  Inversiones
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <UButton
+                    v-for="option in ['all', 'si', 'no']"
+                    :key="`inv-${option}`"
+                    size="sm"
+                    color="neutral"
+                    :variant="inversionesFilter === option ? 'soft' : 'outline'"
+                    @click="inversionesFilter = option"
+                  >
+                    {{
+                      option === "all" ? "Todas" : option === "si" ? "Sí" : "No"
+                    }}
+                  </UButton>
+                </div>
               </div>
-            </div>
 
-            <div class="space-y-2">
-              <p class="text-xs font-medium uppercase tracking-wide text-muted">
-                Tarjeta EEUU
-              </p>
-              <div class="flex flex-wrap gap-2">
-                <UButton
-                  v-for="option in ['all', 'si', 'no']"
-                  :key="`tarjeta-${option}`"
-                  size="sm"
-                  :color="tarjetaFilter === option ? 'neutral' : 'neutral'"
-                  :variant="tarjetaFilter === option ? 'soft' : 'outline'"
-                  @click="tarjetaFilter = option"
+              <div class="space-y-2">
+                <p
+                  class="text-xs font-medium uppercase tracking-wide text-muted"
                 >
-                  {{
-                    option === "all" ? "Todas" : option === "si" ? "Sí" : "No"
-                  }}
-                </UButton>
+                  Tarjeta EEUU
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <UButton
+                    v-for="option in ['all', 'si', 'no']"
+                    :key="`tarjeta-${option}`"
+                    size="sm"
+                    :color="tarjetaFilter === option ? 'neutral' : 'neutral'"
+                    :variant="tarjetaFilter === option ? 'soft' : 'outline'"
+                    @click="tarjetaFilter = option"
+                  >
+                    {{
+                      option === "all" ? "Todas" : option === "si" ? "Sí" : "No"
+                    }}
+                  </UButton>
+                </div>
               </div>
             </div>
           </div>
+          <p class="text-xs text-muted">
+            <strong>{{ RATE_DISPLAY.bid.label }}</strong> es el precio de venta
+            del dólar en vivo. Si hay aclaraciones, aparecen como
+            <strong>Detalle</strong> en la celda.
+          </p>
+          <RemesasSimulator />
         </div>
-        <p class="text-xs text-muted">
-          <strong>{{ RATE_DISPLAY.bid.label }}</strong> es el precio de venta
-          del dólar en vivo. Si hay aclaraciones, aparecen como
-          <strong>Detalle</strong> en la celda.
-        </p>
-        <RemesasSimulator />
-      </div>
-    </template>
+      </template>
 
       <UAlert
         v-if="filteredRows.length === 0"
@@ -690,210 +698,228 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
       />
 
       <div class="space-y-4 p-2 lg:hidden">
-      <div class="flex items-center gap-3">
-        <USelect
-          v-model="activeSortColumn"
-          :items="sortableColumns"
-          value-key="id"
-          label-key="label"
-          placeholder="Ordenar por"
-          aria-label="Ordenar por"
-          size="sm"
-          class="min-w-0 flex-1"
-        />
-        <UButton
-          size="sm"
-          color="neutral"
-          variant="outline"
-          :icon="
-            activeSortDesc
-              ? 'i-lucide-arrow-down-narrow-wide'
-              : 'i-lucide-arrow-up-narrow-wide'
-          "
-          :aria-label="
-            activeSortDesc
-              ? 'Orden descendente, cambiar a ascendente'
-              : 'Orden ascendente, cambiar a descendente'
-          "
-          @click="activeSortDesc = !activeSortDesc"
-        />
-      </div>
+        <div class="flex items-center gap-3">
+          <USelect
+            v-model="activeSortColumn"
+            :items="sortableColumns"
+            value-key="id"
+            label-key="label"
+            placeholder="Ordenar por"
+            aria-label="Ordenar por"
+            size="sm"
+            class="min-w-0 flex-1"
+          />
+          <UButton
+            size="sm"
+            color="neutral"
+            variant="outline"
+            :icon="
+              activeSortDesc
+                ? 'i-lucide-arrow-down-narrow-wide'
+                : 'i-lucide-arrow-up-narrow-wide'
+            "
+            :aria-label="
+              activeSortDesc
+                ? 'Orden descendente, cambiar a ascendente'
+                : 'Orden ascendente, cambiar a descendente'
+            "
+            @click="activeSortDesc = !activeSortDesc"
+          />
+        </div>
 
-      <div class="space-y-3">
-        <div
-          v-for="row in sortedFilteredRows"
-          :key="row.compania"
-          class="rounded-xl border border-default bg-default p-4"
-        >
-          <div class="mb-3 flex items-center gap-3">
-            <a
-              v-if="row.providerUrl"
-              :href="row.providerUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="group -m-1 flex min-w-0 flex-1 items-center gap-3 rounded-lg p-1 transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
-              @click="handleProviderClick(row)"
-            >
-              <img
-                v-if="row.logo"
-                :src="row.logo"
-                :alt="`${row.displayName} logo`"
-                class="size-10 rounded-full object-contain"
-                loading="lazy"
-              />
-              <div
-                v-else
-                class="flex size-10 items-center justify-center rounded-full bg-neutral-100 text-xs font-bold text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+        <div class="space-y-3">
+          <div
+            v-for="row in sortedFilteredRows"
+            :key="row.compania"
+            class="rounded-xl border border-default bg-default p-4"
+          >
+            <div class="mb-3 flex items-center gap-3">
+              <a
+                v-if="row.providerUrl"
+                :href="row.providerUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group -m-1 flex min-w-0 flex-1 items-center gap-3 rounded-lg p-1 transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+                @click="handleProviderClick(row)"
               >
-                {{ row.initials }}
-              </div>
-              <div class="min-w-0">
-                <p
-                  class="font-medium text-neutral-600 group-hover:underline dark:text-neutral-400"
+                <img
+                  v-if="row.logo"
+                  :src="row.logo"
+                  :alt="`${row.displayName} logo`"
+                  class="size-10 rounded-full object-contain"
+                  loading="lazy"
+                />
+                <div
+                  v-else
+                  class="flex size-10 items-center justify-center rounded-full bg-neutral-100 text-xs font-bold text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
                 >
-                  {{ row.displayName }}
-                </p>
+                  {{ row.initials }}
+                </div>
+                <div class="min-w-0">
+                  <p
+                    class="font-medium text-neutral-600 group-hover:underline dark:text-neutral-400"
+                  >
+                    {{ row.displayName }}
+                  </p>
+                </div>
+              </a>
+              <template v-else>
+                <img
+                  v-if="row.logo"
+                  :src="row.logo"
+                  :alt="`${row.displayName} logo`"
+                  class="size-10 rounded-full object-contain"
+                  loading="lazy"
+                />
+                <div
+                  v-else
+                  class="flex size-10 items-center justify-center rounded-full bg-neutral-100 text-xs font-bold text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+                >
+                  {{ row.initials }}
+                </div>
+                <div>
+                  <p class="font-medium">{{ row.displayName }}</p>
+                </div>
+              </template>
+              <div class="ml-auto shrink-0">
+                <UBadge color="neutral" variant="outline" size="sm">
+                  {{ row.averageRatingLabel }}
+                </UBadge>
               </div>
-            </a>
-            <template v-else>
-              <img
-                v-if="row.logo"
-                :src="row.logo"
-                :alt="`${row.displayName} logo`"
-                class="size-10 rounded-full object-contain"
-                loading="lazy"
-              />
-              <div
-                v-else
-                class="flex size-10 items-center justify-center rounded-full bg-neutral-100 text-xs font-bold text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
-              >
-                {{ row.initials }}
-              </div>
-              <div>
-                <p class="font-medium">{{ row.displayName }}</p>
-              </div>
-            </template>
-            <div class="ml-auto shrink-0">
-              <UBadge color="neutral" variant="outline" size="sm">
-                {{ row.averageRatingLabel }}
-              </UBadge>
             </div>
-          </div>
 
-          <div class="grid grid-cols-2 gap-2 text-sm">
-            <div class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5">
-              <span class="text-muted">Cuenta propia</span>
-              <span class="ml-auto" />
-              <UBadge
-                :color="row.cuentaPropia ? 'success' : 'error'"
-                variant="soft"
-                size="sm"
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div
+                class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
               >
-                {{ row.cuentaPropiaLabel }}
-              </UBadge>
-            </div>
-            <div class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5">
-              <span class="text-muted">Inversiones</span>
-              <span class="ml-auto" />
-              <UBadge
-                :color="row.inversiones ? 'success' : 'error'"
-                variant="soft"
-                size="sm"
+                <span class="text-muted">Cuenta propia</span>
+                <span class="ml-auto" />
+                <UBadge
+                  :color="row.cuentaPropia ? 'success' : 'error'"
+                  variant="soft"
+                  size="sm"
+                >
+                  {{ row.cuentaPropiaLabel }}
+                </UBadge>
+              </div>
+              <div
+                class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
               >
-                {{ row.inversionesLabel }}
-              </UBadge>
-            </div>
-            <div class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5">
-              <span class="text-muted">Tarjeta EEUU</span>
-              <span class="ml-auto" />
-              <UBadge
-                :color="row.tarjetaUsa ? 'success' : 'error'"
-                variant="soft"
-                size="sm"
+                <span class="text-muted">Inversiones</span>
+                <span class="ml-auto" />
+                <UBadge
+                  :color="row.inversiones ? 'success' : 'error'"
+                  variant="soft"
+                  size="sm"
+                >
+                  {{ row.inversionesLabel }}
+                </UBadge>
+              </div>
+              <div
+                class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
               >
-                {{ row.tarjetaUsaLabel }}
-              </UBadge>
-            </div>
-            <div class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5">
-              <span class="text-muted">Recibir pagos</span>
-              <span class="ml-auto" />
-              <UBadge
-                :color="row.zeroReceiveCost ? 'success' : 'error'"
-                variant="soft"
-                size="sm"
+                <span class="text-muted">Tarjeta EEUU</span>
+                <span class="ml-auto" />
+                <UBadge
+                  :color="row.tarjetaUsa ? 'success' : 'error'"
+                  variant="soft"
+                  size="sm"
+                >
+                  {{ row.tarjetaUsaLabel }}
+                </UBadge>
+              </div>
+              <div
+                class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
               >
-                {{ row.costoRecibirPagos ?? "N/A" }}
-              </UBadge>
-            </div>
-            <div class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5">
-              <span class="text-muted">Retiro ARS</span>
-              <span class="ml-auto" />
-              <UBadge
-                :color="row.zeroArsWithdrawal ? 'success' : 'error'"
-                variant="soft"
-                size="sm"
+                <span class="text-muted">Recibir pagos</span>
+                <span class="ml-auto" />
+                <UBadge
+                  :color="row.zeroReceiveCost ? 'success' : 'error'"
+                  variant="soft"
+                  size="sm"
+                >
+                  {{ row.costoRecibirPagos ?? "N/A" }}
+                </UBadge>
+              </div>
+              <div
+                class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
               >
-                {{ row.retiroArs ?? "N/A" }}
-              </UBadge>
-            </div>
-            <div class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5">
-              <span class="text-muted">{{ RATE_DISPLAY.bid.label }}</span>
-              <span class="ml-auto" />
-              <NuxtLink
-                v-if="row.vendesA != null && row.vendesAPath"
-                :to="row.vendesAPath"
-                class="font-mono text-xs font-semibold hover:underline"
-                :class="[
-                  RATE_DISPLAY.bid.textClass,
-                  RATE_DISPLAY.bid.darkTextClass,
-                ]"
+                <span class="text-muted">Retiro ARS</span>
+                <span class="ml-auto" />
+                <UBadge
+                  :color="row.zeroArsWithdrawal ? 'success' : 'error'"
+                  variant="soft"
+                  size="sm"
+                >
+                  {{ row.retiroArs ?? "N/A" }}
+                </UBadge>
+              </div>
+              <div
+                class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
               >
-                {{ row.vendesALabel }}
-              </NuxtLink>
-              <span
-                v-else
-                class="text-xs"
-                :class="
-                  row.vendesA == null
-                    ? 'text-muted'
-                    : [
-                        RATE_DISPLAY.bid.textClass,
-                        RATE_DISPLAY.bid.darkTextClass,
-                      ]
-                "
+                <span class="text-muted">{{ RATE_DISPLAY.bid.label }}</span>
+                <span class="ml-auto" />
+                <NuxtLink
+                  v-if="row.vendesA != null && row.vendesAPath"
+                  :to="row.vendesAPath"
+                  class="font-mono text-xs font-semibold hover:underline"
+                  :class="[
+                    RATE_DISPLAY.bid.textClass,
+                    RATE_DISPLAY.bid.darkTextClass,
+                  ]"
+                >
+                  {{ row.vendesALabel }}
+                </NuxtLink>
+                <span
+                  v-else
+                  class="text-xs"
+                  :class="
+                    row.vendesA == null
+                      ? 'text-muted'
+                      : [
+                          RATE_DISPLAY.bid.textClass,
+                          RATE_DISPLAY.bid.darkTextClass,
+                        ]
+                  "
+                >
+                  {{ row.vendesALabel }}
+                </span>
+              </div>
+              <div
+                v-if="isSimulating"
+                class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
               >
-                {{ row.vendesALabel }}
-              </span>
-            </div>
-            <div
-              v-if="isSimulating"
-              class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
-            >
-              <span class="text-muted">Te quedan</span>
-              <span class="ml-auto" />
-              <span
-                class="font-mono text-xs font-semibold tabular-nums text-green-800 dark:text-green-300"
+                <span class="text-muted">Te quedan</span>
+                <span class="ml-auto" />
+                <span
+                  class="font-mono text-xs font-semibold tabular-nums text-green-800 dark:text-green-300"
+                >
+                  {{
+                    row.arsFinal != null ? formatArsAmount(row.arsFinal) : "—"
+                  }}
+                </span>
+              </div>
+              <div
+                class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
               >
-                {{ row.arsFinal != null ? formatArsAmount(row.arsFinal) : "—" }}
-              </span>
-            </div>
-            <div class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5">
-              <span class="text-muted">Mant. tarjeta</span>
-              <span class="ml-auto" />
-              <UBadge color="neutral" variant="soft" size="sm">
-                {{ row.costoMantenimientoTarjeta ?? "N/A" }}
-              </UBadge>
-            </div>
-            <div class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5">
-              <span class="text-muted">Uso tarjeta</span>
-              <span class="ml-auto" />
-              <UBadge color="neutral" variant="soft" size="sm">
-                {{ row.costoTarjeta ?? "N/A" }}
-              </UBadge>
+                <span class="text-muted">Mant. tarjeta</span>
+                <span class="ml-auto" />
+                <UBadge color="neutral" variant="soft" size="sm">
+                  {{ row.costoMantenimientoTarjeta ?? "N/A" }}
+                </UBadge>
+              </div>
+              <div
+                class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
+              >
+                <span class="text-muted">Uso tarjeta</span>
+                <span class="ml-auto" />
+                <UBadge color="neutral" variant="soft" size="sm">
+                  {{ row.costoTarjeta ?? "N/A" }}
+                </UBadge>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
         <div
           v-if="sortedFilteredRows.length === 0"

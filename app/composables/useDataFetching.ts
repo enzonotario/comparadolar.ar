@@ -1,6 +1,9 @@
 import { isBlacklistedProvider } from "~/lib/currencies-config";
 import { getProviderUsdType, isUsdCclProvider } from "~/lib/market-constants";
-import { applyProviderDisplayName, getProviderLogoUrl } from "~/lib/provider-display";
+import {
+  applyProviderDisplayName,
+  getProviderLogoUrl,
+} from "~/lib/provider-display";
 
 export function useDataFetching<T>(url: string) {
   const lastUpdateIso = useState<string>(`lastUpdate:${url}`, () =>

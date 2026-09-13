@@ -1,5 +1,10 @@
 import marketConstants from "../../public/market-constants.json";
-import type { CurrencyType, CryptoType, UsdFilterCategory, UsdProviderType } from "./types";
+import type {
+  CurrencyType,
+  CryptoType,
+  UsdFilterCategory,
+  UsdProviderType,
+} from "./types";
 
 export type ApiCurrencyType = Exclude<CurrencyType, "usd-ccl">;
 

@@ -10,7 +10,7 @@ export function useChartState() {
   const getProvidersStorageKey = (currency: CurrencyType) =>
     `chart-providers-${currency}`;
 
-  const storage = process.client ? localStorage : null;
+  const storage = import.meta.client ? localStorage : null;
 
   const loadSavedState = (currency: CurrencyType) => {
     const savedRange = storage?.getItem(getRangeStorageKey(currency)) ?? null;

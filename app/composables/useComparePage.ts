@@ -18,12 +18,14 @@ import {
 } from "~/utils/og-data";
 import { defineOgImageWithContext } from "~/utils/reactive-og-image";
 
-type CompareOgRates = ExchangeRate[] | Array<{
-  slug: string;
-  prettyName?: string;
-  totalAsk: number;
-  totalBid: number;
-}>;
+type CompareOgRates =
+  | ExchangeRate[]
+  | Array<{
+      slug: string;
+      prettyName?: string;
+      totalAsk: number;
+      totalBid: number;
+    }>;
 
 interface ComparePageSeoOptions {
   currency: CurrencyType;

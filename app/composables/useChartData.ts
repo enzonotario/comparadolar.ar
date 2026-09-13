@@ -109,8 +109,8 @@ export function useChartData(
     let filtered = filterProvidersCatalogForCurrency(data, currencyValue.value);
 
     if (currencyValue.value === "usd") {
-      filtered = filtered.filter((provider) =>
-        enabledTypes.value[getUsdFilterCategory(provider)],
+      filtered = filtered.filter(
+        (provider) => enabledTypes.value[getUsdFilterCategory(provider)],
       );
     }
 

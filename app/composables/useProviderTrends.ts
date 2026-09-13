@@ -37,10 +37,7 @@ export function useProviderTrends(currency: MaybeRefOrGetter<string>) {
 
   const providers = computed(() => data.value?.providers ?? {});
 
-  function getSeries(
-    slug: string,
-    side: "buy" | "sell",
-  ): number[] {
+  function getSeries(slug: string, side: "buy" | "sell"): number[] {
     const series = providers.value[slug] as TrendSeries | undefined;
     if (!series) return [];
     return side === "buy" ? series.ask : series.bid;

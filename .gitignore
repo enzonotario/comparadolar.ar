@@ -8,6 +8,8 @@ dist
 
 # VitePress API docs
 public/docs
+docs/.vitepress/cache
+docs/.vitepress/dist
 
 # Node dependencies
 node_modules

@@ -54,9 +54,7 @@ const colorMode = computed(() => useColorMode().value);
         <ProviderSelector
           :providers="providerOptions"
           :selected-providers="selectedProviders"
-          @update:selected-providers="
-            $emit('update:selectedProviders', $event)
-          "
+          @update:selected-providers="$emit('update:selectedProviders', $event)"
         />
       </div>
     </template>

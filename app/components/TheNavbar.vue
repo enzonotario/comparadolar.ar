@@ -22,7 +22,8 @@ function toggleProviderSearch() {
       :ui="{
         container: 'max-w-7xl mx-auto',
         center: 'hidden md:flex h-full min-w-0 max-w-full justify-center',
-        right: 'flex h-full shrink-0 items-center justify-end gap-1.5 lg:flex-1',
+        right:
+          'flex h-full shrink-0 items-center justify-end gap-1.5 lg:flex-1',
         left: 'flex h-full shrink-0 items-center gap-1.5 lg:flex-1',
         root: 'fixed inset-x-0 top-0 z-50 h-(--ui-header-height) border-b border-default bg-default/75 backdrop-blur',
         // Menú modal (portal): sin z-index, sticky/overlays de página (p.ej. z-20) quedan encima.

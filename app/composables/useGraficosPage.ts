@@ -77,9 +77,7 @@ export async function useGraficosPage() {
   const { data: ogBundle } = await useAsyncData(
     () => `og-graficos-${currency.value}`,
     async () => {
-      const rates = await $fetch<any[]>(
-        `${API_BASE_URL}/${apiCurrency.value}`,
-      );
+      const rates = await $fetch<any[]>(`${API_BASE_URL}/${apiCurrency.value}`);
       const top3 = getGraficosTop3Slugs({
         currency: currency.value,
         isCrypto: isCrypto.value,
@@ -90,9 +88,7 @@ export async function useGraficosPage() {
         top3.map(async ({ slug, name }) => {
           const data = await $fetch<
             Array<{ bid: number; ask: number; timestamp: string }>
-          >(
-            `${API_BASE_URL}/${apiCurrency.value}/providers/${slug}/history`,
-          );
+          >(`${API_BASE_URL}/${apiCurrency.value}/providers/${slug}/history`);
           return { name, data };
         }),
       );

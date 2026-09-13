@@ -1,25 +1,27 @@
 <script setup>
-import { ref } from 'vue'
-import { data } from '../../../data/latestCafecitos.data'
-import SponsorCard from './SponsorCard.vue'
+import { ref } from "vue";
+import { data } from "../../../data/latestCafecitos.data";
+import SponsorCard from "./SponsorCard.vue";
 
 const githubSponsors = ref([
-  'https://github.com/catdevnull',
-  'https://github.com/Xyborg',
-])
+  "https://github.com/catdevnull",
+  "https://github.com/Xyborg",
+]);
 </script>
 
 <template>
   <div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <SponsorCard v-for="(profile, idx) in githubSponsors" :key="idx" :profile="profile" />
+      <SponsorCard
+        v-for="(profile, idx) in githubSponsors"
+        :key="idx"
+        :profile="profile"
+      />
     </div>
 
     <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div class="flex flex-col gap-2">
-        <h3 class="text-[var(--vp-c-text-1)]">
-          Top Cafecitos
-        </h3>
+        <h3 class="text-[var(--vp-c-text-1)]">Top Cafecitos</h3>
         <div class="flex flex-col gap-2">
           <a
             v-for="(donation, idx) in data.topDonations"
@@ -35,9 +37,7 @@ const githubSponsors = ref([
       </div>
 
       <div class="flex flex-col gap-2">
-        <h3 class="text-[var(--vp-c-text-1)]">
-          Últimos Cafecitos
-        </h3>
+        <h3 class="text-[var(--vp-c-text-1)]">Últimos Cafecitos</h3>
         <div class="flex flex-col gap-2">
           <a
             v-for="(donation, idx) in data.latestCoffees"

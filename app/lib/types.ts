@@ -90,7 +90,6 @@ export function getTrendsEndpoint(currency: string): string {
   return `${API_BASE_URL}/${key}/trends`;
 }
 
-
 export const ASSET_CONFIG = {
   defaultOgImage: "https://i.imgur.com/MSynIzj.png",
   ogImageWidth: 1200,

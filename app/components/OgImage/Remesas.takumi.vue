@@ -39,7 +39,8 @@ defineProps<{
         width: '550px',
         height: '550px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)',
+        background:
+          'radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)',
         pointerEvents: 'none',
       }"
     />
@@ -148,8 +149,16 @@ defineProps<{
             padding: '18px 20px',
           }"
         >
-          <div :style="{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }">
-            <div :style="{ display: 'flex', alignItems: 'center', gap: '10px' }">
+          <div
+            :style="{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+            }"
+          >
+            <div
+              :style="{ display: 'flex', alignItems: 'center', gap: '10px' }"
+            >
               <div
                 :style="{
                   width: '34px',
@@ -171,10 +180,22 @@ defineProps<{
               </div>
 
               <div>
-                <div :style="{ fontSize: '28px', fontWeight: '900', color: '#020617' }">
+                <div
+                  :style="{
+                    fontSize: '28px',
+                    fontWeight: '900',
+                    color: '#020617',
+                  }"
+                >
                   {{ item.name }}
                 </div>
-                <div :style="{ marginTop: '2px', fontSize: '14px', color: '#64748b' }">
+                <div
+                  :style="{
+                    marginTop: '2px',
+                    fontSize: '14px',
+                    color: '#64748b',
+                  }"
+                >
                   {{ item.currency }}
                 </div>
               </div>
@@ -189,11 +210,23 @@ defineProps<{
                   color: '#dc2626',
                 }"
               >
-                <div :style="{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase' }">
+                <div
+                  :style="{
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    textTransform: 'uppercase',
+                  }"
+                >
                   Precio de venta
                 </div>
-                <div :style="{ marginTop: '6px', fontSize: '22px', fontWeight: '900' }">
-                  {{ item.vendesA || '—' }}
+                <div
+                  :style="{
+                    marginTop: '6px',
+                    fontSize: '22px',
+                    fontWeight: '900',
+                  }"
+                >
+                  {{ item.vendesA || "—" }}
                 </div>
               </div>
 
@@ -215,10 +248,22 @@ defineProps<{
                       : '#dc2626',
                 }"
               >
-                <div :style="{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase' }">
+                <div
+                  :style="{
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    textTransform: 'uppercase',
+                  }"
+                >
                   Retiro ARS
                 </div>
-                <div :style="{ marginTop: '6px', fontSize: '22px', fontWeight: '900' }">
+                <div
+                  :style="{
+                    marginTop: '6px',
+                    fontSize: '22px',
+                    fontWeight: '900',
+                  }"
+                >
                   {{ item.arsWithdrawal }}
                 </div>
               </div>
@@ -260,7 +305,12 @@ defineProps<{
               {{ item.rating }}
             </div>
             <div
-              :style="{ marginTop: '8px', fontSize: '14px', color: '#64748b', fontWeight: '700' }"
+              :style="{
+                marginTop: '8px',
+                fontSize: '14px',
+                color: '#64748b',
+                fontWeight: '700',
+              }"
             >
               sobre 5,00
             </div>

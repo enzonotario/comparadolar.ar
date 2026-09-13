@@ -44,7 +44,9 @@ const showUsdFilters = computed(
     <div
       v-for="currency in currencies"
       :key="currency.value"
-      :class="currency.value === 'usd' ? 'relative overflow-visible' : undefined"
+      :class="
+        currency.value === 'usd' ? 'relative overflow-visible' : undefined
+      "
     >
       <UButton
         :variant="isActive(currency.value) ? 'solid' : 'outline'"

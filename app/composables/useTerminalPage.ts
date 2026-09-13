@@ -33,7 +33,9 @@ export function buildTerminalOgImage(options: {
   };
 }
 
-export async function useTerminalPage(notFoundMessage = "Moneda no encontrada") {
+export async function useTerminalPage(
+  notFoundMessage = "Moneda no encontrada",
+) {
   const nuxtApp = useNuxtApp();
 
   definePageMeta({
@@ -58,9 +60,7 @@ export async function useTerminalPage(notFoundMessage = "Moneda no encontrada") 
   const providerCount = computed(
     () => terminalTableRef.value?.filteredRates?.length || 0,
   );
-  const isLoading = computed(
-    () => terminalTableRef.value?.isLoading ?? true,
-  );
+  const isLoading = computed(() => terminalTableRef.value?.isLoading ?? true);
 
   const { data: ogData } = await useAsyncData(
     () => `og-terminal-${currency.value}`,
