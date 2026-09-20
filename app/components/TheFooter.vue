@@ -1,46 +1,81 @@
 <script setup lang="ts">
-const friendlyPages = [
+import type { FooterColumn } from "@nuxt/ui";
+import { getFaviconUrl } from "@/lib/favicon-config";
+import { SITE_CONFIG } from "@/lib/types";
+
+const year = new Date().getFullYear();
+
+const { isInstalled, updateAvailable } = usePwaInstall();
+
+/** Promo PWA solo si aporta: instalar/guía, o hay actualización. */
+const showPwaPromo = computed(
+  () => updateAvailable.value || !isInstalled.value,
+);
+
+const columns: FooterColumn[] = [
   {
-    label: "comparatasas.ar",
-    to: "https://comparatasas.ar",
+    label: "Herramientas",
+    children: [
+      { label: "Comparar", to: "/" },
+      { label: "Terminal", to: "/terminal" },
+      { label: "Gráficos", to: "/graficos" },
+      { label: "Remesas", to: "/remesas" },
+    ],
   },
   {
-    label: "comparapix.ar",
-    to: "https://comparapix.ar",
-  },
-  {
-    label: "comparatiendas.com.ar",
-    to: "https://www.comparatiendas.com.ar/",
-  },
-  {
-    label: "icons.com.ar",
-    to: "https://icons.com.ar",
-  },
-  {
-    label: "dolarya.info",
-    to: "https://dub.link/asxwg8M",
-  },
-  {
-    label: "argentinadatos.com",
-    to: "https://dub.link/l58DNjJ",
-  },
-  {
-    label: "dolarito.ar",
-    to: "https://dub.link/cCOI35S",
-  },
-  {
-    label: "impuestito.org",
-    to: "https://dub.link/dh8pB0R",
-  },
-  {
-    label: "enqueinvierto.ar",
-    to: "https://enqueinvierto.ar",
-  },
-  {
-    label: "betece.app",
-    to: "https://betece.app",
+    label: "Proyecto",
+    children: [
+      { label: "Sumarse", to: "/sumarse" },
+      {
+        label: "API Docs",
+        to: "https://comparadolar.ar/docs/",
+        target: "_blank",
+      },
+      {
+        label: "Código en GitHub",
+        to: "https://github.com/enzonotario/comparadolar.ar",
+        target: "_blank",
+      },
+      {
+        label: "Apoyar el proyecto",
+        to: "https://cafecito.app/enzonotario",
+        target: "_blank",
+      },
+    ],
   },
 ];
+
+/** Enlaces de comunidad: nofollow para no parecer link farm. */
+const friendlyPages = [
+  { label: "comparatasas.ar", to: "https://comparatasas.ar" },
+  { label: "comparapix.ar", to: "https://comparapix.ar" },
+  { label: "comparatiendas.com.ar", to: "https://www.comparatiendas.com.ar/" },
+  { label: "icons.com.ar", to: "https://icons.com.ar" },
+  { label: "dolarya.info", to: "https://dub.link/asxwg8M" },
+  { label: "argentinadatos.com", to: "https://dub.link/l58DNjJ" },
+  { label: "dolarito.ar", to: "https://dub.link/cCOI35S" },
+  { label: "impuestito.org", to: "https://dub.link/dh8pB0R" },
+  { label: "enqueinvierto.ar", to: "https://enqueinvierto.ar" },
+  { label: "betece.app", to: "https://betece.app" },
+] as const;
+
+const socialLinks = [
+  {
+    label: "GitHub",
+    to: "https://github.com/enzonotario/comparadolar.ar",
+    icon: "i-lucide-github",
+  },
+  {
+    label: "X (Twitter)",
+    to: "https://twitter.com/enzonotario_",
+    icon: "i-lucide-x",
+  },
+  {
+    label: "Cafecito",
+    to: "https://cafecito.app/enzonotario",
+    icon: "i-lucide-coffee",
+  },
+] as const;
 </script>
 
 <template>
@@ -49,130 +84,123 @@ const friendlyPages = [
 
     <UFooter
       :ui="{
-        top: '!py-6',
-        container: '!p-0',
+        top: 'py-6 lg:py-8',
+        bottom: 'border-t border-default py-3 lg:py-4',
+        container: 'max-w-7xl mx-auto',
       }"
     >
       <template #top>
-        <UContainer class="w-full max-w-3xl mx-auto space-y-12 !py-0">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8">
-            <div class="flex flex-col items-start gap-2">
-              <h2 class="text-xl font-bold">Apoyá el proyecto</h2>
-              <p class="text-sm text-muted">
-                Ayudame a mantener y mejorar este proyecto con una donación.
-              </p>
-              <div class="flex flex-wrap gap-2">
-                <UButton
-                  to="https://cafecito.app/enzonotario"
-                  external
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  color="neutral"
-                  variant="outline"
-                  size="lg"
-                >
-                  <UIcon name="i-heroicons-heart" />
-                  Invitame un café
-                </UButton>
-              </div>
-            </div>
-
-            <div class="space-y-4">
-              <h2 class="text-xl font-bold">Mapa del Sitio</h2>
-              <div class="flex flex-col gap-2">
+        <UContainer class="max-w-7xl mx-auto">
+          <UFooterColumns
+            :columns="columns"
+            :ui="{
+              root: 'xl:grid-cols-3 xl:gap-10',
+              left: 'mb-8 xl:mb-0',
+              center: 'grid grid-cols-2 gap-6 sm:gap-8 xl:col-span-2',
+              label: 'text-sm font-semibold text-highlighted',
+              list: 'mt-3 space-y-2',
+              link: 'text-sm text-muted hover:text-default',
+            }"
+          >
+            <template #left>
+              <div class="space-y-4 max-w-sm">
                 <NuxtLink
                   to="/"
-                  class="text-sm text-zinc-600 dark:text-white/60 hover:underline"
+                  class="inline-flex items-center gap-2 group"
+                  :aria-label="SITE_CONFIG.name"
                 >
-                  Inicio
+                  <img
+                    :src="getFaviconUrl()"
+                    alt=""
+                    width="32"
+                    height="32"
+                    class="size-8 rounded-full"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span
+                    class="text-lg font-bold text-highlighted group-hover:text-primary transition-colors"
+                  >
+                    {{ SITE_CONFIG.domain }}
+                  </span>
                 </NuxtLink>
-                <NuxtLink
-                  to="/graficos"
-                  class="text-sm text-zinc-600 dark:text-white/60 hover:underline"
-                >
-                  Gráficos
-                </NuxtLink>
-                <NuxtLink
-                  to="/terminal"
-                  class="text-sm text-zinc-600 dark:text-white/60 hover:underline"
-                >
-                  Terminal
-                </NuxtLink>
-                <NuxtLink
-                  to="/remesas"
-                  class="text-sm text-zinc-600 dark:text-white/60 hover:underline"
-                >
-                  Remesas
-                </NuxtLink>
-                <NuxtLink
-                  to="/sumarse"
-                  class="text-sm text-zinc-600 dark:text-white/60 hover:underline"
-                >
-                  Sumarse
-                </NuxtLink>
+
+                <p class="text-sm text-muted leading-relaxed">
+                  Compará cotizaciones de dólar y otras monedas en Argentina,
+                  en tiempo real y sin registro.
+                </p>
+
+                <div class="flex flex-col items-start gap-2">
+                  <UButton
+                    to="https://cafecito.app/enzonotario"
+                    external
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="neutral"
+                    variant="soft"
+                    size="sm"
+                    icon="i-lucide-heart"
+                  >
+                    Invitame un café
+                  </UButton>
+
+                  <ClientOnly>
+                    <PwaFooterButton v-if="showPwaPromo" size="sm" />
+                  </ClientOnly>
+                </div>
               </div>
-            </div>
-          </div>
+            </template>
+          </UFooterColumns>
 
-          <div
-            class="flex flex-col items-start gap-2 rounded-xl border border-zinc-200/80 p-4 dark:border-zinc-800"
+          <nav
+            class="mt-6 pt-5 border-t border-default"
+            aria-label="Páginas amigas"
           >
-            <h2 class="text-xl font-bold">Instalá ComparaDólar</h2>
-            <p class="text-sm text-muted">
-              Usá la app como PWA para acceder más rápido y recibir alertas del
-              Top 3 configuradas.
-            </p>
-            <PwaFooterButton />
-          </div>
-
-          <div class="flex flex-col items-start gap-2">
-            <h2 class="text-xl font-bold">Open Source</h2>
-            <p class="text-sm text-muted">
-              Este proyecto es de código abierto. La API pública también está
-              documentada para integraciones.
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <UButton
-                href="https://github.com/enzonotario/comparadolar.ar"
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="outline"
-                color="neutral"
-                class="space-x-2"
-              >
-                <UIcon name="i-lucide-github" class="size-4" />
-                GitHub
-              </UButton>
-              <UButton
-                href="https://comparadolar.ar/docs/"
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="outline"
-                color="neutral"
-                class="space-x-2"
-              >
-                <UIcon name="i-heroicons-document-text" class="size-4" />
-                API Docs
-              </UButton>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <h2 class="text-xl font-bold">Páginas amigas</h2>
-            <div class="flex flex-wrap gap-4">
-              <a
-                v-for="page in friendlyPages"
-                :key="page.label"
-                :href="page.to"
-                class="block text-sm text-zinc-600 dark:text-white/60 hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {{ page.label }}
-              </a>
-            </div>
-          </div>
+            <p class="text-xs font-medium text-muted mb-2">Páginas amigas</p>
+            <ul class="flex flex-wrap gap-x-3 gap-y-1">
+              <li v-for="page in friendlyPages" :key="page.label">
+                <a
+                  :href="page.to"
+                  class="inline-block py-1 text-xs text-muted hover:text-default hover:underline underline-offset-2"
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                >
+                  {{ page.label }}
+                </a>
+              </li>
+            </ul>
+          </nav>
         </UContainer>
+      </template>
+
+      <template #left>
+        <p class="text-xs text-muted text-center lg:text-left">
+          © {{ year }} {{ SITE_CONFIG.name }}
+        </p>
+      </template>
+
+      <p
+        class="text-xs text-muted/80 text-center max-w-md leading-snug order-last lg:order-none mt-2 lg:mt-0"
+      >
+        Datos referenciales con fines informativos. No constituye
+        asesoramiento financiero.
+      </p>
+
+      <template #right>
+        <div class="flex items-center justify-center lg:justify-end gap-0.5">
+          <UButton
+            v-for="link in socialLinks"
+            :key="link.label"
+            :to="link.to"
+            :icon="link.icon"
+            :aria-label="link.label"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="neutral"
+            variant="ghost"
+            size="sm"
+          />
+        </div>
       </template>
     </UFooter>
   </div>

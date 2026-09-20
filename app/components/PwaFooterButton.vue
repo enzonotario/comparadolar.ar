@@ -1,4 +1,11 @@
 <script setup lang="ts">
+const { size } = withDefaults(
+  defineProps<{
+    size?: "xs" | "sm" | "md" | "lg" | "xl";
+  }>(),
+  { size: "md" },
+);
+
 const {
   canInstall,
   isInstalled,
@@ -67,6 +74,7 @@ const handleClick = async () => {
       color="neutral"
       variant="outline"
       class="space-x-2"
+      :size="size"
       :icon="buttonIcon"
       @click.stop.prevent="handleClick"
     >
