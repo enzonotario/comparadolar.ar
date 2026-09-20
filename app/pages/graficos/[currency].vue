@@ -48,6 +48,8 @@ const {
       hydrate-on-visible
     />
 
+    <WeeklyTopBumpChart :currency="currency" />
+
     <PageFooter />
   </div>
 </template>

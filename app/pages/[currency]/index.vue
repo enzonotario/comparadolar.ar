@@ -10,6 +10,8 @@ const { currency } = await useCompareCryptoPage();
 
     <CryptoRates :currency="currency" />
 
+    <WeeklyTopBumpChart :currency="currency" />
+
     <PageFooter remesas-top legal-disclaimer="eager" />
   </div>
 </template>

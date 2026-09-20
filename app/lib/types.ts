@@ -90,6 +90,27 @@ export function getTrendsEndpoint(currency: string): string {
   return `${API_BASE_URL}/${key}/trends`;
 }
 
+export type WeeklyRankingSeriesItem = {
+  slug: string;
+  name: string;
+  ranks: Array<number | null>;
+  prices: Array<number | null>;
+};
+
+export type WeeklyRankingsPayload = {
+  range: "7d";
+  bucket: "1d";
+  topN: number;
+  labels: string[];
+  buy: { series: WeeklyRankingSeriesItem[] };
+  sell: { series: WeeklyRankingSeriesItem[] };
+};
+
+export function getWeeklyRankingsEndpoint(currency: string): string {
+  const key = currency === "usd-ccl" ? "usd" : currency;
+  return `${API_BASE_URL}/${key}/rankings/weekly`;
+}
+
 export const ASSET_CONFIG = {
   defaultOgImage: "https://i.imgur.com/MSynIzj.png",
   ogImageWidth: 1200,

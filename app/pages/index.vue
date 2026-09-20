@@ -18,6 +18,8 @@ const { currency } = await useCompareFiatPage({
 
     <LazyExchangeBandsChart :currency="currency" hydrate-on-visible />
 
+    <WeeklyTopBumpChart :currency="currency" />
+
     <RemesasTop3 />
 
     <Only24x7Switch />
