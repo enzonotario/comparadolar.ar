@@ -11,11 +11,6 @@ interface Banner {
   linkUrl?: string;
 }
 
-interface PlaylistEntry {
-  bannerId: number;
-  duration: number;
-}
-
 interface Props {
   bannerId?: number;
 }
@@ -25,74 +20,29 @@ const { trackSponsorClick } = useAnalytics();
 
 const BASE_URL = "https://api.argentinadatos.com/static/assets/arq/";
 
-const LINK_URL = "https://www.arqfinance.com/?ref=comparadolar.ar";
+const LINK_URL =
+  "https://www.arqfinance.com/referrals/arr?referralCode=enzonotario_sJx&pid=referral&c=arr&is_retargeting=true";
 
-const defaultBanners: Banner[] = [
-  {
-    id: 10,
-    desktopUrl: `${BASE_URL}Desktop_banner_10.png`,
-    mobileUrl: `${BASE_URL}Mobile_banner_10.png`,
-    altText: "Banner 10",
-    linkUrl: LINK_URL,
-  },
-  {
-    id: 20,
-    desktopUrl: `${BASE_URL}Desktop_banner_20.png`,
-    mobileUrl: `${BASE_URL}Mobile_banner_20.png`,
-    altText: "Banner 20",
-    linkUrl: LINK_URL,
-  },
-  {
-    id: 30,
-    desktopUrl: `${BASE_URL}Desktop_banner_30.png`,
-    mobileUrl: `${BASE_URL}Mobile_banner_30.png`,
-    altText: "Banner 30",
-    linkUrl: LINK_URL,
-  },
-  {
-    id: 40,
-    desktopUrl: `${BASE_URL}Desktop_banner_40.png`,
-    mobileUrl: `${BASE_URL}Mobile_banner_40.png`,
-    altText: "Banner 40",
-    linkUrl: LINK_URL,
-  },
-];
-
-const playlist: PlaylistEntry[] = [
-  { bannerId: 10, duration: 5000 },
-  { bannerId: 20, duration: 5000 },
-  { bannerId: 30, duration: 5000 },
-  { bannerId: 40, duration: 3000 },
-];
+const banner: Banner = {
+  id: 1,
+  desktopUrl: `${BASE_URL}comparadolar-desktop.gif`,
+  mobileUrl: `${BASE_URL}comparadolar-mobile.gif`,
+  altText: "ARQ — Datos de cuenta en Estados Unidos",
+  linkUrl: LINK_URL,
+};
 
 const imageError = ref(false);
-const currentPlaylistIndex = ref(0);
 const prefersDark = ref(false);
-let timeoutId: ReturnType<typeof setTimeout> | undefined;
 let darkModeQuery: MediaQueryList | undefined;
 
 const handleDarkModeChange = (e: MediaQueryListEvent) => {
   prefersDark.value = e.matches;
 };
 
-const scheduleNext = () => {
-  const entry = playlist[currentPlaylistIndex.value];
-  timeoutId = setTimeout(() => {
-    currentPlaylistIndex.value =
-      (currentPlaylistIndex.value + 1) % playlist.length;
-    scheduleNext();
-  }, entry.duration);
-};
-
 const currentBanner = computed(() => {
   if (imageError.value) return null;
-
-  if (props.bannerId !== undefined) {
-    return defaultBanners.find((b) => b.id === props.bannerId) || null;
-  }
-
-  const entry = playlist[currentPlaylistIndex.value];
-  return defaultBanners.find((b) => b.id === entry.bannerId) || null;
+  if (props.bannerId !== undefined && props.bannerId !== banner.id) return null;
+  return banner;
 });
 
 const mobileSrc = computed(() => {
@@ -113,17 +63,10 @@ onMounted(() => {
   darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
   prefersDark.value = darkModeQuery.matches;
   darkModeQuery.addEventListener("change", handleDarkModeChange);
-
-  if (props.bannerId === undefined) {
-    scheduleNext();
-  }
 });
 
 onUnmounted(() => {
   darkModeQuery?.removeEventListener("change", handleDarkModeChange);
-  if (timeoutId) {
-    clearTimeout(timeoutId);
-  }
 });
 
 const handleImageError = () => {
@@ -160,8 +103,8 @@ const handleSponsorClick = () => {
         <img
           :src="desktopSrc"
           :alt="currentBanner.altText"
-          width="1280"
-          height="480"
+          width="960"
+          height="120"
           class="w-full h-auto object-cover duration-300"
           loading="lazy"
           decoding="async"
@@ -174,8 +117,8 @@ const handleSponsorClick = () => {
       <img
         :src="desktopSrc"
         :alt="currentBanner.altText"
-        width="1280"
-        height="480"
+        width="960"
+        height="120"
         class="w-full h-auto object-cover duration-300"
         loading="lazy"
         decoding="async"
