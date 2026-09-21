@@ -27,7 +27,7 @@ const accentMuted = hexToRgba(accent, 0.45);
       width: '1200px',
       height: '630px',
       backgroundColor: '#0e1117',
-      fontFamily: "Courier New, Courier, monospace",
+      fontFamily: 'Courier New, Courier, monospace',
       color: '#c9d1d9',
       boxSizing: 'border-box',
       position: 'relative',
