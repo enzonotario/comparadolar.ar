@@ -28,3 +28,5 @@ preview-og/
 .env
 .env.*
 !.env.example
+
+.ai
