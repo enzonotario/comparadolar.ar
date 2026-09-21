@@ -30,7 +30,7 @@ const accentBarEnd = hexToRgba(accent, 0.4);
       width: '1200px',
       height: '630px',
       backgroundColor: '#f8fafc',
-      fontFamily: '\'Inter\', system-ui, sans-serif',
+      fontFamily: "Inter, system-ui, sans-serif",
       fontFeatureSettings: '\'liga\' 0, \'clig\' 0',
       color: '#0f172a',
       boxSizing: 'border-box',

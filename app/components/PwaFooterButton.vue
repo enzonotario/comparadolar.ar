@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { size } = withDefaults(
+const props = withDefaults(
   defineProps<{
     size?: "xs" | "sm" | "md" | "lg" | "xl";
   }>(),
@@ -74,7 +74,7 @@ const handleClick = async () => {
       color="neutral"
       variant="outline"
       class="space-x-2"
-      :size="size"
+      :size="props.size"
       :icon="buttonIcon"
       @click.stop.prevent="handleClick"
     >

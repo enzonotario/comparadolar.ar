@@ -25,7 +25,7 @@ const accentSoft = hexToRgba(accent, 0.18);
       width: '1200px',
       height: '630px',
       backgroundColor: '#f8fafc',
-      fontFamily: '\'Inter\', system-ui, sans-serif',
+      fontFamily: "Inter, system-ui, sans-serif",
       color: '#0f172a',
       boxSizing: 'border-box',
       position: 'relative',

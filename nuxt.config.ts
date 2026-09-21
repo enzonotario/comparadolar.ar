@@ -4,7 +4,13 @@ import { getSitemapUrls } from "./app/lib/sitemap-config";
 
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
-  devtools: { enabled: true },
+  // Devtools only in local dev - avoids extra work in CF Pages builds.
+  // https://nuxt.com/docs/api/nuxt-config#devtools
+  devtools: { enabled: process.env.NODE_ENV !== "production" },
+  // Skip shipping .map files on Cloudflare Pages (smaller artifact, less Nitro work).
+  // https://nuxt.com/docs/api/nuxt-config#sourcemap
+  // https://nitro.build/config#sourcemap
+  sourcemap: { client: false, server: false },
 
   routeRules: {
     "/usdc/dolarapp": { redirect: "/usdc/arq" },
@@ -14,15 +20,51 @@ export default defineNuxtConfig({
     "/terminal/usd-ccl": { redirect: "/terminal/usd" },
     "/graficos/usd-ccl": { redirect: "/graficos/usd" },
     // Short CDN/browser cache for HTML shells — data still refreshes via client fetch.
-    "/": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
-    "/usd": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
-    "/usd/**": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
-    "/usdt": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
-    "/usdc": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
-    "/btc": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
-    "/eth": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
-    "/terminal/**": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
-    "/graficos/**": { headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" } },
+    "/": {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    },
+    "/usd": {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    },
+    "/usd/**": {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    },
+    "/usdt": {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    },
+    "/usdc": {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    },
+    "/btc": {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    },
+    "/eth": {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    },
+    "/terminal/**": {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    },
+    "/graficos/**": {
+      headers: {
+        "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
+      },
+    },
   },
 
   ssr: true,
@@ -30,6 +72,7 @@ export default defineNuxtConfig({
     preset: "cloudflare-pages",
     compressPublicAssets: true,
     minify: true,
+    sourceMap: false,
     rollupConfig: {
       plugins: [
         {
@@ -75,6 +118,7 @@ export default defineNuxtConfig({
       cssCodeSplit: true,
       cssMinify: true,
       minify: "esbuild",
+      sourcemap: false,
     },
   },
 

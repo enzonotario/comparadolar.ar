@@ -3,12 +3,6 @@
 @import "vue-data-ui/style.css";
 
 /* Custom styles for the application */
-.grid-pattern {
-  background-image: url('/grid-pattern.svg');
-  background-repeat: repeat;
-  opacity: 0.03;
-}
-
 .gradient-text {
   background: linear-gradient(to right, #4f46e5, #8b5cf6, #10b981);
   -webkit-background-clip: text;
