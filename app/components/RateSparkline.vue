@@ -17,7 +17,9 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const points = computed(() => {
-  const values = props.values.filter((v) => Number.isFinite(v) && v > 0);
+  const filtered = props.values.filter((v) => Number.isFinite(v) && v > 0);
+  // Single sample (no change in window) → flat grey line, same as all-equal series.
+  const values = filtered.length === 1 ? [filtered[0]!, filtered[0]!] : filtered;
   if (values.length < 2) return "";
 
   const min = Math.min(...values);
