@@ -84,14 +84,37 @@ export async function useGraficosPage() {
         isCcl: isCcl.value,
         rates,
       });
-      const histories = await Promise.all(
-        top3.map(async ({ slug, name }) => {
-          const data = await $fetch<
-            Array<{ bid: number; ask: number; timestamp: string }>
-          >(`${API_BASE_URL}/${apiCurrency.value}/providers/${slug}/history`);
-          return { name, data };
-        }),
-      );
+
+      // Prefer compact /trends (7d hourly) over full 90d /history for OG SSR.
+      type TrendsPayload = {
+        providers?: Record<string, { bid: number[]; ask: number[] }>;
+      };
+      let trends: TrendsPayload | null = null;
+      try {
+        trends = await $fetch<TrendsPayload>(
+          `${API_BASE_URL}/${apiCurrency.value}/trends`,
+        );
+      } catch {
+        trends = null;
+      }
+
+      const now = Date.now();
+      const hourMs = 60 * 60 * 1000;
+
+      const histories = top3.map(({ slug, name }) => {
+        const series = trends?.providers?.[slug];
+        if (!series?.ask?.length) {
+          return { name, data: [] as Array<{ bid: number; ask: number; timestamp: string }> };
+        }
+        const len = series.ask.length;
+        const data = series.ask.map((ask, i) => ({
+          ask,
+          bid: series.bid?.[i] ?? 0,
+          timestamp: new Date(now - (len - 1 - i) * hourMs).toISOString(),
+        }));
+        return { name, data };
+      });
+
       return { histories };
     },
   );

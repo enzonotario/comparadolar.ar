@@ -13,6 +13,16 @@ export default defineNuxtConfig({
     "/usd-ccl": { redirect: "/usd" },
     "/terminal/usd-ccl": { redirect: "/terminal/usd" },
     "/graficos/usd-ccl": { redirect: "/graficos/usd" },
+    // Short CDN/browser cache for HTML shells — data still refreshes via client fetch.
+    "/": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+    "/usd": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+    "/usd/**": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+    "/usdt": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+    "/usdc": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+    "/btc": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+    "/eth": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+    "/terminal/**": { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } },
+    "/graficos/**": { headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" } },
   },
 
   ssr: true,

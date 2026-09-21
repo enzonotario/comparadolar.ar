@@ -43,6 +43,11 @@ const {
   refresh: refetch,
 } = useFetch<HistoryData[]>(
   `https://api.comparadolar.ar/${apiCurrency}/providers/${props.provider}/history`,
+  {
+    // Full 90d history is large — keep it off the SSR payload / worker heap.
+    server: false,
+    lazy: true,
+  },
 );
 
 const chartData = computed(() => {

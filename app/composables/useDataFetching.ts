@@ -10,44 +10,52 @@ export function useDataFetching<T>(url: string) {
     new Date().toISOString(),
   );
 
-  const { data, error, status, refresh } = useAsyncData<T>(url, async () => {
-    let result = await $fetch<T>(url);
+  const { data, error, status, refresh } = useAsyncData<T>(
+    url,
+    async () => {
+      let result = await $fetch<T>(url);
 
-    if (Array.isArray(result)) {
-      result = result.filter((item: any) => !isBlacklistedProvider(item)) as T;
+      if (Array.isArray(result)) {
+        result = result.filter((item: any) => !isBlacklistedProvider(item)) as T;
 
-      result = result.map((item: any) => {
-        let normalized = applyProviderDisplayName(item);
+        result = result.map((item: any) => {
+          let normalized = applyProviderDisplayName(item);
 
-        const logoUrl = getProviderLogoUrl({
-          slug: normalized.slug,
-          logo: normalized.logo,
-          logoUrl: normalized.logoUrl,
-        });
-        if (logoUrl) {
-          normalized = { ...normalized, logoUrl, logo: logoUrl };
-        }
+          const logoUrl = getProviderLogoUrl({
+            slug: normalized.slug,
+            logo: normalized.logo,
+            logoUrl: normalized.logoUrl,
+          });
+          if (logoUrl) {
+            normalized = { ...normalized, logoUrl, logo: logoUrl };
+          }
 
-        if (normalized.prettyName && !normalized.displayName) {
-          normalized = { ...normalized, displayName: normalized.prettyName };
-        }
+          if (normalized.prettyName && !normalized.displayName) {
+            normalized = { ...normalized, displayName: normalized.prettyName };
+          }
 
-        if (isUsdCclProvider(normalized)) {
-          normalized = { ...normalized, isUsdCcl: true };
-        }
+          if (isUsdCclProvider(normalized)) {
+            normalized = { ...normalized, isUsdCcl: true };
+          }
 
-        normalized = {
-          ...normalized,
-          usdType: getProviderUsdType(normalized),
-        };
+          normalized = {
+            ...normalized,
+            usdType: getProviderUsdType(normalized),
+          };
 
-        return normalized;
-      }) as T;
-    }
+          return normalized;
+        }) as T;
+      }
 
-    lastUpdateIso.value = new Date().toISOString();
-    return result;
-  });
+      lastUpdateIso.value = new Date().toISOString();
+      return result;
+    },
+    {
+      // Reuse payload across navigations within the same request/session window.
+      getCachedData: (key, nuxtApp) =>
+        nuxtApp.payload.data[key] ?? nuxtApp.static.data[key],
+    },
+  );
 
   const isLoading = computed(() => status.value === "pending");
   const lastUpdate = computed(() => new Date(lastUpdateIso.value));

@@ -91,6 +91,8 @@ const fetchProviderHistory = async (slug: string) => {
 watch(
   [topProvidersForBuy, topProvidersForSell],
   async () => {
+    if (import.meta.server) return;
+
     isLoadingHistories.value = true;
     const allProviders = [
       ...topProvidersForBuy.value,
@@ -120,6 +122,7 @@ interface InflationItem {
 
 const { data: inflationData } = useFetch<InflationItem[]>(
   "https://api.argentinadatos.com/v1/finanzas/indices/inflacion/",
+  { server: false, lazy: true },
 );
 
 const getInflationForMonth = (year: number, month: number): number => {
