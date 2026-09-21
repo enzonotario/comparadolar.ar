@@ -104,7 +104,10 @@ export async function useGraficosPage() {
       const histories = top3.map(({ slug, name }) => {
         const series = trends?.providers?.[slug];
         if (!series?.ask?.length) {
-          return { name, data: [] as Array<{ bid: number; ask: number; timestamp: string }> };
+          return {
+            name,
+            data: [] as Array<{ bid: number; ask: number; timestamp: string }>,
+          };
         }
         const len = series.ask.length;
         const data = series.ask.map((ask, i) => ({

@@ -16,7 +16,9 @@ export function useDataFetching<T>(url: string) {
       let result = await $fetch<T>(url);
 
       if (Array.isArray(result)) {
-        result = result.filter((item: any) => !isBlacklistedProvider(item)) as T;
+        result = result.filter(
+          (item: any) => !isBlacklistedProvider(item),
+        ) as T;
 
         result = result.map((item: any) => {
           let normalized = applyProviderDisplayName(item);

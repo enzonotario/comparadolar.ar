@@ -126,8 +126,8 @@ const socialLinks = [
                 </NuxtLink>
 
                 <p class="text-sm text-muted leading-relaxed">
-                  Compará cotizaciones de dólar y otras monedas en Argentina,
-                  en tiempo real y sin registro.
+                  Compará cotizaciones de dólar y otras monedas en Argentina, en
+                  tiempo real y sin registro.
                 </p>
 
                 <div class="flex flex-col items-start gap-2">
@@ -182,8 +182,8 @@ const socialLinks = [
       <p
         class="text-xs text-muted/80 text-center max-w-md leading-snug order-last lg:order-none mt-2 lg:mt-0"
       >
-        Datos referenciales con fines informativos. No constituye
-        asesoramiento financiero.
+        Datos referenciales con fines informativos. No constituye asesoramiento
+        financiero.
       </p>
 
       <template #right>
