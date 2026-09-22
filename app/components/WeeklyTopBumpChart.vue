@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { provide } from "vue";
+import { useMediaQuery } from "@vueuse/core";
 import type { TabsItem } from "@nuxt/ui";
 import type {
   CurrencyType,
@@ -25,14 +26,19 @@ const props = withDefaults(defineProps<Props>(), {
   currency: "usd",
 });
 
+/** Tailwind `sm` — endLabels need ~210px; below this use list + full-width plot. */
+const isWide = useMediaQuery("(min-width: 640px)");
+
 const colorMode = computed(() => useColorMode().value);
 provide(
   THEME_KEY,
   computed(() => colorMode.value),
 );
 
+const chartHeight = computed(() => (isWide.value ? 280 : 220));
+
 const initOptions = computed(() => ({
-  height: 280,
+  height: chartHeight.value,
   width: "auto",
   renderer: "svg" as const,
 }));
@@ -172,6 +178,36 @@ const todayIndex = computed(() =>
 
 const topN = computed(() => data.value.topN || 5);
 
+type RankingRow = {
+  slug: string;
+  name: string;
+  color: string;
+  rank: number;
+  price: number | null;
+  meta: ProviderMeta;
+};
+
+/** Today's ranking for the mobile list (chart endLabels stay on sm+). */
+const rankingRows = computed((): RankingRow[] => {
+  const dayIdx = todayIndex.value;
+  return seriesSource.value
+    .map((item: WeeklyRankingSeriesItem, index: number) => {
+      const rank = item.ranks[dayIdx];
+      if (rank == null) return null;
+      const price = item.prices[dayIdx];
+      return {
+        slug: item.slug,
+        name: item.name,
+        color: PALETTE[index % PALETTE.length]!,
+        rank,
+        price: price != null && price > 0 ? price : null,
+        meta: metaFor(item.slug, item.name),
+      };
+    })
+    .filter((row): row is RankingRow => row != null)
+    .sort((a, b) => a.rank - b.rank);
+});
+
 /** Match UBadge / UsdTypeBadge colors from app.config + Nuxt UI tokens. */
 function badgeRichStyle(
   color: string,
@@ -234,14 +270,15 @@ const chartOption = computed(() => {
   const splitColor = isDark.value ? "#3f3f46" : "#e4e4e7";
   const dayIdx = todayIndex.value;
   const richBadges = badgeRich.value;
-
+  const wide = isWide.value;
+  // Narrow: hide endLabel + shrink grid.right so bump lines stay readable.
   const series = seriesSource.value.map(
     (item: WeeklyRankingSeriesItem, index: number) => {
       const color = PALETTE[index % PALETTE.length]!;
       const meta = metaFor(item.slug, item.name);
       const todayRank = item.ranks[dayIdx];
       const todayPrice = item.prices[dayIdx];
-      const showEnd = todayRank != null;
+      const showEnd = wide && todayRank != null;
 
       const badgeParts: string[] = [`{name|${item.name}}`];
       if (meta.is24x7) badgeParts.push("{b247|24/7}");
@@ -259,14 +296,14 @@ const chartOption = computed(() => {
         type: "line" as const,
         smooth: true,
         symbol: "circle",
-        symbolSize: 14,
+        symbolSize: wide ? 14 : 9,
         showSymbol: true,
         connectNulls: false,
         emphasis: {
           focus: "series" as const,
         },
         lineStyle: {
-          width: 3,
+          width: wide ? 3 : 2,
           color,
         },
         itemStyle: {
@@ -301,6 +338,7 @@ const chartOption = computed(() => {
     animationDuration: 400,
     tooltip: {
       trigger: "item",
+      confine: !wide,
       formatter: (params: {
         seriesName?: string;
         value?: number | null;
@@ -311,10 +349,10 @@ const chartOption = computed(() => {
       },
     },
     grid: {
-      left: 36,
-      right: 210,
-      top: 20,
-      bottom: 28,
+      left: wide ? 36 : 28,
+      right: wide ? 210 : 12,
+      top: 16,
+      bottom: wide ? 28 : 24,
       containLabel: false,
     },
     xAxis: {
@@ -329,8 +367,9 @@ const chartOption = computed(() => {
       axisTick: { show: false },
       axisLabel: {
         color: mutedColor,
-        fontSize: 11,
-        margin: 12,
+        fontSize: wide ? 11 : 10,
+        margin: wide ? 12 : 8,
+        hideOverlap: true,
       },
     },
     yAxis: {
@@ -341,8 +380,8 @@ const chartOption = computed(() => {
       interval: 1,
       axisLabel: {
         color: mutedColor,
-        fontSize: 11,
-        margin: 10,
+        fontSize: wide ? 11 : 10,
+        margin: wide ? 10 : 6,
         formatter: (value: number) => `#${value}`,
       },
       splitLine: {
@@ -391,7 +430,7 @@ const chartOption = computed(() => {
 
     <div
       v-if="isLoading && !hasData"
-      class="flex h-[280px] items-center justify-center text-sm text-muted"
+      class="flex h-[220px] items-center justify-center text-sm text-muted sm:h-[280px]"
     >
       Cargando ranking semanal…
     </div>
@@ -406,19 +445,70 @@ const chartOption = computed(() => {
     <div v-else class="w-full">
       <ClientOnly>
         <VChart
-          :key="`${currency}-${activeSide}-${data.labels.join(',')}`"
+          :key="`${currency}-${activeSide}-${data.labels.join(',')}-${isWide ? 'wide' : 'narrow'}`"
           :option="chartOption"
-          class="h-[280px] w-full"
+          class="h-[220px] w-full sm:h-[280px]"
           autoresize
         />
         <template #fallback>
           <div
-            class="flex h-[280px] items-center justify-center text-sm text-muted"
+            class="flex h-[220px] items-center justify-center text-sm text-muted sm:h-[280px]"
           >
             Cargando gráfico…
           </div>
         </template>
       </ClientOnly>
+
+      <ol
+        v-if="!isWide && rankingRows.length"
+        class="mt-3 divide-y divide-default border-t border-default"
+        aria-label="Ranking de hoy"
+      >
+        <li
+          v-for="row in rankingRows"
+          :key="row.slug"
+          class="flex items-center gap-2.5 py-2.5"
+        >
+          <span
+            class="h-2.5 w-2.5 shrink-0 rounded-full"
+            :style="{ backgroundColor: row.color }"
+            aria-hidden="true"
+          />
+          <span
+            class="w-7 shrink-0 font-mono text-xs font-semibold text-muted"
+          >
+            #{{ row.rank }}
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span
+                class="truncate text-sm font-semibold"
+                :style="{ color: row.color }"
+              >
+                {{ row.name }}
+              </span>
+              <UBadge v-if="row.meta.is24x7" color="success" size="xs">
+                24/7
+              </UBadge>
+              <UBadge v-if="row.meta.isCcl" color="info" size="xs">
+                CCL
+              </UBadge>
+              <UsdTypeBadge
+                v-if="showUsdTypes && row.meta.showUsdType"
+                :usd-type="row.meta.usdType"
+                :slug="row.slug"
+                :name="row.name"
+              />
+            </div>
+          </div>
+          <span
+            v-if="row.price != null"
+            class="shrink-0 font-mono text-xs tabular-nums text-muted"
+          >
+            ${{ formatPrice(row.price) }}
+          </span>
+        </li>
+      </ol>
     </div>
   </UCard>
 </template>
