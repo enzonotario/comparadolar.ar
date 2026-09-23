@@ -17,6 +17,7 @@
     "banco-ciudad": "Oficial",
     "banco-provincia": "Oficial",
     "banco-supervielle": "Oficial",
+    "brubank": "Oficial",
     "banco-hipotecario": "Oficial",
     "banco-nacion": "Oficial",
     "plus-inversiones": "MEP",
@@ -25,7 +26,7 @@
     "nexo": "Cripto",
     "takenos": "Cripto"
   },
-  "blacklistedProviders": ["brubank", "bbva"],
+  "blacklistedProviders": ["bbva"],
   "currencyGroups": {
     "crypto": ["usdc", "usdt", "btc", "eth"],
     "fiat": ["usd", "usd-ccl"]
