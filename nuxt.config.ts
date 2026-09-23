@@ -14,6 +14,7 @@ export default defineNuxtConfig({
 
   routeRules: {
     "/usdc/dolarapp": { redirect: "/usdc/arq" },
+    "/usd/brubank": { redirect: "/usd/brubank-ultra" },
     "/terminal": { redirect: "/terminal/usd" },
     "/graficos": { redirect: "/graficos/usd" },
     "/usd-ccl": { redirect: "/usd" },

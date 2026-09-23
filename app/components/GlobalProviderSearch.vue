@@ -21,6 +21,7 @@ const PROVIDER_SEARCH_ALIASES: Record<string, string> = {
   nexo: "Buenbit",
   "fiwind-cripto": "fiwind",
   "fiwind-mep": "fiwind",
+  "brubank-ultra": "brubank",
 };
 
 /** Páginas estáticas del sitio (mapa del sitio / navegación adicional). */
