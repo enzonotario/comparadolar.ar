@@ -24,7 +24,8 @@
     "tiendadolar": "Oficial",
     "ripio": "Cripto",
     "nexo": "Cripto",
-    "takenos": "Cripto"
+    "takenos": "Cripto",
+    "eluter": "Cripto"
   },
   "blacklistedProviders": ["bbva"],
   "currencyGroups": {
