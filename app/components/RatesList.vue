@@ -10,6 +10,7 @@ import {
   getExchangeSpreadAbs,
 } from "@/lib/exchange-rate-sort";
 import { getProviderDisplayName } from "@/lib/provider-display";
+import { omitDuplicateWallbitPro } from "@/lib/wallbit-pro";
 
 const items = [
   {
@@ -197,7 +198,10 @@ const filteredRates = computed(() => {
     }
   });
 
-  return rates;
+  return omitDuplicateWallbitPro(
+    rates,
+    activeTab.value === "buy" ? "ask" : "bid",
+  );
 });
 
 const realTimeRates = computed(() => {
