@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { showOnly24x7 } = use24x7Filter();
 const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
+const { includeConditions } = useIncludeConditions();
 
 const hasPrice = (value: number | null | undefined): value is number =>
   value != null && value > 0;
@@ -26,7 +27,11 @@ const hasPrice = (value: number | null | undefined): value is number =>
 const filteredData = computed(() => {
   if (!props.data || !Array.isArray(props.data)) return null;
 
-  let data = props.data.filter(isRankableProvider);
+  let data = props.data;
+
+  if (!includeConditions.value) {
+    data = data.filter(isRankableProvider);
+  }
 
   if (showOnly24x7.value) {
     data = data.filter((item) => item.is24x7 === true);

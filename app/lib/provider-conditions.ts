@@ -12,8 +12,9 @@ export function hasProviderConditions(item: {
 }
 
 /**
- * Un proveedor con condiciones de acceso no compite en igualdad con el resto:
- * se lista en la tabla, pero queda fuera de rankings y destacados.
+ * Un proveedor con condiciones de acceso se lista en la tabla.
+ * Las cards de resumen lo incluyen salvo que el usuario desmarque
+ * "Con condiciones". Avisos e imágenes OG siguen fuera.
  */
 export function isRankableProvider(item: {
   conditions?: string | null;

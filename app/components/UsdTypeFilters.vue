@@ -11,6 +11,10 @@ withDefaults(defineProps<Props>(), {
 });
 
 const { enabledTypes, categories, setTypeEnabled } = useUsdTypeFilter();
+const { includeConditions } = useIncludeConditions();
+const { getCurrentSection } = useNavigation();
+
+const showConditionsToggle = computed(() => getCurrentSection() === "compare");
 
 const tabColor = (category: UsdFilterCategory) => {
   if (category === "CCL") return "info";
@@ -30,6 +34,13 @@ const tabColor = (category: UsdFilterCategory) => {
       :label="category"
       :color="tabColor(category)"
       @update:model-value="setTypeEnabled(category, $event === true)"
+    />
+    <UCheckbox
+      v-if="showConditionsToggle"
+      v-model="includeConditions"
+      label="Con condiciones"
+      color="warning"
+      class="md:border-l md:border-zinc-200 md:pl-3 dark:md:border-zinc-700"
     />
   </div>
 

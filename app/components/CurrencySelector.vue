@@ -39,7 +39,7 @@ const showUsdFilters = computed(
 <template>
   <div
     class="relative flex flex-wrap items-center justify-center gap-2 overflow-visible"
-    :class="showUsdFilters ? 'pb-9' : undefined"
+    :class="showUsdFilters ? 'pb-48 md:pb-10' : undefined"
   >
     <div
       v-for="currency in currencies"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getProviderDisplayName } from "@/lib/provider-display";
+import { getProviderConditions } from "@/lib/provider-conditions";
 import { getResizedImageUrl } from "@/lib/image-url";
 import { resolveComponent } from "vue";
 import type { ExchangeRate } from "@/lib/types";
@@ -124,6 +125,7 @@ const singleProviderPath = computed(() => {
               :slug="provider?.slug"
               :name="provider?.name"
             />
+            <ConditionsBadge v-if="getProviderConditions(provider)" />
             <span class="flex-1" />
             <UIcon
               name="i-heroicons-chevron-right-solid"
@@ -132,39 +134,51 @@ const singleProviderPath = computed(() => {
           </NuxtLink>
         </div>
 
-        <div
-          v-else-if="providers.length === 1"
-          class="flex items-center space-x-2"
-        >
-          <img
-            :src="
-              getResizedImageUrl(
-                providers[0].logoUrl || providers[0].logo || '/placeholder.svg',
-                24,
-              )
-            "
-            :alt="getProviderDisplayName(providers[0])"
-            width="24"
-            height="24"
-            class="w-6 h-6 rounded-full"
-            loading="lazy"
-            decoding="async"
-            @error="handleImageError"
-          />
-          <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-            {{ getProviderDisplayName(providers[0]) }}
-          </span>
-          <UBadge v-if="providers[0]?.is24x7" color="success" size="xs">
-            24/7
-          </UBadge>
-          <UBadge v-if="providers[0]?.isUsdCcl" color="info" size="xs">
-            CCL
-          </UBadge>
-          <UsdTypeBadge
-            :usd-type="providers[0]?.usdType"
-            :slug="providers[0]?.slug"
-            :name="providers[0]?.name"
-          />
+        <div v-else-if="providers.length === 1" class="space-y-1">
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <img
+              :src="
+                getResizedImageUrl(
+                  providers[0].logoUrl ||
+                    providers[0].logo ||
+                    '/placeholder.svg',
+                  24,
+                )
+              "
+              :alt="getProviderDisplayName(providers[0])"
+              width="24"
+              height="24"
+              class="w-6 h-6 shrink-0 rounded-full"
+              loading="lazy"
+              decoding="async"
+              @error="handleImageError"
+            />
+            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              {{ getProviderDisplayName(providers[0]) }}
+            </span>
+            <UBadge v-if="providers[0]?.is24x7" color="success" size="xs">
+              24/7
+            </UBadge>
+            <UBadge v-if="providers[0]?.isUsdCcl" color="info" size="xs">
+              CCL
+            </UBadge>
+            <UsdTypeBadge
+              :usd-type="providers[0]?.usdType"
+              :slug="providers[0]?.slug"
+              :name="providers[0]?.name"
+            />
+            <ConditionsBadge v-if="getProviderConditions(providers[0])" />
+          </div>
+          <p
+            v-if="getProviderConditions(providers[0])"
+            class="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400"
+          >
+            <UIcon
+              name="i-heroicons-information-circle"
+              class="h-3.5 w-3.5 shrink-0"
+            />
+            {{ getProviderConditions(providers[0]) }}
+          </p>
         </div>
 
         <div v-else class="flex items-center space-x-2">
