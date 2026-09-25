@@ -6,13 +6,6 @@ const PROVIDER_DISPLAY_NAME_OVERRIDES: Record<string, string> = {
   "fiwind-mep": "Fiwind",
 };
 
-const VOII_LOGO_URL =
-  "https://api.argentinadatos.com/static/logos/banco-voii.jpg";
-
-const FORCED_PROVIDER_LOGOS: Record<string, string> = {
-  "voii-oficial": VOII_LOGO_URL,
-};
-
 const PROVIDER_LOGO_OVERRIDES: Record<string, string> = {
   fiwind: FIWIND_LOGO_URL,
   "fiwind-cripto": FIWIND_LOGO_URL,
@@ -24,11 +17,10 @@ export function getProviderLogoUrl(item: {
   logo?: string | null;
   logoUrl?: string | null;
 }): string {
-  const slug = item.slug?.toLowerCase();
-  if (slug && FORCED_PROVIDER_LOGOS[slug]) return FORCED_PROVIDER_LOGOS[slug];
-
   const explicit = item.logoUrl || item.logo;
   if (explicit) return explicit;
+
+  const slug = item.slug?.toLowerCase();
 
   if (slug && PROVIDER_LOGO_OVERRIDES[slug]) {
     return PROVIDER_LOGO_OVERRIDES[slug];
