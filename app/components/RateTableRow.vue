@@ -84,7 +84,6 @@ const handleImageError = (event: Event) => {
                 :slug="rate.slug"
                 :name="rate.name"
               />
-              <ConditionsBadge v-if="conditions" />
             </div>
             <p
               v-if="hasValidSpread"
