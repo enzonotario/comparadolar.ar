@@ -164,6 +164,8 @@ export default defineNuxtConfig({
       siteUrl: SITE_CONFIG.baseUrl,
       siteName: SITE_CONFIG.name,
       siteDescription: currenciesConfig.usd.description,
+      opinaUrl: process.env.NUXT_PUBLIC_OPINA_URL || 'https://opina.enzonotario.me',
+      opinaKey: process.env.NUXT_PUBLIC_OPINA_KEY || 'pk_0iquuzgu7sf14tgw',
     },
   },
 

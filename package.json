@@ -23,6 +23,7 @@
     "@nuxtjs/seo": "^3.4.0",
     "@nuxtjs/sitemap": "7.4.7",
     "@nuxtjs/tailwindcss": "^6.14.0",
+    "@opina/widget": "0.0.1",
     "@pinia/nuxt": "^0.11.3",
     "@takumi-rs/core": "^0.71.7",
     "@takumi-rs/wasm": "^0.71.7",
