@@ -31,6 +31,21 @@ export async function getSitemapUrls() {
     changefreq: "monthly",
     priority: 0.5,
   });
+  urls.push({
+    loc: "/about",
+    changefreq: "monthly",
+    priority: 0.6,
+  });
+  urls.push({
+    loc: "/contact",
+    changefreq: "monthly",
+    priority: 0.6,
+  });
+  urls.push({
+    loc: "/privacy",
+    changefreq: "monthly",
+    priority: 0.5,
+  });
 
   for (const currency of currencies) {
     // Rutas de índice de moneda

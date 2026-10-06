@@ -13,6 +13,8 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = join(__dirname, "../public/openapi.json");
+const SITE_PUBLIC_OUT = join(__dirname, "../../public/openapi.json");
+const CRON_OUT = join(__dirname, "../../../comparadolar-cron/src/openapi.json");
 
 const BASE =
   process.env.OPENAPI_BASE_URL?.replace(/\/$/, "") ||
@@ -350,6 +352,18 @@ async function main() {
 
   writeFileSync(OUT, `${JSON.stringify(spec, null, 2)}\n`, "utf8");
   console.log(`Escrito ${OUT}`);
+  try {
+    writeFileSync(SITE_PUBLIC_OUT, `${JSON.stringify(spec, null, 2)}\n`, "utf8");
+    console.log(`Escrito ${SITE_PUBLIC_OUT}`);
+  } catch (err) {
+    console.warn(`No se pudo escribir ${SITE_PUBLIC_OUT}:`, err.message);
+  }
+  try {
+    writeFileSync(CRON_OUT, `${JSON.stringify(spec, null, 2)}\n`, "utf8");
+    console.log(`Escrito ${CRON_OUT}`);
+  } catch (err) {
+    console.warn(`No se pudo escribir ${CRON_OUT}:`, err.message);
+  }
   for (const c of CURRENCIES) {
     const n = fetched[c.path].slugs.length;
     console.log(

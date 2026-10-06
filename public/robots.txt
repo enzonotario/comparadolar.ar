@@ -1,4 +1,52 @@
 User-Agent: *
 Allow: /
 
+User-Agent: GPTBot
+Allow: /
+
+User-Agent: ChatGPT-User
+Allow: /
+
+User-Agent: ClaudeBot
+Allow: /
+
+User-Agent: anthropic-ai
+Allow: /
+
+User-Agent: Claude-Web
+Allow: /
+
+User-Agent: Google-Extended
+Allow: /
+
+User-Agent: Googlebot
+Allow: /
+
+User-Agent: PerplexityBot
+Allow: /
+
+User-Agent: Amazonbot
+Allow: /
+
+User-Agent: Bytespider
+Allow: /
+
+User-Agent: CCBot
+Allow: /
+
+User-Agent: Diffbot
+Allow: /
+
+User-Agent: FacebookBot
+Allow: /
+
+User-Agent: meta-externalagent
+Allow: /
+
+User-Agent: ora-agent
+Allow: /
+
+User-Agent: DeepSeekBot
+Allow: /
+
 Sitemap: https://comparadolar.ar/sitemap.xml

@@ -1,0 +1,1229 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ComparaDolar API",
+    "description": "API pública de comparadolar.ar para cotizaciones de dólar y criptomonedas en Argentina.\n\n<br/>¿Encontraste útil esta API? **¡Dejá tu ⭐ en [GitHub](https://github.com/enzonotario/comparadolar.ar)!**",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.comparadolar.ar",
+      "description": "Producción"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Cotizaciones",
+      "description": "Listados de cotización vigente por moneda o activo."
+    },
+    {
+      "name": "Proveedores",
+      "description": "Catálogo de proveedores por moneda."
+    },
+    {
+      "name": "Historial",
+      "description": "Series temporales de cotización por proveedor."
+    }
+  ],
+  "paths": {
+    "/usd": {
+      "get": {
+        "tags": [
+          "Cotizaciones"
+        ],
+        "operationId": "getUsdQuotes",
+        "summary": "USD ahora",
+        "description": "Última cotización por proveedor para **usd**.",
+        "responses": {
+          "200": {
+            "description": "Lista de cotizaciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FiatQuote"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usd/providers": {
+      "get": {
+        "tags": [
+          "Proveedores"
+        ],
+        "operationId": "listUsdProviders",
+        "summary": "Proveedores USD",
+        "description": "Catálogo de proveedores o exchanges con metadatos para armar selectores y enlaces.",
+        "responses": {
+          "200": {
+            "description": "Lista de proveedores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderFiat"
+                  }
+                },
+                "examples": {
+                  "muestra": {
+                    "summary": "Primeros 3 registros",
+                    "value": [
+                      {
+                        "slug": "astropay",
+                        "name": "astropay",
+                        "logoUrl": "https://api.argentinadatos.com/static/logos/astropay.png",
+                        "is24x7": true,
+                        "url": "https://www.astropay.com/?ref=comparadolar",
+                        "prettyName": "Astropay",
+                        "slowChange": false,
+                        "isBank": false
+                      },
+                      {
+                        "slug": "balanz",
+                        "name": "balanz",
+                        "logoUrl": "https://api.argentinadatos.com/static/logos/balanz.png",
+                        "is24x7": false,
+                        "url": "https://balanz.com",
+                        "prettyName": "Balanz",
+                        "slowChange": false,
+                        "isBank": false
+                      },
+                      {
+                        "slug": "banco-ciudad",
+                        "name": "banco ciudad",
+                        "logoUrl": "https://api.argentinadatos.com/static/logos/banco-ciudad.png",
+                        "is24x7": false,
+                        "url": "https://bancociudad.com.ar/institucional/?ref=comparadolar",
+                        "prettyName": "Banco Ciudad",
+                        "slowChange": false,
+                        "isBank": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usd/providers/{slug}/history": {
+      "get": {
+        "tags": [
+          "Historial"
+        ],
+        "operationId": "getUsdProviderHistory",
+        "summary": "Historial USD por proveedor",
+        "description": "Serie temporal: `bid`, `ask`, `timestamp` por punto.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "Slug del proveedor (mismo valor que en `/providers`).",
+            "schema": {
+              "type": "string",
+              "example": "astropay"
+            },
+            "examples": {
+              "astropay": {
+                "summary": "astropay",
+                "value": "astropay"
+              },
+              "balanz": {
+                "summary": "balanz",
+                "value": "balanz"
+              },
+              "banco-ciudad": {
+                "summary": "banco-ciudad",
+                "value": "banco-ciudad"
+              },
+              "banco-hipotecario": {
+                "summary": "banco-hipotecario",
+                "value": "banco-hipotecario"
+              },
+              "banco-nacion": {
+                "summary": "banco-nacion",
+                "value": "banco-nacion"
+              },
+              "banco-provincia": {
+                "summary": "banco-provincia",
+                "value": "banco-provincia"
+              },
+              "banco-supervielle": {
+                "summary": "banco-supervielle",
+                "value": "banco-supervielle"
+              },
+              "bbva": {
+                "summary": "bbva",
+                "value": "bbva"
+              },
+              "brubank": {
+                "summary": "brubank",
+                "value": "brubank"
+              },
+              "cocos": {
+                "summary": "cocos",
+                "value": "cocos"
+              },
+              "fiwind-cripto": {
+                "summary": "fiwind-cripto",
+                "value": "fiwind-cripto"
+              },
+              "fiwind-mep": {
+                "summary": "fiwind-mep",
+                "value": "fiwind-mep"
+              },
+              "global66": {
+                "summary": "global66",
+                "value": "global66"
+              },
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
+              },
+              "plus": {
+                "summary": "plus",
+                "value": "plus"
+              },
+              "plus-crypto": {
+                "summary": "plus-crypto",
+                "value": "plus-crypto"
+              },
+              "plus-inversiones": {
+                "summary": "plus-inversiones",
+                "value": "plus-inversiones"
+              },
+              "reba": {
+                "summary": "reba",
+                "value": "reba"
+              },
+              "tiendadolar": {
+                "summary": "tiendadolar",
+                "value": "tiendadolar"
+              },
+              "uala": {
+                "summary": "uala",
+                "value": "uala"
+              },
+              "wallbit": {
+                "summary": "wallbit",
+                "value": "wallbit"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Puntos de historial",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryPointFiat"
+                  }
+                },
+                "examples": {
+                  "puntos": {
+                    "summary": "Primeros puntos (astropay)",
+                    "value": [
+                      {
+                        "bid": 1431.3113674748804,
+                        "ask": 1475.26262733,
+                        "timestamp": "2026-03-13T13:35:52.528Z"
+                      },
+                      {
+                        "bid": 1424.3593943623857,
+                        "ask": 1468.10101019,
+                        "timestamp": "2026-03-13T13:40:55.172Z"
+                      },
+                      {
+                        "bid": 1421.827901950748,
+                        "ask": 1465.49495024,
+                        "timestamp": "2026-03-13T13:50:55.190Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usdc": {
+      "get": {
+        "tags": [
+          "Cotizaciones"
+        ],
+        "operationId": "getUsdcQuotes",
+        "summary": "USDC ahora",
+        "description": "Última cotización por exchange para **usdc**.",
+        "responses": {
+          "200": {
+            "description": "Lista de cotizaciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CryptoQuote"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usdc/providers": {
+      "get": {
+        "tags": [
+          "Proveedores"
+        ],
+        "operationId": "listUsdcProviders",
+        "summary": "Proveedores USDC",
+        "description": "Catálogo de proveedores o exchanges con metadatos para armar selectores y enlaces.",
+        "responses": {
+          "200": {
+            "description": "Lista de proveedores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderCrypto"
+                  }
+                },
+                "examples": {
+                  "muestra": {
+                    "summary": "Primeros 3 registros",
+                    "value": [
+                      {
+                        "slug": "arq",
+                        "logo": "https://api.argentinadatos.com/static/logos/arq.png",
+                        "prettyName": "ARQ",
+                        "url": "https://arqfinance.com/",
+                        "is24x7": true
+                      },
+                      {
+                        "slug": "belo",
+                        "logo": "https://api.argentinadatos.com/static/logos/belo.png",
+                        "prettyName": "Belo",
+                        "url": "https://www.belo.app/en?ref=comparadolar",
+                        "is24x7": true
+                      },
+                      {
+                        "slug": "binance",
+                        "logo": "https://api.argentinadatos.com/static/logos/binance.png",
+                        "prettyName": "Binance",
+                        "url": "https://www.binance.com/en?ref=comparadolar",
+                        "is24x7": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usdc/providers/{slug}/history": {
+      "get": {
+        "tags": [
+          "Historial"
+        ],
+        "operationId": "getUsdcProviderHistory",
+        "summary": "Historial USDC por exchange",
+        "description": "Serie temporal con montos spot y totales por lado del libro.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "Slug del exchange (mismo valor que en `/providers`).",
+            "schema": {
+              "type": "string",
+              "example": "arq"
+            },
+            "examples": {
+              "arq": {
+                "summary": "arq",
+                "value": "arq"
+              },
+              "belo": {
+                "summary": "belo",
+                "value": "belo"
+              },
+              "binance": {
+                "summary": "binance",
+                "value": "binance"
+              },
+              "cocoscrypto": {
+                "summary": "cocoscrypto",
+                "value": "cocoscrypto"
+              },
+              "lemoncash": {
+                "summary": "lemoncash",
+                "value": "lemoncash"
+              },
+              "letsbit": {
+                "summary": "letsbit",
+                "value": "letsbit"
+              },
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
+              },
+              "p2pme": {
+                "summary": "p2pme",
+                "value": "p2pme"
+              },
+              "pluscrypto": {
+                "summary": "pluscrypto",
+                "value": "pluscrypto"
+              },
+              "ripio": {
+                "summary": "ripio",
+                "value": "ripio"
+              },
+              "satoshitango": {
+                "summary": "satoshitango",
+                "value": "satoshitango"
+              },
+              "tiendacrypto": {
+                "summary": "tiendacrypto",
+                "value": "tiendacrypto"
+              },
+              "vesseo": {
+                "summary": "vesseo",
+                "value": "vesseo"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Puntos de historial",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryPointCrypto"
+                  }
+                },
+                "examples": {
+                  "puntos": {
+                    "summary": "Primeros puntos (arq)",
+                    "value": [
+                      {
+                        "ask": 1454.15,
+                        "totalAsk": 1454.15,
+                        "bid": 1451.6769,
+                        "totalBid": 1451.6769,
+                        "timestamp": "2026-03-13T00:00:33.912Z"
+                      },
+                      {
+                        "ask": 1454.15,
+                        "totalAsk": 1454.15,
+                        "bid": 1450.8777,
+                        "totalBid": 1450.8777,
+                        "timestamp": "2026-03-13T00:05:34.202Z"
+                      },
+                      {
+                        "ask": 1454.6,
+                        "totalAsk": 1454.6,
+                        "bid": 1451.597,
+                        "totalBid": 1451.597,
+                        "timestamp": "2026-03-13T00:10:34.985Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usdt": {
+      "get": {
+        "tags": [
+          "Cotizaciones"
+        ],
+        "operationId": "getUsdtQuotes",
+        "summary": "USDT ahora",
+        "description": "Última cotización por exchange para **usdt**.",
+        "responses": {
+          "200": {
+            "description": "Lista de cotizaciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CryptoQuote"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usdt/providers": {
+      "get": {
+        "tags": [
+          "Proveedores"
+        ],
+        "operationId": "listUsdtProviders",
+        "summary": "Proveedores USDT",
+        "description": "Catálogo de proveedores o exchanges con metadatos para armar selectores y enlaces.",
+        "responses": {
+          "200": {
+            "description": "Lista de proveedores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderCrypto"
+                  }
+                },
+                "examples": {
+                  "muestra": {
+                    "summary": "Primeros 3 registros",
+                    "value": [
+                      {
+                        "slug": "astropay",
+                        "logo": "https://api.argentinadatos.com/static/logos/astropay.png",
+                        "prettyName": "Astropay",
+                        "url": "https://www.astropay.com/?ref=comparadolar",
+                        "is24x7": true
+                      },
+                      {
+                        "slug": "belo",
+                        "logo": "https://api.argentinadatos.com/static/logos/belo.png",
+                        "prettyName": "Belo",
+                        "url": "https://www.belo.app/en?ref=comparadolar",
+                        "is24x7": true
+                      },
+                      {
+                        "slug": "binance",
+                        "logo": "https://api.argentinadatos.com/static/logos/binance.png",
+                        "prettyName": "Binance",
+                        "url": "https://www.binance.com/en?ref=comparadolar",
+                        "is24x7": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usdt/providers/{slug}/history": {
+      "get": {
+        "tags": [
+          "Historial"
+        ],
+        "operationId": "getUsdtProviderHistory",
+        "summary": "Historial USDT por exchange",
+        "description": "Serie temporal con montos spot y totales por lado del libro.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "Slug del exchange (mismo valor que en `/providers`).",
+            "schema": {
+              "type": "string",
+              "example": "astropay"
+            },
+            "examples": {
+              "astropay": {
+                "summary": "astropay",
+                "value": "astropay"
+              },
+              "belo": {
+                "summary": "belo",
+                "value": "belo"
+              },
+              "binance": {
+                "summary": "binance",
+                "value": "binance"
+              },
+              "cocoscrypto": {
+                "summary": "cocoscrypto",
+                "value": "cocoscrypto"
+              },
+              "decrypto": {
+                "summary": "decrypto",
+                "value": "decrypto"
+              },
+              "lemoncash": {
+                "summary": "lemoncash",
+                "value": "lemoncash"
+              },
+              "letsbit": {
+                "summary": "letsbit",
+                "value": "letsbit"
+              },
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
+              },
+              "pluscrypto": {
+                "summary": "pluscrypto",
+                "value": "pluscrypto"
+              },
+              "ripio": {
+                "summary": "ripio",
+                "value": "ripio"
+              },
+              "satoshitango": {
+                "summary": "satoshitango",
+                "value": "satoshitango"
+              },
+              "tiendacrypto": {
+                "summary": "tiendacrypto",
+                "value": "tiendacrypto"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Puntos de historial",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryPointCrypto"
+                  }
+                },
+                "examples": {
+                  "puntos": {
+                    "summary": "Primeros puntos (astropay)",
+                    "value": [
+                      {
+                        "ask": 1487.03061123,
+                        "totalAsk": 1487.03061123,
+                        "bid": 1428.1633818908883,
+                        "totalBid": 1428.1633818908883,
+                        "timestamp": "2026-03-13T00:00:33.912Z"
+                      },
+                      {
+                        "ask": 1486.881909,
+                        "totalAsk": 1486.881909,
+                        "bid": 1428.0206206177618,
+                        "totalBid": 1428.0206206177618,
+                        "timestamp": "2026-03-13T00:05:34.202Z"
+                      },
+                      {
+                        "ask": 1487.47672079,
+                        "totalAsk": 1487.47672079,
+                        "bid": 1428.5918370262432,
+                        "totalBid": 1428.5918370262432,
+                        "timestamp": "2026-03-13T00:10:34.985Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/btc": {
+      "get": {
+        "tags": [
+          "Cotizaciones"
+        ],
+        "operationId": "getBtcQuotes",
+        "summary": "BTC ahora",
+        "description": "Última cotización por exchange para **btc**.",
+        "responses": {
+          "200": {
+            "description": "Lista de cotizaciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CryptoQuote"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/btc/providers": {
+      "get": {
+        "tags": [
+          "Proveedores"
+        ],
+        "operationId": "listBtcProviders",
+        "summary": "Proveedores BTC",
+        "description": "Catálogo de proveedores o exchanges con metadatos para armar selectores y enlaces.",
+        "responses": {
+          "200": {
+            "description": "Lista de proveedores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderCrypto"
+                  }
+                },
+                "examples": {
+                  "muestra": {
+                    "summary": "Primeros 3 registros",
+                    "value": [
+                      {
+                        "slug": "belo",
+                        "logo": "https://api.argentinadatos.com/static/logos/belo.png",
+                        "prettyName": "Belo",
+                        "url": "https://www.belo.app/en?ref=comparadolar",
+                        "is24x7": true
+                      },
+                      {
+                        "slug": "binance",
+                        "logo": "https://api.argentinadatos.com/static/logos/binance.png",
+                        "prettyName": "Binance",
+                        "url": "https://www.binance.com/en?ref=comparadolar",
+                        "is24x7": true
+                      },
+                      {
+                        "slug": "cocoscrypto",
+                        "logo": "https://api.argentinadatos.com/static/logos/cocos-crypto.png",
+                        "prettyName": "Cocos Crypto",
+                        "url": "https://cocos.capital/?ref=comparadolar",
+                        "is24x7": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/btc/providers/{slug}/history": {
+      "get": {
+        "tags": [
+          "Historial"
+        ],
+        "operationId": "getBtcProviderHistory",
+        "summary": "Historial BTC por exchange",
+        "description": "Serie temporal con montos spot y totales por lado del libro.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "Slug del exchange (mismo valor que en `/providers`).",
+            "schema": {
+              "type": "string",
+              "example": "belo"
+            },
+            "examples": {
+              "belo": {
+                "summary": "belo",
+                "value": "belo"
+              },
+              "binance": {
+                "summary": "binance",
+                "value": "binance"
+              },
+              "cocoscrypto": {
+                "summary": "cocoscrypto",
+                "value": "cocoscrypto"
+              },
+              "decrypto": {
+                "summary": "decrypto",
+                "value": "decrypto"
+              },
+              "lemoncash": {
+                "summary": "lemoncash",
+                "value": "lemoncash"
+              },
+              "letsbit": {
+                "summary": "letsbit",
+                "value": "letsbit"
+              },
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
+              },
+              "pluscrypto": {
+                "summary": "pluscrypto",
+                "value": "pluscrypto"
+              },
+              "ripio": {
+                "summary": "ripio",
+                "value": "ripio"
+              },
+              "satoshitango": {
+                "summary": "satoshitango",
+                "value": "satoshitango"
+              },
+              "tiendacrypto": {
+                "summary": "tiendacrypto",
+                "value": "tiendacrypto"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Puntos de historial",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryPointCrypto"
+                  }
+                },
+                "examples": {
+                  "puntos": {
+                    "summary": "Primeros puntos (belo)",
+                    "value": [
+                      {
+                        "ask": 104589981.72,
+                        "totalAsk": 104589981.72,
+                        "bid": 101192902.47,
+                        "totalBid": 101192902.47,
+                        "timestamp": "2026-03-13T00:00:33.912Z"
+                      },
+                      {
+                        "ask": 104605100.52,
+                        "totalAsk": 104605100.52,
+                        "bid": 101207530.22,
+                        "totalBid": 101207530.22,
+                        "timestamp": "2026-03-13T00:05:34.202Z"
+                      },
+                      {
+                        "ask": 104745294.39,
+                        "totalAsk": 104745294.39,
+                        "bid": 101343170.61,
+                        "totalBid": 101343170.61,
+                        "timestamp": "2026-03-13T00:10:34.985Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/eth": {
+      "get": {
+        "tags": [
+          "Cotizaciones"
+        ],
+        "operationId": "getEthQuotes",
+        "summary": "ETH ahora",
+        "description": "Última cotización por exchange para **eth**.",
+        "responses": {
+          "200": {
+            "description": "Lista de cotizaciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CryptoQuote"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/eth/providers": {
+      "get": {
+        "tags": [
+          "Proveedores"
+        ],
+        "operationId": "listEthProviders",
+        "summary": "Proveedores ETH",
+        "description": "Catálogo de proveedores o exchanges con metadatos para armar selectores y enlaces.",
+        "responses": {
+          "200": {
+            "description": "Lista de proveedores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderCrypto"
+                  }
+                },
+                "examples": {
+                  "muestra": {
+                    "summary": "Primeros 3 registros",
+                    "value": [
+                      {
+                        "slug": "belo",
+                        "logo": "https://api.argentinadatos.com/static/logos/belo.png",
+                        "prettyName": "Belo",
+                        "url": "https://www.belo.app/en?ref=comparadolar",
+                        "is24x7": true
+                      },
+                      {
+                        "slug": "binance",
+                        "logo": "https://api.argentinadatos.com/static/logos/binance.png",
+                        "prettyName": "Binance",
+                        "url": "https://www.binance.com/en?ref=comparadolar",
+                        "is24x7": true
+                      },
+                      {
+                        "slug": "cocoscrypto",
+                        "logo": "https://api.argentinadatos.com/static/logos/cocos-crypto.png",
+                        "prettyName": "Cocos Crypto",
+                        "url": "https://cocos.capital/?ref=comparadolar",
+                        "is24x7": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/eth/providers/{slug}/history": {
+      "get": {
+        "tags": [
+          "Historial"
+        ],
+        "operationId": "getEthProviderHistory",
+        "summary": "Historial ETH por exchange",
+        "description": "Serie temporal con montos spot y totales por lado del libro.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "description": "Slug del exchange (mismo valor que en `/providers`).",
+            "schema": {
+              "type": "string",
+              "example": "belo"
+            },
+            "examples": {
+              "belo": {
+                "summary": "belo",
+                "value": "belo"
+              },
+              "binance": {
+                "summary": "binance",
+                "value": "binance"
+              },
+              "cocoscrypto": {
+                "summary": "cocoscrypto",
+                "value": "cocoscrypto"
+              },
+              "lemoncash": {
+                "summary": "lemoncash",
+                "value": "lemoncash"
+              },
+              "letsbit": {
+                "summary": "letsbit",
+                "value": "letsbit"
+              },
+              "nexo": {
+                "summary": "nexo",
+                "value": "nexo"
+              },
+              "pluscrypto": {
+                "summary": "pluscrypto",
+                "value": "pluscrypto"
+              },
+              "ripio": {
+                "summary": "ripio",
+                "value": "ripio"
+              },
+              "satoshitango": {
+                "summary": "satoshitango",
+                "value": "satoshitango"
+              },
+              "tiendacrypto": {
+                "summary": "tiendacrypto",
+                "value": "tiendacrypto"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Puntos de historial",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HistoryPointCrypto"
+                  }
+                },
+                "examples": {
+                  "puntos": {
+                    "summary": "Primeros puntos (belo)",
+                    "value": [
+                      {
+                        "ask": 3075719.04,
+                        "totalAsk": 3075719.04,
+                        "bid": 2975805.85,
+                        "totalBid": 2975805.85,
+                        "timestamp": "2026-03-13T00:00:33.912Z"
+                      },
+                      {
+                        "ask": 3077336.27,
+                        "totalAsk": 3077336.27,
+                        "bid": 2977370.55,
+                        "totalBid": 2977370.55,
+                        "timestamp": "2026-03-13T00:05:34.202Z"
+                      },
+                      {
+                        "ask": 3080852.61,
+                        "totalAsk": 3080852.61,
+                        "bid": 2980772.69,
+                        "totalBid": 2980772.69,
+                        "timestamp": "2026-03-13T00:10:34.985Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FiatQuote": {
+        "type": "object",
+        "required": [
+          "slug",
+          "name",
+          "bid",
+          "ask"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bid": {
+            "type": "number"
+          },
+          "ask": {
+            "type": "number"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "is24x7": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          },
+          "prettyName": {
+            "type": "string"
+          },
+          "pct_variation": {
+            "type": "number"
+          },
+          "slowChange": {
+            "type": "boolean"
+          },
+          "isBank": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CryptoQuote": {
+        "type": "object",
+        "required": [
+          "slug",
+          "ask",
+          "totalAsk",
+          "bid",
+          "totalBid",
+          "time"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "ask": {
+            "type": "number"
+          },
+          "totalAsk": {
+            "type": "number"
+          },
+          "bid": {
+            "type": "number"
+          },
+          "totalBid": {
+            "type": "number"
+          },
+          "time": {
+            "type": "number",
+            "description": "Marca de tiempo Unix (segundos o ms según origen)."
+          },
+          "logo": {
+            "type": "string"
+          },
+          "prettyName": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "ProviderFiat": {
+        "type": "object",
+        "required": [
+          "slug",
+          "name",
+          "logoUrl",
+          "is24x7",
+          "url",
+          "prettyName"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "is24x7": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string"
+          },
+          "prettyName": {
+            "type": "string"
+          },
+          "slowChange": {
+            "type": "boolean"
+          },
+          "isBank": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProviderCrypto": {
+        "type": "object",
+        "required": [
+          "slug",
+          "prettyName",
+          "url",
+          "is24x7"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "prettyName": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "is24x7": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HistoryPointFiat": {
+        "type": "object",
+        "required": [
+          "bid",
+          "ask",
+          "timestamp"
+        ],
+        "properties": {
+          "bid": {
+            "type": "number"
+          },
+          "ask": {
+            "type": "number"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HistoryPointCrypto": {
+        "type": "object",
+        "required": [
+          "ask",
+          "totalAsk",
+          "bid",
+          "totalBid",
+          "timestamp"
+        ],
+        "properties": {
+          "ask": {
+            "type": "number"
+          },
+          "totalAsk": {
+            "type": "number"
+          },
+          "bid": {
+            "type": "number"
+          },
+          "totalBid": {
+            "type": "number"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

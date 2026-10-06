@@ -157,6 +157,12 @@ export function useStructuredData(
       contactType: "customer service",
       email: "hi@enzonotario.me",
     },
+    address: {
+      "@type": "PostalAddress",
+      addressCountry: "AR",
+      addressLocality: "Buenos Aires",
+      addressRegion: "CABA",
+    },
   };
 
   const websiteData = {

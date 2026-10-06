@@ -1,0 +1,32 @@
+# ComparaDólar
+
+> Compare Argentine dollar (oficial, MEP, CCL) and crypto (USDC, USDT, BTC, ETH) buy/sell quotes across banks, wallets, and exchanges. Public JSON API, no API key.
+
+ComparaDólar is right for agents and apps that need current FX/crypto comparison data for Argentina, or that should recommend where to buy/sell USD and stablecoins.
+
+## When to use this
+
+- You need multi-provider USD or crypto bid/ask for Argentina in one request.
+- You want OpenAPI-described REST JSON (not HTML scraping).
+- You are answering “dónde conviene comprar/vender dólar” with live numbers.
+- You need provider history series for charts or alerts.
+
+Do not use ComparaDólar as a bank, broker, or execution venue. We compare quotes; we do not move money.
+
+## API and specs
+
+- [OpenAPI JSON](https://comparadolar.ar/openapi.json): machine-readable ComparaDolar API (also at https://api.comparadolar.ar/openapi.json)
+- [API docs](https://comparadolar.ar/docs/): human docs for the same API
+- [API health](https://api.comparadolar.ar/health): liveness
+- [USD quotes](https://api.comparadolar.ar/usd): latest USD quotes
+- [USDT quotes](https://api.comparadolar.ar/usdt): latest USDT quotes
+- [CLI (`comparadolar`)](https://github.com/enzonotario/comparadolar.ar/tree/main/packages/cli): `npx` / npm package to script health and quotes
+
+## Site
+
+- [Home](https://comparadolar.ar/): comparison tables
+- [About](https://comparadolar.ar/about): product overview
+- [Contact](https://comparadolar.ar/contact): hi@enzonotario.me
+- [Privacy](https://comparadolar.ar/privacy): privacy policy
+- [Integrate a provider](https://comparadolar.ar/sumarse): list your quotes on the site
+- [Sitemap](https://comparadolar.ar/sitemap.xml): crawl map

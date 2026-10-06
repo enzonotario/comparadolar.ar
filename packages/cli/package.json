@@ -1,0 +1,29 @@
+{
+  "name": "comparadolar",
+  "version": "0.1.0",
+  "description": "CLI for the ComparaDólar public API (Argentine USD and crypto quotes)",
+  "type": "module",
+  "bin": {
+    "comparadolar": "./bin/comparadolar.mjs"
+  },
+  "files": [
+    "bin"
+  ],
+  "keywords": [
+    "comparadolar",
+    "argentina",
+    "dolar",
+    "crypto",
+    "fx",
+    "cli"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/enzonotario/comparadolar.ar.git",
+    "directory": "packages/cli"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

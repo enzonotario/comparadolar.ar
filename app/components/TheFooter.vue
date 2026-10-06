@@ -25,10 +25,23 @@ const columns: FooterColumn[] = [
   {
     label: "Proyecto",
     children: [
+      { label: "Acerca de", to: "/about" },
+      { label: "Contacto", to: "/contact" },
+      { label: "Privacidad", to: "/privacy" },
       { label: "Sumarse", to: "/sumarse" },
       {
         label: "API Docs",
         to: "https://comparadolar.ar/docs/",
+        target: "_blank",
+      },
+      {
+        label: "OpenAPI",
+        to: "/openapi.json",
+        target: "_blank",
+      },
+      {
+        label: "llms.txt",
+        to: "/llms.txt",
         target: "_blank",
       },
       {
