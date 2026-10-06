@@ -113,9 +113,9 @@
   border-radius: 0;
 }
 
-/* Optical vertical center for mono badges.
+/* Optical vertical center for mono badges — solo dentro de /terminal.
    Ioskeley Mono caps sit high in the em-box; nudge the label down 0.5px. */
-.usd-type-badge {
+.terminal-shell .usd-type-badge {
   display: inline-flex;
   box-sizing: border-box;
   height: 1rem;
@@ -129,7 +129,7 @@
   text-transform: uppercase;
 }
 
-.usd-type-badge__label {
+.terminal-shell .usd-type-badge__label {
   display: block;
   transform: translateY(0.5px);
   line-height: 1;

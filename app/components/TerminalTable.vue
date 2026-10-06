@@ -727,6 +727,7 @@ defineExpose({
                       :usd-type="rate.usdType"
                       :slug="rate.slug"
                       :name="rate.name"
+                      terminal
                     />
                     <span
                       v-if="rate.isUsdCcl"
@@ -886,6 +887,7 @@ defineExpose({
                   :usd-type="row.original.usdType"
                   :slug="row.original.slug"
                   :name="row.original.name"
+                  terminal
                 />
                 <span
                   v-if="row.original.isUsdCcl"

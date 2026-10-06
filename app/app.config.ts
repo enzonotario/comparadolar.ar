@@ -51,7 +51,7 @@ export default defineAppConfig({
         },
         {
           size: "xs",
-          class: "text-[10px] leading-none inline-flex items-center",
+          class: "text-[10px]",
         },
       ],
     },

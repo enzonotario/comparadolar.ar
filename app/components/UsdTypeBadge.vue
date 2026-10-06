@@ -9,13 +9,17 @@ interface Props {
   usdType?: UsdProviderType;
   slug?: string;
   name?: string;
+  /** Estilo mono solo para páginas /terminal. */
+  terminal?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  terminal: false,
+});
 
 const visible = computed(() => shouldShowUsdTypeBadge(props));
 
-const colorClass = computed(() => {
+const terminalColorClass = computed(() => {
   if (!props.usdType) return "";
   const color = getUsdTypeBadgeColor(props.usdType);
   if (color === "warning") return "bg-warning text-inverted";
@@ -26,10 +30,17 @@ const colorClass = computed(() => {
 
 <template>
   <span
-    v-if="visible && props.usdType"
+    v-if="visible && props.usdType && props.terminal"
     class="usd-type-badge shrink-0"
-    :class="colorClass"
+    :class="terminalColorClass"
   >
     <span class="usd-type-badge__label">{{ props.usdType }}</span>
   </span>
+  <UBadge
+    v-else-if="visible && props.usdType"
+    :color="getUsdTypeBadgeColor(props.usdType)"
+    size="xs"
+  >
+    {{ props.usdType }}
+  </UBadge>
 </template>
