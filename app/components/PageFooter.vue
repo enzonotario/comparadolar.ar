@@ -13,6 +13,8 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <footer class="w-full flex flex-col gap-8">
+    <OpinaPageFeedback />
+
     <RemesasTop3 v-if="remesasTop" />
 
     <slot name="before-nav" />
