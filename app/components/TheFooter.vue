@@ -144,6 +144,17 @@ const socialLinks = [
                     Invitame un café
                   </UButton>
 
+                  <span data-opina class="inline-flex">
+                    <UButton
+                      type="button"
+                      color="neutral"
+                      variant="ghost"
+                      size="sm"
+                      icon="i-lucide-message-circle"
+                      label="Dejá tu opinión"
+                    />
+                  </span>
+
                   <ClientOnly>
                     <PwaFooterButton v-if="showPwaPromo" size="sm" />
                   </ClientOnly>
