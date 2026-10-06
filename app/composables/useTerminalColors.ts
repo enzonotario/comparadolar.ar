@@ -19,6 +19,7 @@ export function useTerminalColors(currency: Ref<CurrencyType> | CurrencyType) {
         cellTextYellow: isDark ? "text-yellow-400" : "text-yellow-600",
         blue: isDark ? "text-blue-400/70" : "text-blue-600",
         ring: isDark ? "ring-green-400/50" : "ring-green-500",
+        chipBorder: isDark ? "border-green-400/50" : "border-green-500",
       },
       cyan: {
         text: isDark ? "text-cyan-400" : "text-cyan-600",
@@ -29,6 +30,7 @@ export function useTerminalColors(currency: Ref<CurrencyType> | CurrencyType) {
         cellTextYellow: isDark ? "text-yellow-400" : "text-yellow-600",
         blue: isDark ? "text-blue-400/70" : "text-blue-600",
         ring: isDark ? "ring-cyan-400/50" : "ring-cyan-500",
+        chipBorder: isDark ? "border-cyan-400/50" : "border-cyan-500",
       },
       teal: {
         text: isDark ? "text-teal-400" : "text-teal-600",
@@ -39,6 +41,7 @@ export function useTerminalColors(currency: Ref<CurrencyType> | CurrencyType) {
         cellTextYellow: isDark ? "text-yellow-400" : "text-yellow-600",
         blue: isDark ? "text-blue-400/70" : "text-blue-600",
         ring: isDark ? "ring-teal-400/50" : "ring-teal-500",
+        chipBorder: isDark ? "border-teal-400/50" : "border-teal-500",
       },
       orange: {
         text: isDark ? "text-orange-400" : "text-orange-600",
@@ -49,6 +52,7 @@ export function useTerminalColors(currency: Ref<CurrencyType> | CurrencyType) {
         cellTextYellow: isDark ? "text-yellow-400" : "text-yellow-600",
         blue: isDark ? "text-blue-400/70" : "text-blue-600",
         ring: isDark ? "ring-orange-400/50" : "ring-orange-500",
+        chipBorder: isDark ? "border-orange-400/50" : "border-orange-500",
       },
       violet: {
         text: isDark ? "text-violet-400" : "text-violet-600",
@@ -59,6 +63,7 @@ export function useTerminalColors(currency: Ref<CurrencyType> | CurrencyType) {
         cellTextYellow: isDark ? "text-yellow-400" : "text-yellow-600",
         blue: isDark ? "text-blue-400/70" : "text-blue-600",
         ring: isDark ? "ring-violet-400/50" : "ring-violet-500",
+        chipBorder: isDark ? "border-violet-400/50" : "border-violet-500",
       },
     };
 

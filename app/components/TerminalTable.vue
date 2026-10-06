@@ -602,7 +602,7 @@ defineExpose({
   <div class="w-full space-y-4">
     <div
       v-if="isLoading"
-      :class="`border rounded ${terminalColors.tableBorder} overflow-hidden`"
+      :class="`border rounded-none ${terminalColors.tableBorder} overflow-hidden`"
     >
       <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
         <div
@@ -728,9 +728,12 @@ defineExpose({
                       :slug="rate.slug"
                       :name="rate.name"
                     />
-                    <UBadge v-if="rate.isUsdCcl" color="info" size="xs">
-                      CCL
-                    </UBadge>
+                    <span
+                      v-if="rate.isUsdCcl"
+                      class="usd-type-badge bg-info text-inverted"
+                    >
+                      <span class="usd-type-badge__label">CCL</span>
+                    </span>
                     <UIcon
                       v-if="!rate.is24x7 && !marketHours"
                       name="i-heroicons-moon"
@@ -838,7 +841,7 @@ defineExpose({
 
       <!-- Vista desktop: tabla actual -->
       <div
-        :class="`hidden w-full overflow-clip rounded border bg-default md:block ${terminalColors.tableBorder}`"
+        :class="`hidden w-full overflow-clip rounded-none border bg-default md:block ${terminalColors.tableBorder}`"
       >
         <UTable
           ref="table"
@@ -849,19 +852,19 @@ defineExpose({
           :columns="columns"
           :get-row-id="(row) => row.slug"
           :ui="{
-            root: 'overflow-visible',
+            root: 'overflow-visible font-terminal',
             thead:
               'sticky top-(--ui-header-height) z-20 border-b border-default bg-default/75 backdrop-blur',
             separator: 'hidden',
             tr: `${terminalColors.tableBorder} ${terminalColors.tableHover} data-[selected=true]:bg-zinc-200/50    dark:data-[selected=true]:bg-zinc-700/50`,
-            th: 'py-1',
-            td: 'py-1 md:py-2',
+            th: 'py-1 font-terminal',
+            td: 'py-1 md:py-2 font-terminal',
           }"
         >
           <template #name-cell="{ row }">
             <NuxtLink
               :to="providerDetailTo(row.original.slug)"
-              class="flex items-center gap-2 hover:underline"
+              class="flex items-center gap-2"
             >
               <img
                 v-if="row.original.logoUrl"
@@ -873,23 +876,30 @@ defineExpose({
                 loading="lazy"
                 decoding="async"
               />
-              <span :class="terminalColors.cellText">
+              <span
+                :class="`leading-none hover:underline ${terminalColors.cellText}`"
+              >
                 {{ getProviderDisplayName(row.original) }}
               </span>
-              <UsdTypeBadge
-                :usd-type="row.original.usdType"
-                :slug="row.original.slug"
-                :name="row.original.name"
-              />
-              <UBadge v-if="row.original.isUsdCcl" color="info" size="xs">
-                CCL
-              </UBadge>
-              <UIcon
-                v-if="!row.original.is24x7 && !marketHours"
-                name="i-heroicons-moon"
-                :class="`w-3 h-3 ${terminalColors.blue}`"
-                title="Mercado cerrado"
-              />
+              <span class="inline-flex items-center gap-1.5">
+                <UsdTypeBadge
+                  :usd-type="row.original.usdType"
+                  :slug="row.original.slug"
+                  :name="row.original.name"
+                />
+                <span
+                  v-if="row.original.isUsdCcl"
+                  class="usd-type-badge bg-info text-inverted"
+                >
+                  <span class="usd-type-badge__label">CCL</span>
+                </span>
+                <UIcon
+                  v-if="!row.original.is24x7 && !marketHours"
+                  name="i-heroicons-moon"
+                  :class="`w-3 h-3 ${terminalColors.blue}`"
+                  title="Mercado cerrado"
+                />
+              </span>
             </NuxtLink>
           </template>
 
@@ -958,8 +968,8 @@ defineExpose({
           label="Solo proveedores 24/7"
           size="sm"
           :ui="{
-            root: 'pointer-events-auto bg-white dark:bg-zinc-800 rounded-full shadow-lg border border-zinc-200 dark:border-zinc-700 flex items-center px-4',
-            label: 'py-2',
+            root: 'pointer-events-auto bg-white dark:bg-zinc-800 rounded-none shadow-lg border border-zinc-200 dark:border-zinc-700 flex items-center px-4 font-terminal',
+            label: 'py-2 font-terminal',
           }"
         />
       </div>
