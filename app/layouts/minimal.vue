@@ -45,6 +45,7 @@ const colorScheme = computed(() => {
           </div>
         </UContainer>
 
+        <OpinaPageFeedback />
         <TheFooter />
       </UMain>
     </AppDashboardShell>
