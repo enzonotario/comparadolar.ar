@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { provide } from "vue";
+import { defineChart, dot, lineY, text } from "@tanstack/charts";
+import { decorative } from "@tanstack/charts/mark/decorative";
+import { scaleLinear } from "@tanstack/charts/scales/linear";
+import { scalePoint } from "@tanstack/charts/scales/point";
+import { tooltip } from "@tanstack/charts/tooltip";
+import { portal } from "@tanstack/charts/tooltip/portal";
+import { Chart } from "@tanstack/charts/vue";
 import { useMediaQuery } from "@vueuse/core";
 import type { TabsItem } from "@nuxt/ui";
 import type {
@@ -17,6 +23,7 @@ import {
   shouldShowUsdTypeBadge,
 } from "~/lib/market-constants";
 import { RATE_DISPLAY } from "~/lib/rate-labels";
+import { smoothCurve, useChartInk } from "~/lib/charts/shared";
 
 interface Props {
   currency?: string;
@@ -29,22 +36,9 @@ const props = withDefaults(defineProps<Props>(), {
 /** Tailwind `sm` — endLabels need ~210px; below this use list + full-width plot. */
 const isWide = useMediaQuery("(min-width: 640px)");
 
-const colorMode = computed(() => useColorMode().value);
-provide(
-  THEME_KEY,
-  computed(() => colorMode.value),
-);
+const { isDark, textColor, mutedColor, gridColor } = useChartInk();
 
 const chartHeight = computed(() => (isWide.value ? 280 : 220));
-
-const initOptions = computed(() => ({
-  height: chartHeight.value,
-  width: "auto",
-  renderer: "svg" as const,
-}));
-provide(INIT_OPTIONS_KEY, initOptions);
-
-const isDark = computed(() => colorMode.value === "dark");
 const isUsd = computed(
   () => props.currency === "usd" || props.currency === "usd-ccl",
 );
@@ -208,195 +202,209 @@ const rankingRows = computed((): RankingRow[] => {
     .sort((a, b) => a.rank - b.rank);
 });
 
-/** Match UBadge / UsdTypeBadge colors from app.config + Nuxt UI tokens. */
-function badgeRichStyle(
-  color: string,
-  backgroundColor: string,
-): Record<string, string | number | number[]> {
-  return {
-    fontSize: 10,
-    fontWeight: 600,
-    color,
-    backgroundColor,
-    padding: [3, 5],
-    borderRadius: 4,
-  };
+interface RankPoint {
+  series: string;
+  day: string;
+  rank: number;
+  color: string;
 }
 
-const badgeRich = computed(() => {
-  const dark = isDark.value;
-  return {
-    // success solid override → teal-100/800 · teal-900/200
-    b247: badgeRichStyle(
-      dark ? "#99f6e4" : "#115e59",
-      dark ? "#134e4a" : "#ccfbf1",
-    ),
-    // info solid → blue
-    bCcl: badgeRichStyle(
-      dark ? "#18181b" : "#ffffff",
-      dark ? "#60a5fa" : "#3b82f6",
-    ),
-    // neutral solid → inverted (zinc)
-    bOficial: badgeRichStyle(
-      dark ? "#18181b" : "#ffffff",
-      dark ? "#ffffff" : "#18181b",
-    ),
-    // warning solid → amber
-    bMEP: badgeRichStyle(
-      dark ? "#18181b" : "#ffffff",
-      dark ? "#fcd34d" : "#f59e0b",
-    ),
-    // secondary solid → cyan
-    bCripto: badgeRichStyle(
-      dark ? "#18181b" : "#ffffff",
-      dark ? "#67e8f9" : "#06b6d4",
-    ),
-  };
-});
-
-function usdTypeRichKey(
-  usdType: UsdProviderType,
-): "bOficial" | "bMEP" | "bCripto" {
-  if (usdType === "MEP") return "bMEP";
-  if (usdType === "Cripto") return "bCripto";
-  return "bOficial";
+interface RankSegment {
+  id: string;
+  color: string;
+  points: RankPoint[];
 }
 
-const chartOption = computed(() => {
+function endCaption(
+  item: WeeklyRankingSeriesItem,
+  meta: ProviderMeta,
+  price: number | null,
+) {
+  const parts = [item.name];
+  if (meta.is24x7) parts.push("24/7");
+  if (meta.isCcl) parts.push("CCL");
+  if (showUsdTypes.value && meta.showUsdType && meta.usdType) {
+    parts.push(meta.usdType);
+  }
+  if (price != null && price > 0) parts.push(`$${formatPrice(price)}`);
+  return parts.join(" · ");
+}
+
+function groupByColor(points: RankPoint[]) {
+  const groups = new Map<string, RankPoint[]>();
+  for (const point of points) {
+    const group = groups.get(point.color);
+    if (group) group.push(point);
+    else groups.set(point.color, [point]);
+  }
+  return [...groups.entries()];
+}
+
+const rankModel = computed(() => {
   const labels = data.value.labels ?? [];
   const categories = labels.map(formatDayLabel);
-  const textColor = isDark.value ? "#f4f4f5" : "#18181b";
-  const mutedColor = isDark.value ? "#a1a1aa" : "#71717a";
-  const splitColor = isDark.value ? "#3f3f46" : "#e4e4e7";
   const dayIdx = todayIndex.value;
-  const richBadges = badgeRich.value;
   const wide = isWide.value;
-  // Narrow: hide endLabel + shrink grid.right so bump lines stay readable.
-  const series = seriesSource.value.map(
-    (item: WeeklyRankingSeriesItem, index: number) => {
-      const color = PALETTE[index % PALETTE.length]!;
-      const meta = metaFor(item.slug, item.name);
-      const todayRank = item.ranks[dayIdx];
-      const todayPrice = item.prices[dayIdx];
-      const showEnd = wide && todayRank != null;
+  const segments: RankSegment[] = [];
+  const dots: RankPoint[] = [];
+  const captions: Array<RankPoint & { caption: string }> = [];
 
-      const badgeParts: string[] = [`{name|${item.name}}`];
-      if (meta.is24x7) badgeParts.push("{b247|24/7}");
-      if (meta.isCcl) badgeParts.push("{bCcl|CCL}");
-      if (showUsdTypes.value && meta.showUsdType && meta.usdType) {
-        const key = usdTypeRichKey(meta.usdType);
-        badgeParts.push(`{${key}|${meta.usdType}}`);
-      }
-      if (todayPrice != null && todayPrice > 0) {
-        badgeParts.push(`{price|$${formatPrice(todayPrice)}}`);
-      }
+  seriesSource.value.forEach((item: WeeklyRankingSeriesItem, index: number) => {
+    const color = PALETTE[index % PALETTE.length]!;
+    let current: RankPoint[] = [];
+    const flush = () => {
+      if (!current.length) return;
+      segments.push({
+        id: `${item.slug}-${segments.length}`,
+        color,
+        points: current,
+      });
+      current = [];
+    };
 
-      return {
-        name: item.name,
-        type: "line" as const,
-        smooth: true,
-        symbol: "circle",
-        symbolSize: wide ? 14 : 9,
-        showSymbol: true,
-        connectNulls: false,
-        emphasis: {
-          focus: "series" as const,
-        },
-        lineStyle: {
-          width: wide ? 3 : 2,
-          color,
-        },
-        itemStyle: {
-          color,
-        },
-        endLabel: {
-          show: showEnd,
-          distance: 12,
-          formatter: () => badgeParts.join(" "),
-          rich: {
-            name: {
-              fontWeight: "bold",
-              fontSize: 12,
-              color,
-              padding: [0, 4, 0, 0],
-            },
-            ...richBadges,
-            price: {
-              fontSize: 10,
-              color: mutedColor,
-              padding: [0, 0, 0, 2],
+    item.ranks.forEach((rank, rankIndex) => {
+      const day = categories[rankIndex];
+      if (rank == null || !day) {
+        flush();
+        return;
+      }
+      const point: RankPoint = {
+        series: item.name,
+        day,
+        rank,
+        color,
+      };
+      current.push(point);
+      dots.push(point);
+      if (wide && rankIndex === dayIdx) {
+        const price = item.prices[rankIndex];
+        captions.push({
+          ...point,
+          caption: endCaption(
+            item,
+            metaFor(item.slug, item.name),
+            price != null && price > 0 ? price : null,
+          ),
+        });
+      }
+    });
+    flush();
+  });
+
+  return { categories, segments, dots, captions };
+});
+
+const definition = computed(() => {
+  const { categories, segments, dots, captions } = rankModel.value;
+  if (!categories.length || segments.length === 0) return null;
+
+  const rankTicks = Array.from({ length: topN.value }, (_, index) => index + 1);
+  const wide = isWide.value;
+
+  return defineChart(
+    {
+      margin: {
+        top: 12,
+        right: wide ? 220 : 12,
+        bottom: 8,
+        left: 8,
+      },
+      marks: [
+        ...segments.map((segment) =>
+          lineY(segment.points, {
+            x: (row: RankPoint) => row.day,
+            y: (row: RankPoint) => row.rank,
+            stroke: segment.color,
+            strokeWidth: wide ? 3 : 2,
+            curve: smoothCurve,
+            key: (row: RankPoint) => `${segment.id}-${row.day}`,
+          }),
+        ),
+        ...groupByColor(dots).map(([color, points]) =>
+          dot(points, {
+            x: (row: RankPoint) => row.day,
+            y: (row: RankPoint) => row.rank,
+            r: wide ? 7 : 4.5,
+            fill: color,
+            stroke: isDark.value ? "#18181b" : "#ffffff",
+            strokeWidth: 2,
+            key: (row: RankPoint) => `${row.series}-${row.day}`,
+          }),
+        ),
+        ...(captions.length
+          ? [
+              decorative(
+                text(captions, {
+                  x: (row: RankPoint) => row.day,
+                  y: (row: RankPoint) => row.rank,
+                  text: (row: (typeof captions)[number]) => row.caption,
+                  anchor: "start",
+                  dx: 14,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fill: (row: RankPoint) => row.color,
+                }),
+              ),
+            ]
+          : []),
+      ],
+      scales: {
+        x: {
+          scale: () => scalePoint<string>().domain(categories).padding(0.15),
+          grid: { stroke: gridColor.value, strokeDasharray: "4 4" },
+          axis: {
+            line: { stroke: gridColor.value },
+            ticks: { size: 0 },
+            tickLabels: {
+              thin: true,
+              fontSize: wide ? 11 : 10,
+              fill: mutedColor.value,
             },
           },
         },
-        data: item.ranks.map((rank) => (rank == null ? null : rank)),
-      };
+        y: {
+          scale: scaleLinear().domain([1, topN.value]),
+          reverse: true,
+          grid: { stroke: gridColor.value, strokeDasharray: "4 4" },
+          axis: {
+            line: false,
+            ticks: {
+              values: rankTicks,
+              size: 0,
+              format: (value: number) => `#${value}`,
+            },
+            tickLabels: {
+              fontSize: wide ? 11 : 10,
+              fill: mutedColor.value,
+            },
+          },
+        },
+      },
+      theme: {
+        foreground: textColor.value,
+        muted: mutedColor.value,
+        grid: gridColor.value,
+        background: "transparent",
+        fontFamily: "inherit",
+      },
+    },
+    {
+      focus: "nearest",
+      tooltip: {
+        use: tooltip,
+        portal,
+        content: (points) => {
+          const row = points[0]?.datum as RankPoint | undefined;
+          if (!row) return { rows: [] };
+          return {
+            title: row.series,
+            color: row.color,
+            rows: [{ label: row.day, value: `#${row.rank}` }],
+          };
+        },
+      },
     },
   );
-
-  return {
-    backgroundColor: "transparent",
-    animationDuration: 400,
-    tooltip: {
-      trigger: "item",
-      confine: !wide,
-      formatter: (params: {
-        seriesName?: string;
-        value?: number | null;
-        name?: string;
-      }) => {
-        if (params.value == null) return "";
-        return `${params.seriesName}<br/>${params.name}: #${params.value}`;
-      },
-    },
-    grid: {
-      left: wide ? 36 : 28,
-      right: wide ? 210 : 12,
-      top: 16,
-      bottom: wide ? 28 : 24,
-      containLabel: false,
-    },
-    xAxis: {
-      type: "category",
-      boundaryGap: false,
-      data: categories,
-      splitLine: {
-        show: true,
-        lineStyle: { color: splitColor, type: "dashed" },
-      },
-      axisLine: { lineStyle: { color: splitColor } },
-      axisTick: { show: false },
-      axisLabel: {
-        color: mutedColor,
-        fontSize: wide ? 11 : 10,
-        margin: wide ? 12 : 8,
-        hideOverlap: true,
-      },
-    },
-    yAxis: {
-      type: "value",
-      inverse: true,
-      min: 1,
-      max: topN.value,
-      interval: 1,
-      axisLabel: {
-        color: mutedColor,
-        fontSize: wide ? 11 : 10,
-        margin: wide ? 10 : 6,
-        formatter: (value: number) => `#${value}`,
-      },
-      splitLine: {
-        show: true,
-        lineStyle: { color: splitColor, type: "dashed" },
-      },
-      axisLine: { show: false },
-      axisTick: { show: false },
-    },
-    series,
-    textStyle: {
-      color: textColor,
-      fontFamily: "inherit",
-    },
-  };
 });
 </script>
 
@@ -444,11 +452,13 @@ const chartOption = computed(() => {
 
     <div v-else class="w-full">
       <ClientOnly>
-        <VChart
+        <Chart
+          v-if="definition"
           :key="`${currency}-${activeSide}-${data.labels.join(',')}-${isWide ? 'wide' : 'narrow'}`"
-          :option="chartOption"
+          :definition="definition"
+          aria-label="Ranking semanal de cotizaciones"
           class="h-[220px] w-full sm:h-[280px]"
-          autoresize
+          :height="chartHeight"
         />
         <template #fallback>
           <div
@@ -474,9 +484,7 @@ const chartOption = computed(() => {
             :style="{ backgroundColor: row.color }"
             aria-hidden="true"
           />
-          <span
-            class="w-7 shrink-0 font-mono text-xs font-semibold text-muted"
-          >
+          <span class="w-7 shrink-0 font-mono text-xs font-semibold text-muted">
             #{{ row.rank }}
           </span>
           <div class="min-w-0 flex-1">

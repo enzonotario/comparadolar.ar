@@ -1,9 +1,36 @@
 <script setup lang="ts">
-import { provide } from "vue";
+import {
+  areaY,
+  barY,
+  colorLegend,
+  colorLegendItems,
+  defineChart,
+  lineY,
+} from "@tanstack/charts";
+import { decorative } from "@tanstack/charts/mark/decorative";
+import { controlledSignal } from "@tanstack/charts/interaction/signal";
+import { zoomX } from "@tanstack/charts/interaction/zoom";
+import { scaleLinear } from "@tanstack/charts/scales/linear";
+import { tooltip } from "@tanstack/charts/tooltip";
+import { portal } from "@tanstack/charts/tooltip/portal";
+import { Chart } from "@tanstack/charts/vue";
+import { scaleUtc } from "d3-scale";
 import { calculateSpread } from "~/lib/utils";
 import { RATE_DISPLAY, RATE_LABELS } from "~/lib/rate-labels";
 import { getDateRange, timeRanges } from "~/composables/useChartData";
 import { toApiCurrency } from "~/lib/market-constants";
+import {
+  extendSeriesToRange,
+  formatAxisDate,
+  formatPrice,
+  formatSpread,
+  formatTooltipDate,
+  paddedDomain,
+  smoothCurve,
+  useChartInk,
+  useZoomPlotHover,
+  useZoomWindow,
+} from "~/lib/charts/shared";
 
 interface HistoryData {
   bid: number;
@@ -17,23 +44,8 @@ const props = defineProps<{
   currency: string;
 }>();
 
-const colorMode = computed(() => useColorMode().value);
-
-provide(
-  THEME_KEY,
-  computed(() => colorMode.value),
-);
-
+const { isDark, textColor, gridColor } = useChartInk();
 const selectedRange = ref("7d");
-
-const renderer = ref("svg");
-const initOptions = computed(() => ({
-  height: 400,
-  width: "auto",
-  renderer: renderer.value,
-}));
-provide(INIT_OPTIONS_KEY, initOptions);
-
 const apiCurrency = toApiCurrency(props.currency);
 
 const {
@@ -44,7 +56,6 @@ const {
 } = useFetch<HistoryData[]>(
   `https://api.comparadolar.ar/${apiCurrency}/providers/${props.provider}/history`,
   {
-    // Full 90d history is large — keep it off the SSR payload / worker heap.
     server: false,
     lazy: true,
   },
@@ -68,292 +79,245 @@ const chartData = computed(() => {
     }));
 });
 
-const chartOption = computed(() => {
-  if (!chartData.value.length) return {};
-
-  // Calcular el rango completo basado en selectedRange
+const extent = computed(() => {
   const { start, end } = getDateRange(selectedRange.value);
-  const rangeStartTimestamp = start.toISOString();
-  const rangeEndTimestamp = end.toISOString();
-
-  const times = chartData.value.map((item) => item.timestamp);
-  const bidPrices = chartData.value.map((item) => item.bid);
-  const askPrices = chartData.value.map((item) => item.ask);
-  const spreads = chartData.value.map((item) => item.spread);
-
-  // Obtener el primer y último timestamp del rango
-  const firstTimestamp = rangeStartTimestamp;
-  const lastTimestamp = rangeEndTimestamp;
-  const firstTimestampNum = new Date(firstTimestamp).getTime();
-  const lastTimestampNum = new Date(lastTimestamp).getTime();
-
-  // Obtener el primer y último valor disponible
-  const firstTime = times[0];
-  const lastTime = times[times.length - 1];
-  const firstTimeNum = firstTime ? new Date(firstTime).getTime() : null;
-  const lastTimeNum = lastTime ? new Date(lastTime).getTime() : null;
-
-  // Preparar datos en formato numérico [timestamp (number), value]
-  // Extendemos al inicio solo si el primer valor está DENTRO del rango seleccionado
-  const prepareData = (
-    values: number[],
-    addStart: boolean,
-    addEnd: boolean,
-  ): Array<[number, number]> => {
-    const data: Array<[number, number]> = [];
-
-    if (values.length === 0) return data;
-
-    // Añadir valor computado al inicio solo si el primer valor de la API está DENTRO del rango
-    // Si el rango comienza antes del primer valor disponible, no extendemos hacia atrás
-    if (
-      addStart &&
-      firstTimeNum &&
-      firstTimeNum >= firstTimestampNum &&
-      firstTimeNum > firstTimestampNum &&
-      values[0] !== undefined
-    ) {
-      data.push([firstTimestampNum, values[0]]);
-    }
-
-    // Añadir todos los datos existentes
-    values.forEach((value, index) => {
-      if (times[index]) {
-        data.push([new Date(times[index]).getTime(), value]);
-      }
-    });
-
-    // Añadir valor computado al final si es necesario
-    const lastValue = values[values.length - 1];
-    if (
-      addEnd &&
-      lastTimeNum &&
-      lastTimeNum < lastTimestampNum &&
-      lastValue !== undefined
-    ) {
-      data.push([lastTimestampNum, lastValue]);
-    }
-
-    // Ordenar por timestamp
-    return data.sort((a, b) => a[0] - b[0]);
-  };
-
-  const bidData = prepareData(
-    bidPrices,
-    firstTimeNum ? firstTimeNum >= firstTimestampNum : false,
-    lastTimeNum ? lastTimeNum < lastTimestampNum : false,
-  );
-  const askData = prepareData(
-    askPrices,
-    firstTimeNum ? firstTimeNum >= firstTimestampNum : false,
-    lastTimeNum ? lastTimeNum < lastTimestampNum : false,
-  );
-  const spreadData = prepareData(
-    spreads,
-    firstTimeNum ? firstTimeNum >= firstTimestampNum : false,
-    lastTimeNum ? lastTimeNum < lastTimestampNum : false,
-  );
-
-  return {
-    tooltip: {
-      trigger: "axis",
-      formatter: (params: any) => {
-        // params[0].axisValue ya contiene el timestamp formateado cuando usamos type: "time"
-        const timestamp = params[0].axisValue || params[0].data[0];
-        const date =
-          typeof timestamp === "number"
-            ? new Date(timestamp)
-            : new Date(timestamp);
-        const timeString = date.toLocaleString("es-AR", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-
-        let tooltip = `<strong>${timeString}</strong><br/>`;
-        params.forEach((item: any) => {
-          if (item.seriesName === "Spread") {
-            tooltip += `${item.marker} ${item.seriesName}: ${formatPercentage(
-              item.data[1],
-            )}<br/>`;
-          } else {
-            tooltip += `${item.marker} ${item.seriesName}: $${formatPrice(
-              item.data[1],
-            )}<br/>`;
-          }
-        });
-        return tooltip;
-      },
-    },
-    legend: {
-      data: [RATE_LABELS.ask, RATE_LABELS.bid, RATE_LABELS.spread],
-      top: 10,
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "10%",
-      top: "15%",
-      outerBoundsMode: "same",
-      outerBoundsContain: "axisLabel",
-    },
-    xAxis: {
-      type: "time",
-      boundaryGap: false,
-      min: firstTimestampNum,
-      max: lastTimestampNum,
-      axisLabel: {
-        formatter: (value: number | string) => {
-          const date =
-            typeof value === "string" ? new Date(value) : new Date(value);
-
-          if (selectedRange.value === "1d") {
-            return date.toLocaleTimeString("es-AR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-          } else if (selectedRange.value === "7d") {
-            return date.toLocaleDateString("es-AR", {
-              month: "2-digit",
-              day: "2-digit",
-            });
-          } else {
-            return date.toLocaleDateString("es-AR", {
-              month: "2-digit",
-              day: "2-digit",
-            });
-          }
-        },
-      },
-    },
-    yAxis: [
-      {
-        type: "value",
-        name: "Precio",
-        position: "left",
-        axisLabel: {
-          formatter: (value: number) => `$${formatPrice(value)}`,
-        },
-        min: "dataMin",
-      },
-      {
-        type: "value",
-        name: "Spread",
-        position: "right",
-        axisLabel: {
-          formatter: (value: number) => `${formatPercentage(value)}`,
-        },
-        splitLine: {
-          show: false,
-        },
-      },
-    ],
-    dataZoom: [
-      {
-        type: "inside",
-        xAxisIndex: [0],
-        filterMode: "none",
-      },
-      {
-        type: "slider",
-        xAxisIndex: [0],
-        height: 20,
-        bottom: 10,
-        start: 0,
-        end: 100,
-        filterMode: "none",
-      },
-    ],
-    series: [
-      {
-        name: RATE_LABELS.ask,
-        type: "line",
-        data: askData,
-        smooth: true,
-        showSymbol: false,
-        connectNulls: true,
-        sampling: "lttb",
-        lineStyle: {
-          color: RATE_DISPLAY.ask.chartColor,
-          width: 2,
-        },
-        itemStyle: {
-          color: RATE_DISPLAY.ask.chartColor,
-        },
-        areaStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: RATE_DISPLAY.ask.chartAreaStart },
-              { offset: 1, color: RATE_DISPLAY.ask.chartAreaEnd },
-            ],
-          },
-        },
-      },
-      {
-        name: RATE_LABELS.bid,
-        type: "line",
-        data: bidData,
-        smooth: true,
-        showSymbol: false,
-        connectNulls: true,
-        sampling: "lttb",
-        lineStyle: {
-          color: RATE_DISPLAY.bid.chartColor,
-          width: 2,
-        },
-        itemStyle: {
-          color: RATE_DISPLAY.bid.chartColor,
-        },
-        areaStyle: {
-          color: {
-            type: "linear",
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: RATE_DISPLAY.bid.chartAreaStart },
-              { offset: 1, color: RATE_DISPLAY.bid.chartAreaEnd },
-            ],
-          },
-        },
-      },
-      {
-        name: "Spread",
-        type: "bar",
-        yAxisIndex: 1,
-        data: spreadData,
-        itemStyle: {
-          color: colorMode.value === "dark" ? "#3f3f46" : "#d4d4d8",
-        },
-        barWidth: 10,
-      },
-    ],
-    backgroundColor: "transparent",
-  };
+  return [start, end] as const;
 });
 
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat("es-AR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(price);
-};
+const zoomWindow = useZoomWindow(extent);
 
-const formatPercentage = (value: number) => {
-  return new Intl.NumberFormat("es-AR", {
-    style: "percent",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value / 100);
-};
+const spreadColor = computed(() => (isDark.value ? "#3f3f46" : "#d4d4d8"));
+
+interface PricePoint {
+  x: Date;
+  y: number;
+  series: string;
+}
+
+const definition = computed(() => {
+  const items = chartData.value;
+  const current = zoomWindow.value;
+  const dates = extent.value;
+  if (!items.length || !current) return null;
+
+  const [start, end] = dates;
+  const ask = extendSeriesToRange(
+    items.map((item) => ({ timestamp: item.timestamp, value: item.ask })),
+    start,
+    end,
+  ).map((point) => ({ ...point, series: RATE_LABELS.ask }));
+  const bid = extendSeriesToRange(
+    items.map((item) => ({ timestamp: item.timestamp, value: item.bid })),
+    start,
+    end,
+  ).map((point) => ({ ...point, series: RATE_LABELS.bid }));
+  const spread = extendSeriesToRange(
+    items.map((item) => ({ timestamp: item.timestamp, value: item.spread })),
+    start,
+    end,
+  );
+  const [yMin, yMax] = paddedDomain([...ask, ...bid].map((point) => point.y));
+  const spreadMax = Math.max(...spread.map((point) => point.y), 0);
+  const xScale = scaleUtc().domain([current.start, current.end]);
+
+  const priceMark = (
+    rows: PricePoint[],
+    label: string,
+    color: string,
+    gradientId: string,
+  ) => [
+    decorative(
+      areaY(rows, {
+        x: (row: PricePoint) => row.x,
+        y1: yMin,
+        y2: (row: PricePoint) => row.y,
+        fill: `url(#${gradientId})`,
+        curve: smoothCurve,
+        key: (row: PricePoint) => row.x.toISOString(),
+      }),
+    ),
+    lineY(rows, {
+      x: (row: PricePoint) => row.x,
+      y: (row: PricePoint) => row.y,
+      color: () => label,
+      stroke: color,
+      strokeWidth: 2,
+      curve: smoothCurve,
+      key: (row: PricePoint) => row.x.toISOString(),
+    }),
+  ];
+
+  return defineChart(
+    {
+      clip: true,
+      margin: { top: 28, bottom: 28 },
+      gradients: [
+        {
+          id: "history-ask",
+          x1: 0,
+          y1: 0,
+          x2: 0,
+          y2: 1,
+          stops: [
+            { offset: 0, color: RATE_DISPLAY.ask.chartColor, opacity: 0.3 },
+            { offset: 1, color: RATE_DISPLAY.ask.chartColor, opacity: 0.05 },
+          ],
+        },
+        {
+          id: "history-bid",
+          x1: 0,
+          y1: 0,
+          x2: 0,
+          y2: 1,
+          stops: [
+            { offset: 0, color: RATE_DISPLAY.bid.chartColor, opacity: 0.3 },
+            { offset: 1, color: RATE_DISPLAY.bid.chartColor, opacity: 0.05 },
+          ],
+        },
+      ],
+      marks: [
+        barY(spread, {
+          x: (row) => row.x,
+          y1: 0,
+          y2: (row) => row.y,
+          yScale: "spread",
+          fill: spreadColor.value,
+          maxThickness: 10,
+          color: () => RATE_LABELS.spread,
+          key: (row) => row.x.toISOString(),
+        }),
+        ...priceMark(
+          ask,
+          RATE_LABELS.ask,
+          RATE_DISPLAY.ask.chartColor,
+          "history-ask",
+        ),
+        ...priceMark(
+          bid,
+          RATE_LABELS.bid,
+          RATE_DISPLAY.bid.chartColor,
+          "history-bid",
+        ),
+      ],
+      scales: {
+        x: {
+          scale: xScale,
+          grid: false,
+          axis: {
+            ticks: {
+              format: (value: Date) =>
+                formatAxisDate(value, selectedRange.value),
+            },
+            tickLabels: { thin: true, fontSize: 11 },
+          },
+        },
+        y: {
+          scale: scaleLinear().domain([yMin, yMax]),
+          grid: { stroke: gridColor.value, strokeDasharray: "4 4" },
+          axis: {
+            label: "Precio",
+            ticks: { format: (value: number) => `$${formatPrice(value)}` },
+          },
+        },
+        spread: {
+          channel: "y",
+          side: "right",
+          scale: scaleLinear().domain([0, spreadMax * 1.15 || 1]),
+          grid: false,
+          axis: {
+            label: "Spread",
+            ticks: { format: (value: number) => formatSpread(value) },
+          },
+        },
+      },
+      color: {
+        domain: [RATE_LABELS.ask, RATE_LABELS.bid, RATE_LABELS.spread],
+        range: [
+          RATE_DISPLAY.ask.chartColor,
+          RATE_DISPLAY.bid.chartColor,
+          spreadColor.value,
+        ],
+        legend: colorLegend({
+          placement: "top",
+          items: colorLegendItems({
+            indicator: {
+              shape: (value) =>
+                value === RATE_LABELS.spread ? "square" : "line",
+            },
+          }),
+        }),
+      },
+      theme: {
+        foreground: textColor.value,
+        muted: textColor.value,
+        grid: gridColor.value,
+        background: "transparent",
+      },
+      controls: [
+        zoomX({
+          window: controlledSignal(current, (next) => {
+            zoomWindow.value = { start: next.start, end: next.end };
+          }),
+          extent: [dates[0], dates[1]],
+          ariaLabel: "Período visible de la cotización histórica",
+          format: (value) => formatTooltipDate(value),
+        }),
+      ],
+    },
+    {
+      focus: "nearest-x",
+      maxFocusDistance: Number.POSITIVE_INFINITY,
+      tooltip: {
+        use: tooltip,
+        portal,
+        content: (points) => {
+          const focused = points[0]?.datum as { x?: Date } | undefined;
+          const time = focused?.x;
+          if (!(time instanceof Date)) return { rows: [] };
+          const closest = <T extends { x: Date }>(rows: readonly T[]) =>
+            rows.reduce<T | null>((best, point) => {
+              if (!best) return point;
+              return Math.abs(point.x.getTime() - time.getTime()) <
+                Math.abs(best.x.getTime() - time.getTime())
+                ? point
+                : best;
+            }, null);
+          const askPoint = closest(ask);
+          const bidPoint = closest(bid);
+          const spreadPoint = closest(spread);
+          return {
+            title: formatTooltipDate(time),
+            rows: [
+              askPoint
+                ? {
+                    label: RATE_LABELS.ask,
+                    value: `$${formatPrice(askPoint.y)}`,
+                    color: RATE_DISPLAY.ask.chartColor,
+                  }
+                : null,
+              bidPoint
+                ? {
+                    label: RATE_LABELS.bid,
+                    value: `$${formatPrice(bidPoint.y)}`,
+                    color: RATE_DISPLAY.bid.chartColor,
+                  }
+                : null,
+              spreadPoint
+                ? {
+                    label: RATE_LABELS.spread,
+                    value: formatSpread(spreadPoint.y),
+                    color: spreadColor.value,
+                  }
+                : null,
+            ].filter((row) => row != null),
+          };
+        },
+      },
+    },
+  );
+});
+
+const { onRender: onZoomPlotHover } = useZoomPlotHover();
 </script>
 
 <template>
@@ -417,7 +381,14 @@ const formatPercentage = (value: number) => {
     </div>
 
     <div v-else-if="chartData && chartData.length > 0" class="w-full">
-      <VChart :option="chartOption" class="w-full h-80" autoresize />
+      <Chart
+        v-if="definition"
+        :definition="definition"
+        aria-label="Cotización histórica del proveedor"
+        class="h-80 w-full"
+        :height="320"
+        @render="onZoomPlotHover"
+      />
     </div>
 
     <div v-else class="flex items-center justify-center h-64">

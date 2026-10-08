@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
-@import "vue-data-ui/style.css";
 
 /* Ioskeley Mono — https://github.com/ahatem/IoskeleyMono (SIL OFL 1.1) */
 @font-face {

@@ -1,12 +1,28 @@
 <script setup lang="ts">
-import type { VueUiXyConfig, VueUiXyDatasetItem } from "vue-data-ui";
+import {
+  areaY,
+  colorLegend,
+  colorLegendItems,
+  d3Curve,
+  defineChart,
+  dot,
+  lineY,
+  ruleX,
+  text,
+} from "@tanstack/charts";
+import { decorative } from "@tanstack/charts/mark/decorative";
+import { controlledSignal } from "@tanstack/charts/interaction/signal";
+import { zoomX } from "@tanstack/charts/interaction/zoom";
+import { scaleLinear } from "@tanstack/charts/scales/linear";
+import { tooltip } from "@tanstack/charts/tooltip";
+import { portal } from "@tanstack/charts/tooltip/portal";
+import { Chart } from "@tanstack/charts/vue";
+import { curveMonotoneX } from "d3-shape";
+import { scaleUtc } from "d3-scale";
 import type { ExchangeRate, CurrencyType } from "@/lib/types";
 import { API_ENDPOINTS, API_BASE_URL } from "@/lib/types";
 import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
-
-const VueUiXy = defineAsyncComponent(() =>
-  import("vue-data-ui/vue-ui-xy").then((m) => m.VueUiXy ?? m.default),
-);
+import { useZoomPlotHover, useZoomWindow } from "~/lib/charts/shared";
 
 interface Props {
   currency?: CurrencyType;
@@ -296,6 +312,46 @@ const getLatestProviderValue = (
   return valueType === "bid" ? latestItem.bid : latestItem.ask;
 };
 
+interface ProviderPoint {
+  provider: (typeof topProvidersForBuy.value)[0];
+  value: number;
+  type: "buy" | "sell";
+}
+
+const providerPoints = computed<ProviderPoint[]>(() => {
+  const points: ProviderPoint[] = [];
+
+  topProvidersForSell.value.forEach((provider) => {
+    const value = getLatestProviderValue(provider, "ask");
+    if (value == null) return;
+    points.push({ provider, value, type: "sell" });
+  });
+
+  topProvidersForBuy.value.forEach((provider) => {
+    const value = getLatestProviderValue(provider, "bid");
+    if (value == null) return;
+    points.push({ provider, value, type: "buy" });
+  });
+
+  return points.sort((a, b) => a.value - b.value);
+});
+
+const yScale = computed(() => {
+  const { lower, upper } = bandsData.value;
+  const providerValues = providerPoints.value.map((point) => point.value);
+  const allValues = [...lower, ...upper, ...providerValues];
+  if (allValues.length === 0) {
+    return { min: 0, max: 2000 };
+  }
+  const dataMin = Math.min(...allValues);
+  const dataMax = Math.max(...allValues);
+  const padding = (dataMax - dataMin) * 0.08;
+  return {
+    min: Math.max(0, Math.floor(dataMin - padding)),
+    max: Math.ceil(dataMax + padding),
+  };
+});
+
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("es-AR", {
     minimumFractionDigits: 2,
@@ -320,475 +376,403 @@ const getImageUrl = (url: string): string => {
   return url;
 };
 
-interface ProviderLogoMarker {
-  id: string;
-  logoUrl: string;
-  color: string;
-  displayName: string;
-  badgeLabel: string;
-  valueLabel: string;
-  x: number;
-  y: number;
-  plotX: number;
-  plotY: number;
-}
-
-const LOGO_SIZE = 40;
-const LOGO_OFFSET_X = 120;
-const LOGO_STACK_GAP = 56;
-
-const buildProviderLogoMarkers = (svg: {
-  data?: Array<{
-    id?: string;
-    type?: string;
-    color?: string;
-    name?: string;
-    logoUrl?: string;
-    displayName?: string;
-    badgeLabel?: string;
-    plots?: Array<{ x: number; y: number; value: number | null }>;
-  }>;
-  drawingArea?: {
-    right: number;
-    left: number;
-    top: number;
-    bottom: number;
-  };
-}): ProviderLogoMarker[] => {
-  if (!svg?.data?.length) return [];
-
-  const plotSeries = svg.data.filter(
-    (serie) => serie.type === "plot" && serie.logoUrl,
-  );
-
-  const rawMarkers = plotSeries
-    .map((serie) => {
-      const plot = serie.plots?.find(
-        (item) => item.value != null && Number.isFinite(item.x),
-      );
-      if (!plot || plot.value == null) return null;
-
-      // Keep a clear gap from the datapoint; draw into the right padding zone.
-      const x = plot.x + LOGO_OFFSET_X;
-
-      return {
-        id: String(serie.id ?? serie.name),
-        logoUrl: getImageUrl(String(serie.logoUrl)),
-        color: serie.color || RATE_DISPLAY.ask.chartColor,
-        displayName:
-          serie.displayName ||
-          String(serie.name || "").replace(/\s*\(.*\)$/, ""),
-        badgeLabel: serie.badgeLabel || "",
-        valueLabel: `$${formatPrice(Number(plot.value))}`,
-        x,
-        y: plot.y,
-        plotX: plot.x,
-        plotY: plot.y,
-      };
-    })
-    .filter((marker): marker is ProviderLogoMarker => marker != null)
-    .sort((a, b) => a.y - b.y);
-
-  if (rawMarkers.length <= 1) return rawMarkers;
-
-  const areaTop = svg.drawingArea?.top ?? 0;
-  const areaBottom = svg.drawingArea?.bottom ?? rawMarkers[0]!.y;
-  const stacked = rawMarkers.map((marker) => ({ ...marker }));
-
-  for (let i = 1; i < stacked.length; i++) {
-    const prev = stacked[i - 1]!;
-    const current = stacked[i]!;
-    if (current.y - prev.y < LOGO_STACK_GAP) {
-      current.y = prev.y + LOGO_STACK_GAP;
-    }
-  }
-
-  const last = stacked[stacked.length - 1]!;
-  if (last.y + LOGO_SIZE / 2 > areaBottom) {
-    const overflow = last.y + LOGO_SIZE / 2 - areaBottom;
-    for (const marker of stacked) {
-      marker.y -= overflow;
-    }
-  }
-
-  const first = stacked[0]!;
-  if (first.y - LOGO_SIZE / 2 < areaTop) {
-    const shift = areaTop + LOGO_SIZE / 2 - first.y;
-    for (const marker of stacked) {
-      marker.y += shift;
-    }
-  }
-
-  return stacked;
+const smoothCurve = d3Curve(curveMonotoneX);
+const { textColor, mutedColor, gridColor } = {
+  textColor: computed(() => (isDark.value ? "#f4f4f5" : "#18181b")),
+  mutedColor: computed(() => (isDark.value ? "#a1a1aa" : "#71717a")),
+  gridColor: computed(() => (isDark.value ? "#3f3f46" : "#e4e4e7")),
 };
 
-interface ProviderPoint {
-  provider: (typeof topProvidersForBuy.value)[0];
-  value: number;
-  type: "buy" | "sell";
-  historyItem?: HistoryItem;
+const bandExtent = computed(() => {
+  const labels = bandsData.value.labels;
+  const first = labels[0];
+  const last = labels[labels.length - 1];
+  if (first == null || last == null) return null;
+  return [new Date(first), new Date(last)] as const;
+});
+
+const zoomWindow = useZoomWindow(bandExtent);
+
+interface BandPoint {
+  x: Date;
+  lower: number;
+  upper: number;
 }
 
-const providerPoints = computed<ProviderPoint[]>(() => {
-  const points: ProviderPoint[] = [];
+interface CalloutPoint {
+  x: Date;
+  y: number;
+  name: string;
+  badge: string;
+  valueLabel: string;
+  detail: string;
+  color: string;
+  logo: string;
+  id: string;
+}
 
-  topProvidersForSell.value.forEach((provider) => {
-    const value = getLatestProviderValue(provider, "ask");
-    if (value == null) return;
-    const historyItem = providerHistories.value[provider.slug]?.[0];
-    points.push({ provider, value, type: "sell", historyItem });
-  });
-
-  topProvidersForBuy.value.forEach((provider) => {
-    const value = getLatestProviderValue(provider, "bid");
-    if (value == null) return;
-    const historyItem = providerHistories.value[provider.slug]?.[0];
-    points.push({ provider, value, type: "buy", historyItem });
-  });
-
-  return points.sort((a, b) => a.value - b.value);
-});
-
-const yScale = computed(() => {
-  const { lower, upper } = bandsData.value;
-  const providerValues = providerPoints.value.map((p) => p.value);
-  const allValues = [...lower, ...upper, ...providerValues];
-  if (allValues.length === 0) {
-    return { min: 0, max: 2000 };
-  }
-  const dataMin = Math.min(...allValues);
-  const dataMax = Math.max(...allValues);
-  const padding = (dataMax - dataMin) * 0.08;
-  return {
-    min: Math.max(0, Math.floor(dataMin - padding)),
-    max: Math.ceil(dataMax + padding),
-  };
-});
-
-const chartDataset = computed<VueUiXyDatasetItem[]>(() => {
-  const { lower, upper, labels } = bandsData.value;
-  const pointCount = labels.length;
+const callouts = computed<CalloutPoint[]>(() => {
+  const labels = bandsData.value.labels;
   const index = todayIndex.value;
+  const timestamp = labels[index];
+  if (timestamp == null) return [];
 
-  const dataset: VueUiXyDatasetItem[] = [
-    {
-      name: "Banda inferior",
-      type: "line",
-      series: lower,
-      color: "#ef4444",
-      useArea: true,
-      smooth: true,
-      dataLabels: false,
-    },
-    {
-      name: "Banda superior",
-      type: "line",
-      series: upper,
-      color: "#f59e0b",
-      useArea: true,
-      smooth: true,
-      dataLabels: false,
-    },
-  ];
-
-  if (index < 0 || pointCount === 0) {
-    return dataset;
-  }
-
-  providerPoints.value.forEach((point) => {
-    const series = Array.from(
-      { length: pointCount },
-      () => null as number | null,
-    );
-    series[index] = point.value;
-
-    const label = point.type === "buy" ? RATE_LABELS.bid : RATE_LABELS.ask;
-    // buy → Vendes a (bid); sell → Compras a (ask)
+  return providerPoints.value.map((point) => {
+    const badge = point.type === "buy" ? RATE_LABELS.bid : RATE_LABELS.ask;
     const color =
       point.type === "buy"
         ? RATE_DISPLAY.bid.chartColor
         : RATE_DISPLAY.ask.chartColor;
-
-    dataset.push({
-      name: `${point.provider.displayName} (${label})`,
-      type: "plot",
-      series,
+    return {
+      x: new Date(timestamp),
+      y: point.value,
+      name: point.provider.displayName,
+      badge,
+      valueLabel: `$${formatPrice(point.value)}`,
+      detail: `${badge} · $${formatPrice(point.value)}`,
       color,
-      useTag: "none",
-      showSerieName: undefined,
-      dataLabels: false,
-      shape: "circle",
-      logoUrl: point.provider.logoUrl,
-      displayName: point.provider.displayName,
-      badgeLabel: label,
-      providerType: point.type,
-      prefix: "$",
-    });
-  });
-
-  return dataset;
-});
-
-const chartConfig = computed<VueUiXyConfig>(() => {
-  const labels = bandsData.value.labels;
-  const index = todayIndex.value;
-  const textColor = isDark.value ? "#f4f4f5" : "#18181b";
-  const mutedColor = isDark.value ? "#a1a1aa" : "#71717a";
-  const gridColor = isDark.value ? "#3f3f46" : "#e4e4e7";
-  const tooltipBg = isDark.value ? "#000000" : "#ffffff";
-  const tooltipBorder = isDark.value
-    ? "rgba(255, 255, 255, 0.2)"
-    : "rgba(0, 0, 0, 0.12)";
-  const modulo = Math.max(1, Math.ceil(labels.length / 12));
-
-  return {
-    responsive: false,
-    loading: isLoadingHistories.value && labels.length === 0,
-    downsample: {
-      threshold: 2000,
-    },
-    chart: {
-      fontFamily: "inherit",
-      backgroundColor: "transparent",
-      color: textColor,
-      height: 500,
-      width: 1120,
-      padding: {
-        top: 36,
-        right: 280,
-        bottom: 12,
-        left: 8,
-      },
-      zoom: {
-        show: true,
-        color: mutedColor,
-        highlightColor: textColor,
-        enableRangeHandles: true,
-        enableSelectionDrag: true,
-        minimap: {
-          show: true,
-          selectedColor: "#10b981",
-          selectedColorOpacity: 0.2,
-          indicatorColor: textColor,
-          lineColor: mutedColor,
-          compact: true,
-        },
-        preview: {
-          enable: true,
-        },
-        useDefaultFormat: false,
-        customFormat: ({ absoluteIndex }) => {
-          const ts = labels[absoluteIndex];
-          return ts ? formatDateLabel(ts) : "";
-        },
-      },
-      highlightArea:
-        index >= 0
-          ? {
-              show: true,
-              from: index,
-              to: index,
-              color: "#10b981",
-              opacity: 18,
-              caption: {
-                text: "Hoy",
-                fontSize: 12,
-                color: textColor,
-                bold: true,
-                offsetY: -4,
-              },
-            }
-          : { show: false },
-      highlighter: {
-        color: textColor,
-        opacity: 6,
-        useLine: true,
-        lineDasharray: 4,
-        lineWidth: 1,
-      },
-      grid: {
-        stroke: gridColor,
-        showHorizontalLines: true,
-        showVerticalLines: false,
-        labels: {
-          show: true,
-          color: textColor,
-          fontSize: 12,
-          axis: {
-            yLabel: "Valores de la banda cambiaria",
-            fontSize: 12,
-          },
-          yAxis: {
-            useNiceScale: false,
-            commonScaleSteps: 6,
-            rounding: 0,
-            scaleMin: yScale.value.min,
-            scaleMax: yScale.value.max,
-            formatter: ({ value }) => `$${formatPrice(value)}`,
-          },
-          xAxisLabels: {
-            show: true,
-            color: mutedColor,
-            values: labels,
-            fontSize: 11,
-            showOnlyAtModulo: true,
-            modulo,
-            datetimeFormatter: {
-              enable: true,
-              locale: "es",
-              options: {
-                year: "yyyy",
-                month: "MMM yy",
-                day: "dd MMM",
-              },
-            },
-            autoRotate: {
-              enable: true,
-              angle: -30,
-            },
-          },
-        },
-      },
-      legend: {
-        show: true,
-        color: textColor,
-        fontSize: 13,
-        position: "top",
-      },
-      title: {
-        show: false,
-      },
-      tooltip: {
-        show: true,
-        color: textColor,
-        backgroundColor: tooltipBg,
-        borderColor: tooltipBorder,
-        borderRadius: 8,
-        backgroundOpacity: 82,
-        backdropFilter: true,
-        roundingValue: 2,
-        showPercentage: false,
-        showTimeLabel: true,
-        useDefaultTimeFormat: false,
-        timeFormat: "dd MMM yyyy",
-      },
-      userOptions: {
-        show: false,
-      },
-    },
-    line: {
-      strokeWidth: 2,
-      useGradient: true,
-      labels: {
-        show: false,
-      },
-      area: {
-        useGradient: true,
-        opacity: 18,
-      },
-      interLine: {
-        pairs: [["Banda inferior", "Banda superior"]],
-        colors: [["rgba(239, 68, 68, 0.25)", "rgba(245, 158, 11, 0.25)"]],
-        fillOpacity: 0.2,
-      },
-      dot: {
-        hideAboveMaxSerieLength: 1,
-        strokeWidth: 0,
-      },
-      tag: {
-        followValue: true,
-        fontSize: 12,
-        formatter: ({ value }) => `$${formatPrice(value)}`,
-      },
-    },
-    plot: {
-      radius: 7,
-      useGradient: false,
-      labels: {
-        show: false,
-      },
-      tag: {
-        followValue: false,
-        fontSize: 12,
-      },
-      dot: {
-        useSerieColor: true,
-        fill: isDark.value ? "#18181b" : "#ffffff",
-        strokeWidth: 2,
-      },
-    },
-  };
-});
-
-interface TooltipRow {
-  name: string;
-  value: number;
-  color: string;
-}
-
-interface TooltipContent {
-  timeString: string;
-  bandas: TooltipRow[];
-  compras: TooltipRow[];
-  ventas: TooltipRow[];
-}
-
-const buildTooltipContent = (payload: {
-  datapoint?: unknown;
-  absoluteIndex?: number;
-  timeLabel?: { text?: string; absoluteIndex?: number };
-}): TooltipContent => {
-  const labels = bandsData.value.labels;
-  const absoluteIndex =
-    typeof payload.absoluteIndex === "number"
-      ? payload.absoluteIndex
-      : payload.timeLabel?.absoluteIndex;
-  const ts =
-    typeof absoluteIndex === "number" ? labels[absoluteIndex] : undefined;
-  const timeString = ts
-    ? formatDateLabel(ts)
-    : payload.timeLabel?.text || formatDateLabel(todayTimestamp);
-
-  const bandas: TooltipRow[] = [];
-  const compras: TooltipRow[] = [];
-  const ventas: TooltipRow[] = [];
-  const items = Array.isArray(payload.datapoint)
-    ? payload.datapoint
-    : payload.datapoint
-      ? [payload.datapoint]
-      : [];
-
-  items.forEach((item: any) => {
-    const name = item?.name ?? "";
-    const value =
-      item?.value ??
-      item?.absoluteValue ??
-      (typeof item?.y === "number" ? item.y : null);
-    if (value == null || Number.isNaN(Number(value))) return;
-
-    const entry = {
-      name,
-      value: Number(value),
-      color: item?.color ?? "#888",
+      logo: getImageUrl(point.provider.logoUrl),
+      id: `${point.provider.slug}-${point.type}`,
     };
-
-    if (name === "Banda superior" || name === "Banda inferior") {
-      bandas.push(entry);
-    } else if (name.includes(RATE_LABELS.ask)) {
-      compras.push(entry);
-    } else if (name.includes(RATE_LABELS.bid)) {
-      ventas.push(entry);
-    }
   });
+});
 
-  bandas.sort((a, b) =>
-    a.name === "Banda superior" ? -1 : b.name === "Banda superior" ? 1 : 0,
+const definition = computed(() => {
+  const { labels, lower, upper } = bandsData.value;
+  const current = zoomWindow.value;
+  const dates = bandExtent.value;
+  if (!labels.length || !current || !dates) return null;
+
+  const bands: BandPoint[] = labels.map((timestamp, index) => ({
+    x: new Date(timestamp),
+    lower: lower[index] ?? 0,
+    upper: upper[index] ?? 0,
+  }));
+  const today = callouts.value[0]?.x ?? null;
+  const yDomain = scaleLinear().domain([yScale.value.min, yScale.value.max]);
+
+  return defineChart(
+    {
+      clip: true,
+      margin: { top: 36, right: 280 },
+      marks: [
+        decorative(
+          areaY(bands, {
+            x: (row: BandPoint) => row.x,
+            y1: (row: BandPoint) => row.lower,
+            y2: (row: BandPoint) => row.upper,
+            fill: "rgba(245, 158, 11, 0.16)",
+            curve: smoothCurve,
+            key: (row: BandPoint) => row.x.toISOString(),
+          }),
+        ),
+        lineY(bands, {
+          x: (row: BandPoint) => row.x,
+          y: (row: BandPoint) => row.lower,
+          stroke: "#ef4444",
+          strokeWidth: 2,
+          curve: smoothCurve,
+          color: () => "Banda inferior",
+          key: (row: BandPoint) => row.x.toISOString(),
+        }),
+        lineY(bands, {
+          x: (row: BandPoint) => row.x,
+          y: (row: BandPoint) => row.upper,
+          stroke: "#f59e0b",
+          strokeWidth: 2,
+          curve: smoothCurve,
+          color: () => "Banda superior",
+          key: (row: BandPoint) => `upper-${row.x.toISOString()}`,
+        }),
+        ...(today
+          ? [
+              ruleX([{ x: today }], {
+                x: "x",
+                stroke: "#10b981",
+                strokeDasharray: "4 4",
+                strokeWidth: 1.5,
+              }),
+              decorative(
+                text([{ x: today, y: yScale.value.max }], {
+                  x: "x",
+                  y: "y",
+                  text: () => "Hoy",
+                  anchor: "middle",
+                  dy: 14,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  fill: textColor.value,
+                }),
+              ),
+            ]
+          : []),
+        ...callouts.value.map((row) =>
+          dot([row], {
+            x: (point: CalloutPoint) => point.x,
+            y: (point: CalloutPoint) => point.y,
+            r: 7,
+            fill: isDark.value ? "#18181b" : "#ffffff",
+            stroke: row.color,
+            strokeWidth: 2,
+            key: () => row.id,
+          }),
+        ),
+      ],
+      scales: {
+        x: {
+          scale: scaleUtc().domain([current.start, current.end]),
+          grid: false,
+          axis: {
+            ticks: {
+              format: (value: Date) =>
+                value.toLocaleDateString("es-AR", {
+                  day: "2-digit",
+                  month: "short",
+                }),
+            },
+            tickLabels: {
+              thin: true,
+              rotate: -30,
+              fontSize: 11,
+              fill: mutedColor.value,
+            },
+          },
+        },
+        y: {
+          scale: yDomain,
+          grid: { stroke: gridColor.value },
+          axis: {
+            label: "Valores de la banda cambiaria",
+            ticks: { format: (value: number) => `$${formatPrice(value)}` },
+          },
+        },
+      },
+      color: {
+        domain: ["Banda inferior", "Banda superior"],
+        range: ["#ef4444", "#f59e0b"],
+        legend: colorLegend({
+          placement: "top",
+          items: colorLegendItems({
+            indicator: { shape: "line" },
+          }),
+        }),
+      },
+      theme: {
+        foreground: textColor.value,
+        muted: mutedColor.value,
+        grid: gridColor.value,
+        background: "transparent",
+      },
+      controls: [
+        zoomX({
+          window: controlledSignal(current, (next) => {
+            zoomWindow.value = { start: next.start, end: next.end };
+          }),
+          extent: [dates[0], dates[1]],
+          ariaLabel: "Período visible de las bandas cambiarias",
+          format: (value) => formatDateLabel(value.getTime()),
+        }),
+      ],
+    },
+    {
+      focus: "nearest-x",
+      maxFocusDistance: Number.POSITIVE_INFINITY,
+      tooltip: {
+        use: tooltip,
+        portal,
+        content: (points) => {
+          const focused = points.find((point) => {
+            const datum = point.datum as { x?: Date; lower?: number };
+            return datum?.x instanceof Date && datum.lower != null;
+          });
+          const datum = focused?.datum as BandPoint | undefined;
+          if (!datum) {
+            const callout = points[0]?.datum as CalloutPoint | undefined;
+            if (!callout?.name) return { rows: [] };
+            return {
+              title: formatDateLabel(callout.x.getTime()),
+              rows: [
+                {
+                  label: callout.name,
+                  value: callout.detail,
+                  color: callout.color,
+                },
+              ],
+            };
+          }
+          const rows = [
+            {
+              label: "Banda superior",
+              value: `$${formatPrice(datum.upper)}`,
+              color: "#f59e0b",
+            },
+            {
+              label: "Banda inferior",
+              value: `$${formatPrice(datum.lower)}`,
+              color: "#ef4444",
+            },
+          ];
+          if (today && datum.x.getTime() === today.getTime()) {
+            for (const callout of callouts.value) {
+              rows.push({
+                label: callout.name,
+                value: callout.detail,
+                color: callout.color,
+              });
+            }
+          }
+          return { title: formatDateLabel(datum.x.getTime()), rows };
+        },
+      },
+    },
   );
-  compras.sort((a, b) => a.value - b.value);
-  ventas.sort((a, b) => b.value - a.value);
+});
 
-  return { timeString, bandas, compras, ventas };
-};
+const SVG_NS = "http://www.w3.org/2000/svg";
+const XHTML_NS = "http://www.w3.org/1999/xhtml";
+const LOGO_SIZE = 40;
+const LOGO_OFFSET_X = 120;
+const LOGO_STACK_GAP = 56;
+
+function paintBandCallouts(svg: SVGSVGElement) {
+  svg.querySelectorAll("[data-band-callout]").forEach((node) => node.remove());
+
+  const plot = svg.querySelector<SVGRectElement>(
+    'clipPath[id*="ts-chart-clip"] rect',
+  );
+  if (!plot) return;
+  const areaTop = Number(plot.getAttribute("y"));
+  const areaBottom = areaTop + Number(plot.getAttribute("height"));
+  const circles = [
+    ...svg.querySelectorAll<SVGCircleElement>("circle[data-ts-key]"),
+  ];
+
+  const markers = callouts.value.flatMap((callout) => {
+    const circle = circles.find((node) =>
+      node.getAttribute("data-ts-key")?.includes(callout.id),
+    );
+    if (!circle) return [];
+    const plotX = Number(circle.getAttribute("cx"));
+    const plotY = Number(circle.getAttribute("cy"));
+    if (!Number.isFinite(plotX) || !Number.isFinite(plotY)) return [];
+    return [{ ...callout, plotX, plotY, x: plotX + LOGO_OFFSET_X, y: plotY }];
+  });
+  markers.sort((a, b) => a.y - b.y);
+
+  for (let index = 1; index < markers.length; index++) {
+    const previous = markers[index - 1];
+    const current = markers[index];
+    if (!previous || !current) continue;
+    if (current.y - previous.y < LOGO_STACK_GAP) {
+      current.y = previous.y + LOGO_STACK_GAP;
+    }
+  }
+
+  const last = markers[markers.length - 1];
+  if (last && last.y + LOGO_SIZE / 2 > areaBottom) {
+    const overflow = last.y + LOGO_SIZE / 2 - areaBottom;
+    for (const marker of markers) marker.y -= overflow;
+  }
+  const first = markers[0];
+  if (first && first.y - LOGO_SIZE / 2 < areaTop) {
+    const shift = areaTop + LOGO_SIZE / 2 - first.y;
+    for (const marker of markers) marker.y += shift;
+  }
+
+  const layer = document.createElementNS(SVG_NS, "g");
+  layer.setAttribute("data-band-callout", "");
+  layer.setAttribute("pointer-events", "none");
+
+  for (const marker of markers) {
+    const clipId = `band-logo-${marker.id}`;
+    const clip = document.createElementNS(SVG_NS, "clipPath");
+    clip.setAttribute("id", clipId);
+    const clipCircle = document.createElementNS(SVG_NS, "circle");
+    clipCircle.setAttribute("cx", String(marker.x));
+    clipCircle.setAttribute("cy", String(marker.y));
+    clipCircle.setAttribute("r", String(LOGO_SIZE / 2 - 2));
+    clip.append(clipCircle);
+
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", String(marker.plotX + 8));
+    line.setAttribute("y1", String(marker.plotY));
+    line.setAttribute("x2", String(marker.x - LOGO_SIZE / 2 - 2));
+    line.setAttribute("y2", String(marker.y));
+    line.setAttribute("stroke", marker.color);
+    line.setAttribute("stroke-dasharray", "3 3");
+    line.setAttribute("stroke-width", "1.5");
+    line.setAttribute("opacity", "0.7");
+
+    const frame = document.createElementNS(SVG_NS, "circle");
+    frame.setAttribute("cx", String(marker.x));
+    frame.setAttribute("cy", String(marker.y));
+    frame.setAttribute("r", String(LOGO_SIZE / 2));
+    frame.setAttribute("fill", isDark.value ? "#18181b" : "#ffffff");
+    frame.setAttribute("stroke", marker.color);
+    frame.setAttribute("stroke-width", "2.5");
+
+    const image = document.createElementNS(SVG_NS, "image");
+    image.setAttribute("href", marker.logo);
+    image.setAttribute("x", String(marker.x - LOGO_SIZE / 2 + 2));
+    image.setAttribute("y", String(marker.y - LOGO_SIZE / 2 + 2));
+    image.setAttribute("width", String(LOGO_SIZE - 4));
+    image.setAttribute("height", String(LOGO_SIZE - 4));
+    image.setAttribute("clip-path", `url(#${clipId})`);
+    image.setAttribute("preserveAspectRatio", "xMidYMid slice");
+
+    const label = document.createElementNS(SVG_NS, "foreignObject");
+    label.setAttribute("x", String(marker.x + LOGO_SIZE / 2 + 6));
+    label.setAttribute("y", String(marker.y - 22));
+    label.setAttribute("width", "130");
+    label.setAttribute("height", "52");
+    const card = document.createElementNS(XHTML_NS, "div");
+    card.setAttribute(
+      "style",
+      "display:flex;flex-direction:column;gap:2px;line-height:1.15;font-family:inherit;",
+    );
+    const badge = document.createElementNS(XHTML_NS, "span");
+    badge.textContent = marker.badge;
+    badge.setAttribute(
+      "style",
+      `width:fit-content;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;color:#fff;background:${marker.color};`,
+    );
+    const name = document.createElementNS(XHTML_NS, "span");
+    name.textContent = marker.name;
+    name.setAttribute(
+      "style",
+      `overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:600;color:${textColor.value};`,
+    );
+    const value = document.createElementNS(XHTML_NS, "span");
+    value.textContent = marker.valueLabel;
+    value.setAttribute(
+      "style",
+      `font-size:11px;font-weight:500;color:${marker.color};`,
+    );
+    card.append(badge, name, value);
+    label.append(card);
+
+    layer.append(clip, line, frame, image, label);
+  }
+
+  svg.append(layer);
+}
+
+const { onRender: onZoomPlotHover } = useZoomPlotHover();
+
+function onRender(context: {
+  svg: SVGSVGElement;
+  container: HTMLElement;
+  interaction: {
+    resolvePointer: (clientX: number, clientY: number) => unknown;
+    setControlledFocus: (
+      target: unknown,
+      options?: { source?: "pointer" },
+    ) => void;
+  };
+}) {
+  paintBandCallouts(context.svg);
+  onZoomPlotHover(context);
+}
 </script>
 
 <template>
@@ -803,139 +787,14 @@ const buildTooltipContent = (payload: {
 
     <div class="w-full overflow-x-auto">
       <ClientOnly>
-        <VueUiXy :dataset="chartDataset" :config="chartConfig">
-          <template #tooltip="tooltipProps">
-            <div
-              v-for="content in [buildTooltipContent(tooltipProps)]"
-              :key="content.timeString"
-              class="min-w-[180px] text-sm leading-snug"
-            >
-              <div class="mb-1.5 font-semibold">
-                {{ content.timeString }}
-              </div>
-
-              <div
-                v-for="item in content.bandas"
-                :key="`band-${item.name}`"
-                class="flex items-center gap-1.5"
-              >
-                <span :style="{ color: item.color }">●</span>
-                <span>{{ item.name }}: ${{ formatPrice(item.value) }}</span>
-              </div>
-
-              <template v-if="content.compras.length">
-                <div class="mt-2 font-semibold">{{ RATE_LABELS.ask }}:</div>
-                <div
-                  v-for="item in content.compras"
-                  :key="`ask-${item.name}`"
-                  class="flex items-center gap-1.5"
-                >
-                  <span :style="{ color: item.color }">●</span>
-                  <span
-                    >{{ item.name.replace(` (${RATE_LABELS.ask})`, "") }}: ${{
-                      formatPrice(item.value)
-                    }}</span
-                  >
-                </div>
-              </template>
-
-              <template v-if="content.ventas.length">
-                <div class="mt-2 font-semibold">{{ RATE_LABELS.bid }}:</div>
-                <div
-                  v-for="item in content.ventas"
-                  :key="`bid-${item.name}`"
-                  class="flex items-center gap-1.5"
-                >
-                  <span :style="{ color: item.color }">●</span>
-                  <span
-                    >{{ item.name.replace(` (${RATE_LABELS.bid})`, "") }}: ${{
-                      formatPrice(item.value)
-                    }}</span
-                  >
-                </div>
-              </template>
-            </div>
-          </template>
-
-          <template #svg="{ svg }">
-            <g
-              v-for="marker in buildProviderLogoMarkers(svg)"
-              :key="marker.id"
-              class="pointer-events-none"
-            >
-              <defs>
-                <clipPath :id="`provider-logo-clip-${marker.id}`">
-                  <circle
-                    :cx="marker.x"
-                    :cy="marker.y"
-                    :r="LOGO_SIZE / 2 - 2"
-                  />
-                </clipPath>
-              </defs>
-
-              <line
-                :x1="marker.plotX + 8"
-                :y1="marker.plotY"
-                :x2="marker.x - LOGO_SIZE / 2 - 2"
-                :y2="marker.y"
-                :stroke="marker.color"
-                stroke-width="1.5"
-                stroke-dasharray="3 3"
-                opacity="0.7"
-              />
-
-              <circle
-                :cx="marker.x"
-                :cy="marker.y"
-                :r="LOGO_SIZE / 2"
-                :fill="isDark ? '#18181b' : '#ffffff'"
-                :stroke="marker.color"
-                stroke-width="2.5"
-              />
-
-              <image
-                :href="marker.logoUrl"
-                :x="marker.x - LOGO_SIZE / 2 + 2"
-                :y="marker.y - LOGO_SIZE / 2 + 2"
-                :width="LOGO_SIZE - 4"
-                :height="LOGO_SIZE - 4"
-                :clip-path="`url(#provider-logo-clip-${marker.id})`"
-                preserveAspectRatio="xMidYMid slice"
-              />
-
-              <foreignObject
-                :x="marker.x + LOGO_SIZE / 2 + 6"
-                :y="marker.y - 22"
-                width="120"
-                height="44"
-              >
-                <div
-                  xmlns="http://www.w3.org/1999/xhtml"
-                  class="flex flex-col gap-0.5 leading-tight"
-                >
-                  <span
-                    class="w-fit rounded px-1.5 py-0.5 text-[9px] font-bold text-white"
-                    :style="{ backgroundColor: marker.color }"
-                  >
-                    {{ marker.badgeLabel }}
-                  </span>
-                  <span
-                    class="truncate text-[11px] font-semibold"
-                    :style="{ color: isDark ? '#f4f4f5' : '#18181b' }"
-                  >
-                    {{ marker.displayName }}
-                  </span>
-                  <span
-                    class="text-[11px] font-medium"
-                    :style="{ color: marker.color }"
-                  >
-                    {{ marker.valueLabel }}
-                  </span>
-                </div>
-              </foreignObject>
-            </g>
-          </template>
-        </VueUiXy>
+        <Chart
+          v-if="definition"
+          :definition="definition"
+          aria-label="Esquema de bandas cambiarias"
+          class="h-[500px] w-full"
+          :height="500"
+          @render="onRender"
+        />
         <template #fallback>
           <div
             class="flex h-[500px] w-full items-center justify-center text-sm text-zinc-500 dark:text-zinc-400"
