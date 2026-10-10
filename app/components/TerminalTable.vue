@@ -16,7 +16,10 @@ import type { TableColumn } from "@nuxt/ui";
 import { use24x7Filter } from "@/composables/use24x7Filter";
 import { useTerminalColors } from "@/composables/useTerminalColors";
 import { useRouteQuery } from "@vueuse/router";
-import { getProviderDisplayName } from "@/lib/provider-display";
+import {
+  getProviderDisplayName,
+  getProviderNameNote,
+} from "@/lib/provider-display";
 import { getResizedImageUrl } from "@/lib/image-url";
 
 interface Props {
@@ -722,6 +725,12 @@ defineExpose({
                   >
                     {{ getProviderDisplayName(rate) }}
                   </p>
+                  <p
+                    v-if="getProviderNameNote(rate)"
+                    class="text-[10px] normal-case tracking-normal text-gray-500 dark:text-gray-400"
+                  >
+                    {{ getProviderNameNote(rate) }}
+                  </p>
                   <div class="mt-1 flex flex-wrap items-center gap-1.5">
                     <UsdTypeBadge
                       :usd-type="rate.usdType"
@@ -877,10 +886,18 @@ defineExpose({
                 loading="lazy"
                 decoding="async"
               />
-              <span
-                :class="`leading-none hover:underline ${terminalColors.cellText}`"
-              >
-                {{ getProviderDisplayName(row.original) }}
+              <span class="min-w-0">
+                <span
+                  :class="`leading-none hover:underline ${terminalColors.cellText}`"
+                >
+                  {{ getProviderDisplayName(row.original) }}
+                </span>
+                <span
+                  v-if="getProviderNameNote(row.original)"
+                  class="mt-0.5 block text-[10px] leading-tight normal-case tracking-normal text-gray-500 dark:text-gray-400"
+                >
+                  {{ getProviderNameNote(row.original) }}
+                </span>
               </span>
               <span class="inline-flex items-center gap-1.5">
                 <UsdTypeBadge

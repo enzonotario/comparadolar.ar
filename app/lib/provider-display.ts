@@ -4,7 +4,16 @@ const FIWIND_LOGO_URL =
 const PROVIDER_DISPLAY_NAME_OVERRIDES: Record<string, string> = {
   "fiwind-cripto": "Fiwind",
   "fiwind-mep": "Fiwind",
+  "cocos-bank": "Cocos Bank*",
 };
+
+export const COCOS_BANK_NAME_NOTE =
+  "Aún está esperando la aprobación del cambio de nombre del BCRA";
+
+export function getProviderNameNote(item: { slug?: string }): string | null {
+  if (item.slug?.toLowerCase() === "cocos-bank") return COCOS_BANK_NAME_NOTE;
+  return null;
+}
 
 const PROVIDER_LOGO_OVERRIDES: Record<string, string> = {
   fiwind: FIWIND_LOGO_URL,

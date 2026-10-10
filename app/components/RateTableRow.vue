@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { ExchangeRate } from "@/lib/types";
-import { getProviderDisplayName } from "@/lib/provider-display";
+import {
+  getProviderDisplayName,
+  getProviderNameNote,
+} from "@/lib/provider-display";
 import { getProviderConditions } from "@/lib/provider-conditions";
 import { getResizedImageUrl } from "@/lib/image-url";
 
@@ -16,6 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const conditions = computed(() => getProviderConditions(props.rate));
+const nameNote = computed(() => getProviderNameNote(props.rate));
 
 const hasValidSpread = computed(() => {
   return (
@@ -93,6 +97,12 @@ const handleImageError = (event: Event) => {
             </p>
             <p v-else class="text-xs text-gray-500 dark:text-gray-400">
               Spread: N/A
+            </p>
+            <p
+              v-if="nameNote"
+              class="text-xs text-gray-500 dark:text-gray-400"
+            >
+              {{ nameNote }}
             </p>
             <p
               v-if="conditions"

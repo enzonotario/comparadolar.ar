@@ -4,6 +4,10 @@ import type { ExchangeRate, ProviderInfo } from "@/lib/types";
 import { useAnalytics } from "@/composables/useAnalytics";
 import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
 import { getProviderConditions } from "@/lib/provider-conditions";
+import {
+  getProviderDisplayName,
+  getProviderNameNote,
+} from "@/lib/provider-display";
 import { getResizedImageUrl } from "@/lib/image-url";
 
 const { trackProviderClick } = useAnalytics();
@@ -18,8 +22,12 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const displayName = computed(
-  () => props.provider.prettyName || props.rateData?.prettyName || props.entity,
+const displayName = computed(() =>
+  getProviderDisplayName({
+    slug: props.provider.slug || props.entity,
+    prettyName: props.provider.prettyName || props.rateData?.prettyName,
+    name: props.provider.name,
+  }),
 );
 const providerUrl = computed(() => props.provider.url || "#");
 const logo = computed(() => {
@@ -33,6 +41,9 @@ const logo = computed(() => {
 const currencySymbol = computed(() => props.currency.toUpperCase());
 const conditions = computed(() =>
   props.rateData ? getProviderConditions(props.rateData) : null,
+);
+const nameNote = computed(() =>
+  getProviderNameNote({ slug: props.provider.slug || props.entity }),
 );
 
 const spread = computed(() => {
@@ -86,6 +97,12 @@ const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.d
         >
           {{ displayName }}
         </h1>
+        <p
+          v-if="nameNote"
+          class="mb-2 text-sm text-gray-500 dark:text-gray-400"
+        >
+          {{ nameNote }}
+        </p>
         <div class="flex items-center flex-wrap gap-2">
           <span class="text-lg font-medium">
             Cotización {{ currencySymbol }}
