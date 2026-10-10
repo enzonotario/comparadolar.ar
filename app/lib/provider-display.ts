@@ -8,7 +8,7 @@ const PROVIDER_DISPLAY_NAME_OVERRIDES: Record<string, string> = {
 };
 
 export const COCOS_BANK_NAME_NOTE =
-  "En espera de aprobación de cambio de nombre";
+  "*En espera de aprobación de cambio de nombre";
 
 export function getProviderNameNote(item: { slug?: string }): string | null {
   if (item.slug?.toLowerCase() === "cocos-bank") return COCOS_BANK_NAME_NOTE;
