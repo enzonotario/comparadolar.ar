@@ -580,15 +580,6 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
             <p class="text-xs text-muted sm:text-right">
               Fuente:
               <a
-                href="https://www.dolarito.ar/remotito"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="font-medium text-primary-600 hover:underline dark:text-primary-400"
-              >
-                Dolarito
-              </a>
-              vía
-              <a
                 href="https://argentinadatos.com"
                 target="_blank"
                 rel="noopener noreferrer"
