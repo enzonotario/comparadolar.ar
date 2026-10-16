@@ -498,7 +498,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "tarjetaUsa",
-    header: createSortableHeader("Tarjeta USD"),
+    header: createSortableHeader("Tarjeta USA"),
     cell: ({ row }) =>
       renderBooleanCell(
         row.original.tarjetaUsa,
