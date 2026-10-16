@@ -8,6 +8,8 @@ const EMPTY_RANKINGS: WeeklyRankingsPayload = {
   labels: [],
   buy: { series: [] },
   sell: { series: [] },
+  buy24x7: { series: [] },
+  sell24x7: { series: [] },
 };
 
 /**
@@ -37,7 +39,9 @@ export function useWeeklyRankings(currency: MaybeRefOrGetter<string>) {
     if (!payload?.labels?.length) return false;
     return (
       (payload.buy?.series?.length ?? 0) > 0 ||
-      (payload.sell?.series?.length ?? 0) > 0
+      (payload.sell?.series?.length ?? 0) > 0 ||
+      (payload.buy24x7?.series?.length ?? 0) > 0 ||
+      (payload.sell24x7?.series?.length ?? 0) > 0
     );
   });
 

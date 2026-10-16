@@ -118,6 +118,8 @@ function metaFor(slug: string | undefined, name: string): ProviderMeta {
 }
 
 const activeSide = ref<"buy" | "sell">("buy");
+/** Vista por defecto: solo proveedores que operan 24/7. */
+const only24x7 = ref(true);
 
 const sideTabs = [
   {
@@ -163,7 +165,13 @@ function formatPrice(price: number): string {
 
 const seriesSource = computed(() => {
   const side = activeSide.value;
-  return side === "buy" ? data.value.buy.series : data.value.sell.series;
+  const payload = data.value;
+  if (only24x7.value) {
+    const filtered = side === "buy" ? payload.buy24x7 : payload.sell24x7;
+    // La API vieja no trae buy24x7/sell24x7. Hasta el próximo export se ve el ranking completo.
+    if (filtered) return filtered.series;
+  }
+  return side === "buy" ? payload.buy.series : payload.sell.series;
 });
 
 const todayIndex = computed(() =>
@@ -350,7 +358,9 @@ const definition = computed(() => {
       ],
       scales: {
         x: {
-          scale: () => scalePoint<string>().domain(categories).padding(0.15),
+          // Instancia, no factory: una factory hace que TanStack reemplace el
+          // dominio por el orden de aparición en las series (bancos primero).
+          scale: scalePoint<string>().domain(categories).padding(0.15),
           grid: { stroke: gridColor.value, strokeDasharray: "4 4" },
           axis: {
             line: { stroke: gridColor.value },
@@ -420,9 +430,17 @@ const definition = computed(() => {
       <div
         class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
       >
-        <h2 class="text-lg font-bold text-zinc-900 dark:text-white">
-          Top semanal
-        </h2>
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <h2 class="text-lg font-bold text-zinc-900 dark:text-white">
+            Top semanal
+          </h2>
+          <USwitch
+            v-if="isUsd"
+            v-model="only24x7"
+            label="Solo 24/7"
+            size="xs"
+          />
+        </div>
 
         <UTabs
           v-model="activeSide"
@@ -454,7 +472,7 @@ const definition = computed(() => {
       <ClientOnly>
         <Chart
           v-if="definition"
-          :key="`${currency}-${activeSide}-${data.labels.join(',')}-${isWide ? 'wide' : 'narrow'}`"
+          :key="`${currency}-${activeSide}-${only24x7 ? '24x7' : 'all'}-${data.labels.join(',')}-${isWide ? 'wide' : 'narrow'}`"
           :definition="definition"
           aria-label="Ranking semanal de cotizaciones"
           class="h-[220px] w-full sm:h-[280px]"

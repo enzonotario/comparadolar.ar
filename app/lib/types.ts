@@ -104,6 +104,9 @@ export type WeeklyRankingsPayload = {
   labels: string[];
   buy: { series: WeeklyRankingSeriesItem[] };
   sell: { series: WeeklyRankingSeriesItem[] };
+  /** Ranking recalculado solo entre proveedores 24/7. */
+  buy24x7?: { series: WeeklyRankingSeriesItem[] };
+  sell24x7?: { series: WeeklyRankingSeriesItem[] };
 };
 
 export function getWeeklyRankingsEndpoint(currency: string): string {
