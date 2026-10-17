@@ -39,6 +39,7 @@ function normalizeCatalogProvider(
     url: raw.url ?? "",
     prettyName: raw.prettyName || raw.name || slug,
     isBank: Boolean(raw.isBank),
+    usdType: raw.usdType,
   };
 
   return applyProviderDisplayName(provider);

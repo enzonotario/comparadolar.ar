@@ -82,7 +82,6 @@ const handleImageError = (event: Event) => {
               <UBadge v-if="rate.is24x7" color="success" size="xs">
                 24/7
               </UBadge>
-              <UBadge v-if="rate.isUsdCcl" color="info" size="xs"> CCL </UBadge>
               <UsdTypeBadge
                 :usd-type="rate.usdType"
                 :slug="rate.slug"

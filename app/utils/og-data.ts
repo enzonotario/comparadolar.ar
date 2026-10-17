@@ -1,8 +1,5 @@
 import type { ExchangeRate } from "~/lib/types";
-import {
-  USD_CCL_PROVIDERS,
-  BLACKLISTED_PROVIDERS,
-} from "~/lib/currencies-config";
+import { BLACKLISTED_PROVIDERS } from "~/lib/currencies-config";
 import { isRankableProvider } from "~/lib/provider-conditions";
 import {
   compareExchangeRatesForBuy,
@@ -35,8 +32,8 @@ function isBlacklisted(slug: string): boolean {
   return BLACKLISTED_PROVIDERS.some((p) => slug.toLowerCase() === p);
 }
 
-function isCcl(slug: string): boolean {
-  return USD_CCL_PROVIDERS.some((p) => slug.toLowerCase() === p);
+function isCcl(item: { usdType?: string }): boolean {
+  return item.usdType === "CCL";
 }
 
 function askPrice(item: ExchangeRate): number {
@@ -99,7 +96,7 @@ export function top3BuyUsdCcl(data: ExchangeRate[]): OgItem[] {
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
         isRankableProvider(item) &&
-        isCcl(item.slug ?? "") &&
+        isCcl(item) &&
         askPrice(item) > 0,
     )
     .sort(compareExchangeRatesForBuy)
@@ -116,7 +113,7 @@ export function top3SellUsdCcl(data: ExchangeRate[]): OgItem[] {
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
         isRankableProvider(item) &&
-        isCcl(item.slug ?? "") &&
+        isCcl(item) &&
         bidPrice(item) > 0,
     )
     .sort(compareExchangeRatesForSell)
@@ -190,7 +187,7 @@ export function top3SlugsForBuyUsdCcl(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
         isRankableProvider(item) &&
-        isCcl(item.slug ?? "") &&
+        isCcl(item) &&
         askPrice(item) > 0,
     )
     .sort(compareExchangeRatesForBuy)
@@ -337,7 +334,7 @@ export function top5TerminalUsdCcl(data: ExchangeRate[]): OgTerminalRow[] {
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
         isRankableProvider(item) &&
-        isCcl(item.slug ?? "") &&
+        isCcl(item) &&
         askPrice(item) > 0 &&
         bidPrice(item) > 0,
     )

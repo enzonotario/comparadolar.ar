@@ -13,11 +13,6 @@ export const API_CURRENCY_ALIASES =
     Record<CurrencyType, ApiCurrencyType>
   >;
 
-export const USD_CCL_PROVIDERS = marketConstants.providerGroups.usdCcl;
-export const PROVIDER_USD_TYPES = marketConstants.providerUsdTypes as Partial<
-  Record<string, UsdProviderType>
->;
-export const DEFAULT_USD_PROVIDER_TYPE: UsdProviderType = "Oficial";
 export const USD_FILTER_CATEGORIES: UsdFilterCategory[] = [
   "Oficial",
   "MEP",
@@ -47,50 +42,16 @@ export function isCryptoCurrency(currency: string): currency is CryptoType {
   return CRYPTO_CURRENCIES.includes(currency as CryptoType);
 }
 
-export function isUsdCclProvider(item: {
-  slug?: string;
-  name?: string;
-}): boolean {
-  const slug = item.slug?.toLowerCase() || "";
-  const name = item.name?.toLowerCase() || "";
-  return USD_CCL_PROVIDERS.some(
-    (provider) => slug === provider || name === provider,
-  );
-}
-
-function getConfiguredUsdType(item: {
-  slug?: string;
-  name?: string;
-}): UsdProviderType | undefined {
-  const slug = item.slug?.toLowerCase() || "";
-  const name = item.name?.toLowerCase() || "";
-
-  if (slug && PROVIDER_USD_TYPES[slug]) {
-    return PROVIDER_USD_TYPES[slug]!;
-  }
-
-  if (name && PROVIDER_USD_TYPES[name]) {
-    return PROVIDER_USD_TYPES[name]!;
-  }
-
-  return undefined;
-}
-
 export function getUsdFilterCategory(item: {
-  slug?: string;
-  name?: string;
-  isUsdCcl?: boolean;
   usdType?: UsdProviderType;
 }): UsdFilterCategory {
-  if (item.isUsdCcl || isUsdCclProvider(item)) return "CCL";
-  return item.usdType ?? getProviderUsdType(item);
+  return item.usdType ?? "Oficial";
 }
 
 export function matchesUsdTypeFilter(
   item: {
     slug?: string;
     name?: string;
-    isUsdCcl?: boolean;
     usdType?: UsdProviderType;
   },
   enabled: Record<UsdFilterCategory, boolean>,
@@ -98,33 +59,18 @@ export function matchesUsdTypeFilter(
   return enabled[getUsdFilterCategory(item)];
 }
 
-export function getProviderUsdType(item: {
-  slug?: string;
-  name?: string;
-}): UsdProviderType {
-  return getConfiguredUsdType(item) ?? DEFAULT_USD_PROVIDER_TYPE;
-}
-
-export function hasConfiguredUsdType(item: {
-  slug?: string;
-  name?: string;
-}): boolean {
-  return getConfiguredUsdType(item) !== undefined;
-}
-
 export function shouldShowUsdTypeBadge(item: {
-  slug?: string;
-  name?: string;
   usdType?: UsdProviderType;
 }): boolean {
-  return hasConfiguredUsdType(item);
+  return Boolean(item.usdType);
 }
 
 export function getUsdTypeBadgeColor(
   usdType: UsdProviderType,
-): "secondary" | "warning" | "neutral" {
+): "secondary" | "warning" | "neutral" | "info" {
   if (usdType === "Cripto") return "secondary";
   if (usdType === "MEP") return "warning";
+  if (usdType === "CCL") return "info";
   return "neutral";
 }
 

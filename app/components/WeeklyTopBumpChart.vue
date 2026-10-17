@@ -16,12 +16,7 @@ import type {
   WeeklyRankingSeriesItem,
 } from "@/lib/types";
 import { API_ENDPOINTS } from "@/lib/types";
-import {
-  getProviderUsdType,
-  isCryptoCurrency,
-  isUsdCclProvider,
-  shouldShowUsdTypeBadge,
-} from "~/lib/market-constants";
+import { isCryptoCurrency, shouldShowUsdTypeBadge } from "~/lib/market-constants";
 import { RATE_DISPLAY } from "~/lib/rate-labels";
 import { smoothCurve, useChartInk } from "~/lib/charts/shared";
 
@@ -73,7 +68,6 @@ const { data: quotesRaw } = useAsyncData(
 
 type ProviderMeta = {
   is24x7: boolean;
-  isCcl: boolean;
   usdType?: UsdProviderType;
   showUsdType: boolean;
 };
@@ -90,8 +84,7 @@ const providerMeta = computed(() => {
     if (!rate?.slug) return;
     map.set(rate.slug, {
       is24x7: Boolean(rate.is24x7),
-      isCcl: isUsdCclProvider(rate),
-      usdType: rate.usdType ?? getProviderUsdType(rate),
+      usdType: rate.usdType,
       showUsdType: shouldShowUsdTypeBadge(rate),
     });
   };
@@ -105,15 +98,14 @@ const providerMeta = computed(() => {
   return map;
 });
 
-function metaFor(slug: string | undefined, name: string): ProviderMeta {
+function metaFor(slug: string | undefined, _name: string): ProviderMeta {
   if (slug && providerMeta.value.has(slug)) {
     return providerMeta.value.get(slug)!;
   }
   return {
     is24x7: false,
-    isCcl: slug ? isUsdCclProvider({ slug, name }) : false,
-    usdType: slug ? getProviderUsdType({ slug, name }) : undefined,
-    showUsdType: isUsd.value && shouldShowUsdTypeBadge({ slug, name }),
+    usdType: undefined,
+    showUsdType: false,
   };
 }
 
@@ -230,7 +222,6 @@ function endCaption(
 ) {
   const parts = [item.name];
   if (meta.is24x7) parts.push("24/7");
-  if (meta.isCcl) parts.push("CCL");
   if (showUsdTypes.value && meta.showUsdType && meta.usdType) {
     parts.push(meta.usdType);
   }
@@ -515,9 +506,6 @@ const definition = computed(() => {
               </span>
               <UBadge v-if="row.meta.is24x7" color="success" size="xs">
                 24/7
-              </UBadge>
-              <UBadge v-if="row.meta.isCcl" color="info" size="xs">
-                CCL
               </UBadge>
               <UsdTypeBadge
                 v-if="showUsdTypes && row.meta.showUsdType"

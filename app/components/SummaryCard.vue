@@ -117,9 +117,6 @@ const singleProviderPath = computed(() => {
             <UBadge v-if="provider?.is24x7" color="success" size="xs">
               24/7
             </UBadge>
-            <UBadge v-if="provider?.isUsdCcl" color="info" size="xs">
-              CCL
-            </UBadge>
             <UsdTypeBadge
               :usd-type="provider?.usdType"
               :slug="provider?.slug"
@@ -158,9 +155,6 @@ const singleProviderPath = computed(() => {
             </span>
             <UBadge v-if="providers[0]?.is24x7" color="success" size="xs">
               24/7
-            </UBadge>
-            <UBadge v-if="providers[0]?.isUsdCcl" color="info" size="xs">
-              CCL
             </UBadge>
             <UsdTypeBadge
               :usd-type="providers[0]?.usdType"

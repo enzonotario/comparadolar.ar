@@ -2,33 +2,6 @@
   "apiCurrencyAliases": {
     "usd-ccl": "usd"
   },
-  "providerGroups": {
-    "usdCcl": ["astropay", "global66", "wallbit", "wallbit-pro", "plus-crypto"]
-  },
-  "providerUsdTypes": {
-    "fiwind-mep": "MEP",
-    "fiwind-cripto": "Cripto",
-    "cocos": "MEP",
-    "cocos-bank": "Oficial",
-    "uala": "Oficial",
-    "reba": "Oficial",
-    "plus": "Oficial",
-    "balanz": "Oficial",
-    "banco-bica": "Oficial",
-    "banco-ciudad": "Oficial",
-    "banco-provincia": "Oficial",
-    "banco-supervielle": "Oficial",
-    "brubank-ultra": "Oficial",
-    "banco-hipotecario": "Oficial",
-    "banco-nacion": "Oficial",
-    "icbc": "Oficial",
-    "plus-inversiones": "MEP",
-    "tiendadolar": "Oficial",
-    "ripio": "Cripto",
-    "nexo": "Cripto",
-    "takenos": "Cripto",
-    "eluter": "Cripto"
-  },
   "blacklistedProviders": ["bbva"],
   "currencyGroups": {
     "crypto": ["usdc", "usdt", "btc", "eth"],

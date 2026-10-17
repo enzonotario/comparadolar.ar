@@ -738,12 +738,6 @@ defineExpose({
                       :name="rate.name"
                       terminal
                     />
-                    <span
-                      v-if="rate.isUsdCcl"
-                      class="usd-type-badge bg-info text-inverted"
-                    >
-                      <span class="usd-type-badge__label">CCL</span>
-                    </span>
                     <UIcon
                       v-if="!rate.is24x7 && !marketHours"
                       name="i-heroicons-moon"
@@ -906,12 +900,6 @@ defineExpose({
                   :name="row.original.name"
                   terminal
                 />
-                <span
-                  v-if="row.original.isUsdCcl"
-                  class="usd-type-badge bg-info text-inverted"
-                >
-                  <span class="usd-type-badge__label">CCL</span>
-                </span>
                 <UIcon
                   v-if="!row.original.is24x7 && !marketHours"
                   name="i-heroicons-moon"

@@ -280,6 +280,10 @@ async function main() {
             pct_variation: { type: "number" },
             slowChange: { type: "boolean" },
             isBank: { type: "boolean" },
+            usdType: {
+              type: "string",
+              enum: ["Oficial", "MEP", "Cripto", "CCL"],
+            },
           },
         },
         CryptoQuote: {
@@ -313,6 +317,10 @@ async function main() {
             prettyName: { type: "string" },
             slowChange: { type: "boolean" },
             isBank: { type: "boolean" },
+            usdType: {
+              type: "string",
+              enum: ["Oficial", "MEP", "Cripto", "CCL"],
+            },
           },
         },
         ProviderCrypto: {

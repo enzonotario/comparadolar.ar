@@ -24,6 +24,7 @@ const terminalColorClass = computed(() => {
   const color = getUsdTypeBadgeColor(props.usdType);
   if (color === "warning") return "bg-warning text-inverted";
   if (color === "secondary") return "bg-secondary text-inverted";
+  if (color === "info") return "bg-info text-inverted";
   return "bg-inverted text-inverted";
 });
 </script>

@@ -1,5 +1,5 @@
-export type UsdProviderType = "Oficial" | "MEP" | "Cripto";
-export type UsdFilterCategory = UsdProviderType | "CCL";
+export type UsdProviderType = "Oficial" | "MEP" | "Cripto" | "CCL";
+export type UsdFilterCategory = UsdProviderType;
 
 export interface ExchangeRate {
   slug: string;
@@ -14,7 +14,6 @@ export interface ExchangeRate {
   pct_variation?: number | null;
   slowChange?: boolean;
   isBank?: boolean;
-  isUsdCcl?: boolean;
   usdType?: UsdProviderType;
   conditions?: string | null;
   /** Solo mockups/demos de anuncio sponsored */
@@ -57,6 +56,7 @@ export interface ProviderInfo {
   url: string;
   prettyName: string;
   isBank: boolean;
+  usdType?: UsdProviderType;
 }
 
 export type CryptoType = "usdc" | "usdt" | "btc" | "eth";
