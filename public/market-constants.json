@@ -2,7 +2,7 @@
   "apiCurrencyAliases": {
     "usd-ccl": "usd"
   },
-  "blacklistedProviders": ["bbva"],
+  "blacklistedProviders": ["bbva", "pluscrypto"],
   "currencyGroups": {
     "crypto": ["usdc", "usdt", "btc", "eth"],
     "fiat": ["usd", "usd-ccl"]
