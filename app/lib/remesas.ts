@@ -64,6 +64,7 @@ export const REMESA_QUOTE_MAP: Record<string, RemesaQuoteMapping> = {
   cocos: { asset: "usdc", slug: "cocoscrypto" },
   global66: { asset: "usd", slug: "global66" },
   takenos: { asset: "usd", slug: "takenos" },
+  grabrfi: { asset: "usd", slug: "grabrfi" },
   arq: { asset: "usdc", slug: "arq" },
   lemon: { asset: "usdc", slug: "lemoncash" },
   belo: { asset: "usdc", slug: "belo" },
