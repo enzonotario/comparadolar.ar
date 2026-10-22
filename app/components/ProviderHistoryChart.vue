@@ -270,6 +270,10 @@ const definition = computed(() => {
       tooltip: {
         use: tooltip,
         portal,
+        // El ancla Y queda en el borde del plot. Así el cuadro no salta
+        // entre la línea de cotización y la barra de spread.
+        anchor: { x: "value", y: "plot-top" },
+        placement: ["bottom", "top"],
         content: (points) => {
           const focused = points[0]?.datum as { x?: Date } | undefined;
           const time = focused?.x;
