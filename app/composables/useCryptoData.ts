@@ -46,6 +46,8 @@ function normalizeData(data: any): NormalizedCryptoRate[] {
       is24x7: true,
       prettyName: override?.prettyName ?? item.prettyName ?? key,
       url: override?.url ?? item.url ?? "",
+      lastSeenAt: item.lastSeenAt ?? null,
+      stale: item.stale === true,
     };
 
     return applyProviderDisplayName(rate);

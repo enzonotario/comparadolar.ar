@@ -56,7 +56,7 @@ const data = computed(() => {
 const noSlowChangeData = computed(() => {
   if (!data.value || !Array.isArray(data.value)) return null;
 
-  return data.value.filter((item) => !item.slowChange);
+  return data.value.filter((item) => !item.slowChange && item.stale !== true);
 });
 </script>
 

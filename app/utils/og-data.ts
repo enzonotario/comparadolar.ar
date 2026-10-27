@@ -1,6 +1,7 @@
 import type { ExchangeRate } from "~/lib/types";
 import { BLACKLISTED_PROVIDERS } from "~/lib/currencies-config";
 import { isRankableProvider } from "~/lib/provider-conditions";
+import { isStaleQuote } from "~/lib/quote-freshness";
 import {
   compareExchangeRatesForBuy,
   compareExchangeRatesForSell,
@@ -61,6 +62,7 @@ export function top3BuyUsd(data: ExchangeRate[], only24x7 = false): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        !isStaleQuote(item) &&
         isRankableProvider(item) &&
         askPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
@@ -78,6 +80,7 @@ export function top3SellUsd(data: ExchangeRate[], only24x7 = false): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        !isStaleQuote(item) &&
         isRankableProvider(item) &&
         bidPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
@@ -95,6 +98,7 @@ export function top3BuyUsdCcl(data: ExchangeRate[]): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        !isStaleQuote(item) &&
         isRankableProvider(item) &&
         isCcl(item) &&
         askPrice(item) > 0,
@@ -112,6 +116,7 @@ export function top3SellUsdCcl(data: ExchangeRate[]): OgItem[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        !isStaleQuote(item) &&
         isRankableProvider(item) &&
         isCcl(item) &&
         bidPrice(item) > 0,
@@ -128,7 +133,7 @@ export function top3BuyCrypto(
   data: Array<{ slug: string; prettyName?: string; totalAsk: number }>,
 ): OgItem[] {
   return data
-    .filter((item) => !isBlacklisted(item.slug) && item.totalAsk > 0)
+    .filter((item) => !isBlacklisted(item.slug) && !isStaleQuote(item) && item.totalAsk > 0)
     .sort((a, b) => a.totalAsk - b.totalAsk)
     .slice(0, 3)
     .map((item) => ({
@@ -141,7 +146,7 @@ export function top3SellCrypto(
   data: Array<{ slug: string; prettyName?: string; totalBid: number }>,
 ): OgItem[] {
   return data
-    .filter((item) => !isBlacklisted(item.slug) && item.totalBid > 0)
+    .filter((item) => !isBlacklisted(item.slug) && !isStaleQuote(item) && item.totalBid > 0)
     .sort((a, b) => b.totalBid - a.totalBid)
     .slice(0, 3)
     .map((item) => ({
@@ -167,6 +172,7 @@ export function top3SlugsForBuyUsd(
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        !isStaleQuote(item) &&
         isRankableProvider(item) &&
         askPrice(item) > 0 &&
         (!only24x7 || item.is24x7),
@@ -186,6 +192,7 @@ export function top3SlugsForBuyUsdCcl(
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        !isStaleQuote(item) &&
         isRankableProvider(item) &&
         isCcl(item) &&
         askPrice(item) > 0,
@@ -202,7 +209,7 @@ export function top3SlugsForBuyCrypto(
   data: Array<{ slug: string; prettyName?: string; totalAsk: number }>,
 ): Array<{ slug: string; name: string }> {
   return data
-    .filter((item) => !isBlacklisted(item.slug) && item.totalAsk > 0)
+    .filter((item) => !isBlacklisted(item.slug) && !isStaleQuote(item) && item.totalAsk > 0)
     .sort((a, b) => a.totalAsk - b.totalAsk)
     .slice(0, 3)
     .map((item) => ({ slug: item.slug, name: item.prettyName || item.slug }));
@@ -314,6 +321,7 @@ export function top5TerminalUsd(
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        !isStaleQuote(item) &&
         isRankableProvider(item) &&
         askPrice(item) > 0 &&
         bidPrice(item) > 0 &&
@@ -333,6 +341,7 @@ export function top5TerminalUsdCcl(data: ExchangeRate[]): OgTerminalRow[] {
     .filter(
       (item) =>
         !isBlacklisted(item.slug ?? "") &&
+        !isStaleQuote(item) &&
         isRankableProvider(item) &&
         isCcl(item) &&
         askPrice(item) > 0 &&
@@ -358,7 +367,7 @@ export function top5TerminalCrypto(
   return data
     .filter(
       (item) =>
-        !isBlacklisted(item.slug) && item.totalAsk > 0 && item.totalBid > 0,
+        !isBlacklisted(item.slug) && !isStaleQuote(item) && item.totalAsk > 0 && item.totalBid > 0,
     )
     .sort((a, b) => a.totalAsk - a.totalBid - (b.totalAsk - b.totalBid))
     .slice(0, 5)

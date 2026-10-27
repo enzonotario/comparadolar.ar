@@ -2,6 +2,7 @@
 import type { ExchangeRate } from "@/lib/types";
 import { RATE_DISPLAY } from "@/lib/rate-labels";
 import { isRankableProvider } from "@/lib/provider-conditions";
+import { withoutStaleQuotes } from "@/lib/quote-freshness";
 import {
   compareExchangeRatesForBuy,
   compareExchangeRatesForSell,
@@ -27,7 +28,7 @@ const hasPrice = (value: number | null | undefined): value is number =>
 const filteredData = computed(() => {
   if (!props.data || !Array.isArray(props.data)) return null;
 
-  let data = props.data;
+  let data = withoutStaleQuotes(props.data);
 
   if (!includeConditions.value) {
     data = data.filter(isRankableProvider);

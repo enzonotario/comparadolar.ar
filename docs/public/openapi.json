@@ -1070,6 +1070,14 @@
           "usdType": {
             "type": "string",
             "enum": ["Oficial", "MEP", "Cripto", "CCL"]
+          },
+          "lastSeenAt": {
+            "type": ["string", "null"],
+            "description": "Última vez que el fetcher devolvió una cotización válida (ISO 8601)."
+          },
+          "stale": {
+            "type": "boolean",
+            "description": "true si lastSeenAt tiene más de 12 horas. Los listados del sitio lo ocultan; el detalle sigue disponible."
           }
         }
       },
@@ -1114,6 +1122,14 @@
           },
           "url": {
             "type": "string"
+          },
+          "lastSeenAt": {
+            "type": ["string", "null"],
+            "description": "Última vez que el fetcher devolvió una cotización válida (ISO 8601)."
+          },
+          "stale": {
+            "type": "boolean",
+            "description": "true si lastSeenAt tiene más de 12 horas. Los listados del sitio lo ocultan; el detalle sigue disponible."
           }
         }
       },

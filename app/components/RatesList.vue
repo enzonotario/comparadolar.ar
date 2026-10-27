@@ -10,6 +10,7 @@ import {
   getExchangeSpreadAbs,
 } from "@/lib/exchange-rate-sort";
 import { getProviderDisplayName } from "@/lib/provider-display";
+import { withoutStaleQuotes } from "@/lib/quote-freshness";
 import { omitDuplicateWallbitPro } from "@/lib/wallbit-pro";
 
 const items = [
@@ -183,7 +184,7 @@ const columns = computed<TableColumn<ExchangeRate>[]>(() => {
 const filteredRates = computed(() => {
   if (!props.data || !Array.isArray(props.data)) return [];
 
-  let rates = [...props.data];
+  let rates = withoutStaleQuotes(props.data);
 
   if (showOnly24x7.value) {
     rates = rates.filter((rate) => rate.is24x7);

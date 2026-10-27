@@ -4,6 +4,7 @@ import type { ExchangeRate, ProviderInfo } from "@/lib/types";
 import { useAnalytics } from "@/composables/useAnalytics";
 import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
 import { getProviderConditions } from "@/lib/provider-conditions";
+import { staleQuoteMessage } from "@/lib/quote-freshness";
 import {
   getProviderDisplayName,
   getProviderNameNote,
@@ -42,6 +43,7 @@ const currencySymbol = computed(() => props.currency.toUpperCase());
 const conditions = computed(() =>
   props.rateData ? getProviderConditions(props.rateData) : null,
 );
+const staleMessage = computed(() => staleQuoteMessage(props.rateData));
 const nameNote = computed(() =>
   getProviderNameNote({ slug: props.provider.slug || props.entity }),
 );
@@ -148,6 +150,15 @@ const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.d
   </div>
 
   <div class="space-y-6">
+    <UAlert
+      v-if="staleMessage"
+      icon="i-heroicons-exclamation-triangle"
+      color="warning"
+      variant="subtle"
+      title="Cotización desactualizada"
+      :description="staleMessage"
+    />
+
     <UAlert
       v-if="conditions"
       icon="i-heroicons-information-circle"

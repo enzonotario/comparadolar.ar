@@ -21,6 +21,7 @@ import {
   getProviderNameNote,
 } from "@/lib/provider-display";
 import { getResizedImageUrl } from "@/lib/image-url";
+import { withoutStaleQuotes } from "@/lib/quote-freshness";
 
 interface Props {
   currency: CurrencyType;
@@ -216,7 +217,9 @@ const allRates = computed(() => {
 
 const filteredRates = computed(() => {
   const currencyMatch = props.currency.toUpperCase();
-  let rates = allRates.value.filter((rate) => rate.currency === currencyMatch);
+  let rates = withoutStaleQuotes(
+    allRates.value.filter((rate) => rate.currency === currencyMatch),
+  );
 
   if (showOnly24x7.value && props.currency === "usd") {
     rates = rates.filter((rate) => rate.is24x7 === true);

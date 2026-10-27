@@ -16,6 +16,10 @@ export interface ExchangeRate {
   isBank?: boolean;
   usdType?: UsdProviderType;
   conditions?: string | null;
+  /** Última respuesta válida del fetcher (ISO). */
+  lastSeenAt?: string | null;
+  /** true si lastSeenAt tiene más de 12h — oculto en listados. */
+  stale?: boolean;
   /** Solo mockups/demos de anuncio sponsored */
   sponsoredBanner?: boolean;
 }
@@ -46,6 +50,8 @@ export interface NormalizedCryptoRate {
   prettyName: string;
   url: string;
   slug: string;
+  lastSeenAt?: string | null;
+  stale?: boolean;
 }
 
 export interface ProviderInfo {
