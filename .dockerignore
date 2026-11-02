@@ -14,6 +14,8 @@ dist
 node_modules
 docs/.vitepress/cache
 docs/.vitepress/dist
+docs/package-lock.json
+docs/node_modules
 public/docs
 preview-og
 .playwright-mcp

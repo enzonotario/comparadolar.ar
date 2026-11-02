@@ -9,7 +9,8 @@ COPY package.json bun.lock pnpm-workspace.yaml ./
 COPY docs/package.json ./docs/
 COPY packages/cli/package.json ./packages/cli/
 
-RUN bun install --frozen-lockfile
+# Hoisted linker: VitePress needs a real @vue/server-renderer (isolated links break SSR).
+RUN bun install --frozen-lockfile --linker=hoisted
 
 FROM deps AS build
 WORKDIR /app

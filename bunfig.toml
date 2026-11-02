@@ -1,0 +1,3 @@
+[install]
+# Match Dockerfile: VitePress SSR needs hoisted @vue/server-renderer.
+linker = "hoisted"

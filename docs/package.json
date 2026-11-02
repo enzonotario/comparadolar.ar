@@ -9,7 +9,11 @@
     "start": "vitepress dev .",
     "openapi:sync": "node scripts/sync-openapi-examples.mjs"
   },
+  "dependencies": {
+    "vue": "^3.5.29"
+  },
   "devDependencies": {
+    "@vue/server-renderer": "^3.5.29",
     "autoprefixer": "^10.4.21",
     "axios": "^1.13.2",
     "cheerio": "^1.2.0",
