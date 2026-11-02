@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vitepress";
 import { useSidebar } from "vitepress-openapi";
 import { GOOGLE_ANALYTICS_ID } from "./analytics";
@@ -19,8 +20,6 @@ export default defineConfig({
     "API pública de comparadolar.ar para cotizaciones de dólar y criptomonedas en Argentina.",
 
   head: [
-    // Vendor CSS as static asset (see scripts/sync-openapi-css.mjs) — avoids Tailwind PostCSS on `@layer`.
-    ["link", { rel: "stylesheet", href: "/docs/vitepress-openapi.css" }],
     ["link", { rel: "preconnect", href: "https://www.googletagmanager.com" }],
     ["link", { rel: "dns-prefetch", href: "https://www.googletagmanager.com" }],
     [
@@ -82,5 +81,9 @@ gtag('config', '${GOOGLE_ANALYTICS_ID}');`,
       pageData.frontmatter ??= {};
       pageData.frontmatter.title = pageTitle;
     }
+  },
+
+  vite: {
+    plugins: [tailwindcss()],
   },
 });

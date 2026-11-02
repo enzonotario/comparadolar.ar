@@ -3,23 +3,21 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "docs:dev": "node scripts/sync-openapi-css.mjs && vitepress dev .",
-    "docs:build": "node scripts/sync-openapi-css.mjs && vitepress build .",
+    "docs:dev": "vitepress dev .",
+    "docs:build": "vitepress build .",
     "docs:preview": "vitepress preview .",
     "start": "vitepress dev .",
-    "openapi:sync": "node scripts/sync-openapi-examples.mjs",
-    "openapi:css": "node scripts/sync-openapi-css.mjs"
+    "openapi:sync": "node scripts/sync-openapi-examples.mjs"
   },
   "dependencies": {
     "vue": "^3.5.29"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
     "@vue/server-renderer": "^3.5.29",
-    "autoprefixer": "^10.4.21",
     "axios": "^1.13.2",
     "cheerio": "^1.2.0",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.2.2",
     "vitepress": "latest",
     "vitepress-openapi": "latest"
   }

@@ -4,7 +4,7 @@ import type { Theme } from "vitepress";
 import { GOOGLE_ANALYTICS_ID } from "../analytics";
 import "./tailwind.css";
 import { theme, useOpenapi } from "vitepress-openapi/client";
-// Loaded via <link> in config head so PostCSS/Tailwind does not parse vendor `@layer`.
+import "vitepress-openapi/dist/style.css";
 import spec from "../../public/openapi.json" with { type: "json" };
 import CustomLayout from "./CustomLayout.vue";
 
