@@ -13,7 +13,8 @@
     "lint:fix": "eslint --fix .",
     "preview:og": "tsx scripts/preview-og.ts",
     "docs:dev": "pnpm --filter @comparadolar/docs run docs:dev",
-    "pwa:version": "node scripts/write-pwa-version.mjs"
+    "pwa:version": "node scripts/write-pwa-version.mjs",
+    "start": "bun run .output/server/index.mjs"
   },
   "dependencies": {
     "@nuxt/eslint": "1.9.0",
@@ -38,6 +39,7 @@
     "nuxt-echarts": "1.0.1",
     "nuxt-gtag": "4.0.0",
     "nuxt-og-image": "^6.0.0",
+    "pinia": "3.0.3",
     "slugify": "^1.6.6",
     "vue": "^3.5.29",
     "vue-echarts": "^8.3.1",
@@ -55,5 +57,9 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@10.30.3"
+  "packageManager": "pnpm@10.30.3",
+  "workspaces": [
+    "docs",
+    "packages/cli"
+  ]
 }

@@ -17,6 +17,7 @@ const commit =
   process.env.CF_PAGES_COMMIT_SHA?.slice(0, 12) ||
   process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ||
   process.env.GITHUB_SHA?.slice(0, 12) ||
+  process.env.SOURCE_COMMIT?.slice(0, 12) ||
   process.env.COMMIT_SHA?.slice(0, 12) ||
   gitCommit() ||
   "local";

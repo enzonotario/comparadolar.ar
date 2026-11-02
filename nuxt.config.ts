@@ -69,8 +69,9 @@ export default defineNuxtConfig({
   },
 
   ssr: true,
+  // Coolify/Docker sets NITRO_PRESET=bun. Cloudflare Pages keeps the default.
   nitro: {
-    preset: "cloudflare-pages",
+    preset: process.env.NITRO_PRESET || "cloudflare-pages",
     compressPublicAssets: true,
     minify: true,
     sourceMap: false,
