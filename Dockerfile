@@ -5,12 +5,11 @@
 FROM oven/bun:1.3-slim AS deps
 WORKDIR /app
 
-COPY package.json bun.lock pnpm-workspace.yaml ./
+COPY package.json bun.lock bunfig.toml pnpm-workspace.yaml ./
 COPY docs/package.json ./docs/
 COPY packages/cli/package.json ./packages/cli/
 
-# Hoisted linker: VitePress needs a real @vue/server-renderer (isolated links break SSR).
-RUN bun install --frozen-lockfile --linker=hoisted
+RUN bun install --frozen-lockfile
 
 FROM deps AS build
 WORKDIR /app

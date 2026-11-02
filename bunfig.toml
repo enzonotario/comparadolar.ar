@@ -1,3 +1,3 @@
 [install]
-# Match Dockerfile: VitePress SSR needs hoisted @vue/server-renderer.
-linker = "hoisted"
+# Isolated workspaces: docs declares vue + @vue/server-renderer explicitly.
+# Do not hoist — root Tailwind v4 breaks VitePress (Tailwind v3) CSS.
