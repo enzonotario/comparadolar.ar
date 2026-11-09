@@ -40,6 +40,5 @@ useHead({
     <template #before-nav>
       <SponsorBanner />
     </template>
-    <RemesasTop3 />
   </PageFooter>
 </template>
