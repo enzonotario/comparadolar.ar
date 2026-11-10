@@ -45,6 +45,10 @@ const colorScheme = computed(() => {
           </div>
         </UContainer>
 
+        <UContainer class="w-full max-w-3xl mx-auto mt-12">
+          <OpinaPageFeedback />
+        </UContainer>
+
         <TheFooter />
       </UMain>
     </AppDashboardShell>

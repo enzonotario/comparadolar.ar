@@ -46,6 +46,10 @@ const isSumarsePage = computed(() => route.path === "/sumarse");
           </div>
         </div>
 
+        <UContainer class="w-full max-w-3xl mx-auto mt-12">
+          <OpinaPageFeedback />
+        </UContainer>
+
         <TheFooter />
       </UMain>
     </AppDashboardShell>
