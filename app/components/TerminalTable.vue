@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  h,
-  onMounted,
-  onUnmounted,
-  ref,
-  resolveComponent,
-  watch,
-} from "vue";
+import { computed, h, onMounted, ref, resolveComponent, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import type { ExchangeRate, CurrencyType } from "@/lib/types";
 import { API_ENDPOINTS } from "@/lib/types";
@@ -30,7 +22,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const toast = useToast();
-const marketHours = ref(true);
+const { isMarketOpen: marketHours } = useMarketMode();
 const { showOnly24x7 } = use24x7Filter();
 const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
 const { saveSortToStorage, saveSelectedToStorage, loadSavedState } =
@@ -125,29 +117,8 @@ const { data: usdtRates, isLoading: usdtLoading } = useCryptoData("usdt");
 const { data: btcRates, isLoading: btcLoading } = useCryptoData("btc");
 const { data: ethRates, isLoading: ethLoading } = useCryptoData("eth");
 
-const isMarketHours = () => {
-  const now = new Date();
-  const hours = now.getHours();
-  const day = now.getDay();
-
-  const isWeekday = day >= 1 && day <= 5;
-  return isWeekday && hours >= 10 && hours < 16;
-};
-
-let marketHoursInterval: NodeJS.Timeout | null = null;
-
 onMounted(() => {
   if (import.meta.client) {
-    const defer =
-      window.requestIdleCallback || ((fn: () => void) => setTimeout(fn, 1));
-
-    defer(() => {
-      marketHours.value = isMarketHours();
-      marketHoursInterval = setInterval(() => {
-        marketHours.value = isMarketHours();
-      }, 60000);
-    });
-
     if (sortQuery.value) {
       sorting.value = parseSortQuery(sortQuery.value);
     } else {
@@ -166,10 +137,6 @@ onMounted(() => {
       }
     }
   }
-});
-
-onUnmounted(() => {
-  if (marketHoursInterval) clearInterval(marketHoursInterval);
 });
 
 const allRates = computed(() => {
