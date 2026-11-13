@@ -44,6 +44,11 @@ const conditions = computed(() =>
   props.rateData ? getProviderConditions(props.rateData) : null,
 );
 const staleMessage = computed(() => staleQuoteMessage(props.rateData));
+const { isMarketOpen } = useMarketMode();
+const isOffHours = computed(
+  () =>
+    props.currency === "usd" && !props.provider?.is24x7 && !isMarketOpen.value,
+);
 const nameNote = computed(() =>
   getProviderNameNote({ slug: props.provider.slug || props.entity }),
 );
@@ -126,6 +131,15 @@ const bidIconClass = `w-5 h-5 ${RATE_DISPLAY.bid.textClass} ${RATE_DISPLAY.bid.d
             class="flex items-center gap-1 text-amber-700 dark:text-amber-300"
           >
             Horario comercial
+          </UBadge>
+          <UBadge
+            v-if="isOffHours"
+            variant="subtle"
+            color="neutral"
+            icon="i-heroicons-moon"
+            title="Opera solo en horario bancario (lunes a viernes hábiles, de 10 a 17 h)"
+          >
+            Fuera de horario
           </UBadge>
         </div>
       </div>
