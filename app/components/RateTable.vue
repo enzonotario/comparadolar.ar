@@ -11,6 +11,7 @@ interface Props {
   sorting?: Array<{ id: string; desc: boolean }>;
   manualSorting?: boolean;
   trends?: Record<string, TrendSeries>;
+  offHours?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -54,6 +55,7 @@ function trendFor(slug: string) {
           :currency="currency"
           :active-tab="activeTab"
           :trend-values="trendFor(row.original.slug)"
+          :off-hours="offHours"
         />
       </template>
 

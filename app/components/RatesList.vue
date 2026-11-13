@@ -42,6 +42,10 @@ const props = defineProps<Props>();
 
 const activeTab = ref<"buy" | "sell">("buy");
 const { showOnly24x7 } = use24x7Filter();
+const { isMarketOpen } = useMarketMode();
+const showOffHours = computed(
+  () => props.currency === "usd" && !isMarketOpen.value,
+);
 const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
 const sorting: Ref<Array<{ id: string; desc: boolean }>> = ref([]);
 const { providers: trendProviders } = useProviderTrends(() => props.currency);
@@ -304,6 +308,7 @@ const handleRetry = () => {
           :active-tab="activeTab"
           :is-loading="isLoading"
           :trends="trendProviders"
+          :off-hours="showOffHours"
         />
 
         <div
@@ -322,6 +327,7 @@ const handleRetry = () => {
           :active-tab="activeTab"
           :is-loading="isLoading"
           :trends="trendProviders"
+          :off-hours="showOffHours"
         />
       </template>
     </UCard>

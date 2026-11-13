@@ -12,10 +12,12 @@ interface Props {
   currency: string;
   activeTab: "buy" | "sell";
   trendValues?: number[];
+  offHours?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   trendValues: () => [],
+  offHours: false,
 });
 
 const conditions = computed(() => getProviderConditions(props.rate));
@@ -81,6 +83,16 @@ const handleImageError = (event: Event) => {
               </h3>
               <UBadge v-if="rate.is24x7" color="success" size="xs">
                 24/7
+              </UBadge>
+              <UBadge
+                v-else-if="offHours"
+                color="neutral"
+                variant="subtle"
+                size="xs"
+                icon="i-heroicons-moon"
+                title="Opera solo en horario bancario (lunes a viernes hábiles, de 10 a 17 h)"
+              >
+                Fuera de horario
               </UBadge>
               <UsdTypeBadge
                 :usd-type="rate.usdType"
@@ -154,6 +166,16 @@ const handleImageError = (event: Event) => {
               </h3>
               <UBadge v-if="rate.is24x7" color="success" size="xs">
                 24/7
+              </UBadge>
+              <UBadge
+                v-else-if="offHours"
+                color="neutral"
+                variant="subtle"
+                size="xs"
+                icon="i-heroicons-moon"
+                title="Opera solo en horario bancario (lunes a viernes hábiles, de 10 a 17 h)"
+              >
+                Fuera de horario
               </UBadge>
               <UsdTypeBadge
                 :usd-type="rate.usdType"
