@@ -12,9 +12,12 @@ interface Props {
   data: ExchangeRate | ExchangeRate[] | null;
   value: number;
   currency: string;
+  offHours?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  offHours: false,
+});
 const NuxtLink = resolveComponent("NuxtLink");
 
 const handleImageError = (event: Event) => {
@@ -117,6 +120,16 @@ const singleProviderPath = computed(() => {
             <UBadge v-if="provider?.is24x7" color="success" size="xs">
               24/7
             </UBadge>
+            <UBadge
+              v-else-if="offHours"
+              color="neutral"
+              variant="subtle"
+              size="xs"
+              icon="i-heroicons-moon"
+              title="Opera solo en horario bancario (lunes a viernes hábiles, de 10 a 17 h)"
+            >
+              Fuera de horario
+            </UBadge>
             <UsdTypeBadge
               :usd-type="provider?.usdType"
               :slug="provider?.slug"
@@ -155,6 +168,16 @@ const singleProviderPath = computed(() => {
             </span>
             <UBadge v-if="providers[0]?.is24x7" color="success" size="xs">
               24/7
+            </UBadge>
+            <UBadge
+              v-else-if="offHours"
+              color="neutral"
+              variant="subtle"
+              size="xs"
+              icon="i-heroicons-moon"
+              title="Opera solo en horario bancario (lunes a viernes hábiles, de 10 a 17 h)"
+            >
+              Fuera de horario
             </UBadge>
             <UsdTypeBadge
               :usd-type="providers[0]?.usdType"

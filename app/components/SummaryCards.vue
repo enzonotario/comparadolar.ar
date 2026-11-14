@@ -21,6 +21,11 @@ const props = withDefaults(defineProps<Props>(), {
 const { showOnly24x7 } = use24x7Filter();
 const { matchesFilter: matchesUsdType } = useUsdTypeFilter();
 const { includeConditions } = useIncludeConditions();
+const { isMarketOpen } = useMarketMode();
+
+const showOffHours = computed(
+  () => props.currency === "usd" && !isMarketOpen.value,
+);
 
 const hasPrice = (value: number | null | undefined): value is number =>
   value != null && value > 0;
@@ -108,6 +113,7 @@ const spreadIconClass = `w-5 h-5 ${RATE_DISPLAY.spread.textClass}`;
       :data="isLoading ? null : bestBuy"
       :value="bestBuy?.[0]?.ask ?? 0"
       :currency="props.currency"
+      :off-hours="showOffHours"
     />
 
     <SummaryCard
@@ -117,6 +123,7 @@ const spreadIconClass = `w-5 h-5 ${RATE_DISPLAY.spread.textClass}`;
       :data="isLoading ? null : bestSell"
       :value="bestSell?.[0]?.bid ?? 0"
       :currency="props.currency"
+      :off-hours="showOffHours"
     />
 
     <SummaryCard
@@ -126,6 +133,7 @@ const spreadIconClass = `w-5 h-5 ${RATE_DISPLAY.spread.textClass}`;
       :data="isLoading ? null : lowestSpread"
       :value="lowestSpreadAmount"
       :currency="props.currency"
+      :off-hours="showOffHours"
     />
   </div>
 </template>
