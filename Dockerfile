@@ -23,12 +23,18 @@ ENV PORT=3000
 # Invoke steps with Bun (package.json scripts still use pnpm for CF Pages).
 # Nitro traces @takumi-rs/core into .output but drops its optional platform
 # binding, so /_og/* 500s with "Cannot find module '@takumi-rs/core-linux-x64-gnu'".
+# Bun may also skip linking that optional dep under node_modules/@takumi-rs/.
 RUN bun run pwa:version \
   && bun run --cwd docs docs:build \
   && bunx --bun nuxi build \
   && mkdir -p .output/server/node_modules/@takumi-rs \
-  && cp -a node_modules/@takumi-rs/core-linux-x64-gnu \
-    .output/server/node_modules/@takumi-rs/
+  && TAKUMI_NATIVE="$(find node_modules -type d -name 'core-linux-x64-gnu' 2>/dev/null | head -n1)" \
+  && if [ -z "$TAKUMI_NATIVE" ]; then \
+       bun add --no-save @takumi-rs/core-linux-x64-gnu@0.71.7; \
+       TAKUMI_NATIVE="node_modules/@takumi-rs/core-linux-x64-gnu"; \
+     fi \
+  && test -d "$TAKUMI_NATIVE" \
+  && cp -a "$TAKUMI_NATIVE" .output/server/node_modules/@takumi-rs/core-linux-x64-gnu
 
 FROM oven/bun:1.3-slim AS runtime
 WORKDIR /app
