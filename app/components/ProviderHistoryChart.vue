@@ -65,18 +65,34 @@ const chartData = computed(() => {
   if (!historyData.value) return [];
 
   const { start, end } = getDateRange(selectedRange.value);
+  const startMs = start.getTime();
+  const endMs = end.getTime();
+  const rows = [...historyData.value].sort(
+    (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp),
+  );
 
-  return historyData.value
-    .filter((item) => {
-      const itemDate = new Date(item.timestamp);
-      return itemDate >= start && itemDate <= end;
-    })
-    .map((item) => ({
-      bid: item.bid,
-      ask: item.ask,
-      timestamp: item.timestamp,
-      spread: calculateSpread(item.ask, item.bid),
-    }));
+  const inRange = rows.filter((item) => {
+    const itemMs = Date.parse(item.timestamp);
+    return itemMs >= startMs && itemMs <= endMs;
+  });
+
+  // Solo guardamos filas cuando cambia el precio: si el provider lleva días
+  // estable, el rango puede quedar vacío. Arrancamos con el último valor
+  // conocido para dibujar la línea plana en lugar de "sin datos".
+  const lastBefore = rows
+    .filter((item) => Date.parse(item.timestamp) < startMs)
+    .at(-1);
+
+  const visible = lastBefore
+    ? [{ ...lastBefore, timestamp: start.toISOString() }, ...inRange]
+    : inRange;
+
+  return visible.map((item) => ({
+    bid: item.bid,
+    ask: item.ask,
+    timestamp: item.timestamp,
+    spread: calculateSpread(item.ask, item.bid),
+  }));
 });
 
 const extent = computed(() => {
