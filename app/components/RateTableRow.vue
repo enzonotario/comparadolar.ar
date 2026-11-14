@@ -77,7 +77,7 @@ const handleImageError = (event: Event) => {
             @error="handleImageError"
           />
           <div class="min-w-0">
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
               <h3 class="text-sm font-medium text-gray-900 dark:text-white">
                 {{ getProviderDisplayName(rate) }}
               </h3>
