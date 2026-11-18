@@ -10,6 +10,7 @@ import {
   isZeroLike,
   simulateRemesaPayout,
 } from "~/lib/remesas";
+import { withHeaderTooltip } from "~/lib/table-header-tooltip";
 import { getDetail, type RemesaRow } from "~/composables/useRemesasRows";
 
 interface SimulatedRemesaRow extends RemesaRow {
@@ -269,15 +270,14 @@ function renderProviderCell(row: RemesaRow) {
   ]);
 }
 
-function createSortableHeader(label: string, shortLabel = label) {
+function createSortableHeader(label: string, fullLabel?: string) {
   return ({ column }: { column: any }) => {
     const isSorted = column.getIsSorted();
-    return h(UButton, {
+    const button = h(UButton, {
       color: "neutral",
       variant: "ghost",
       size: "sm",
-      label: shortLabel,
-      title: label,
+      label,
       icon: isSorted
         ? isSorted === "asc"
           ? "i-lucide-arrow-up-narrow-wide"
@@ -286,6 +286,7 @@ function createSortableHeader(label: string, shortLabel = label) {
       class: "-mx-1 px-1 text-xs font-semibold",
       onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
     });
+    return withHeaderTooltip(button, fullLabel);
   };
 }
 
@@ -480,7 +481,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "cuentaPropia",
-    header: createSortableHeader("Cuenta propia", "Propia"),
+    header: createSortableHeader("Propia", "Cuenta propia"),
     cell: ({ row }) =>
       renderBooleanCell(
         row.original.cuentaPropia,
@@ -489,7 +490,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "inversiones",
-    header: createSortableHeader("Inversiones", "Invers."),
+    header: createSortableHeader("Invers.", "Inversiones"),
     cell: ({ row }) =>
       renderBooleanCell(
         row.original.inversiones,
@@ -498,7 +499,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "tarjetaUsa",
-    header: createSortableHeader("Tarjeta USA"),
+    header: createSortableHeader("Tarjeta USA", "Tarjeta de Estados Unidos"),
     cell: ({ row }) =>
       renderBooleanCell(
         row.original.tarjetaUsa,
@@ -507,7 +508,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "costoRecibirPagosSort",
-    header: createSortableHeader("Recibir pagos", "Recibir"),
+    header: createSortableHeader("Recibir", "Costo por recibir pagos"),
     cell: ({ row }) =>
       renderCostCell(
         row.original.costoRecibirPagos,
@@ -516,7 +517,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "retiroArsSort",
-    header: createSortableHeader("Retiro ARS", "Retiro"),
+    header: createSortableHeader("Retiro", "Costo de retiro en pesos"),
     cell: ({ row }) =>
       renderCostCell(
         row.original.retiroArs,
@@ -535,7 +536,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "costoMantenimientoTarjetaSort",
-    header: createSortableHeader("Mant. tarjeta", "Mant."),
+    header: createSortableHeader("Mant.", "Mantenimiento de tarjeta"),
     cell: ({ row }) =>
       renderCostCell(
         row.original.costoMantenimientoTarjeta,
@@ -544,7 +545,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "costoTarjetaSort",
-    header: createSortableHeader("Uso tarjeta", "Uso"),
+    header: createSortableHeader("Uso", "Costo por uso de tarjeta"),
     cell: ({ row }) =>
       renderCostCell(
         row.original.costoTarjeta,
@@ -553,7 +554,7 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
   },
   {
     accessorKey: "averageRating",
-    header: createSortableHeader("Rating promedio", "Rating"),
+    header: createSortableHeader("Rating", "Rating promedio"),
     cell: ({ row }) =>
       h(
         "span",
