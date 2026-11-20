@@ -71,8 +71,16 @@ const SITE_PAGES = [
 const open = ref(false);
 const bootstrapping = ref(false);
 
+/** Opina CSAT mounts at z-index ~max with aria-modal and covers the search palette. */
+function dismissOpinaOverlay() {
+  (
+    window as Window & { Opina?: { hide?: () => void } }
+  ).Opina?.hide?.();
+}
+
 watch(open, async (isOpen) => {
   if (!isOpen) return;
+  dismissOpinaOverlay();
   bootstrapping.value = true;
   try {
     await ensureProvidersCatalogsLoaded(catalogs);
@@ -80,6 +88,8 @@ watch(open, async (isOpen) => {
     bootstrapping.value = false;
   }
 });
+
+
 
 const paletteGroups = computed(() => {
   type Item = {
@@ -156,6 +166,8 @@ const providerItemCount = computed(() =>
   <UDashboardSearch
     v-if="showPalette"
     v-model:open="open"
+    title="Buscar"
+    description="Proveedores y páginas de ComparaDólar"
     :groups="paletteGroups"
     :loading="bootstrapping"
     :fuse="{
@@ -169,5 +181,8 @@ const providerItemCount = computed(() =>
     :color-mode="false"
     placeholder="Buscar proveedor o página…"
     :virtualize="providerItemCount > 48"
+    :ui="{
+      modal: 'z-[2147483647]',
+    }"
   />
 </template>

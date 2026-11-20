@@ -10,6 +10,10 @@ const appConfig = useAppConfig();
 
 /** Mismo hook que `UDashboardSearch` / `provideDashboardContext` — el header no recibe `inject` del dashboard. */
 function toggleProviderSearch() {
+  // Opina CSAT (z-index ~max) blocks the palette if left open.
+  (
+    window as Window & { Opina?: { hide?: () => void } }
+  ).Opina?.hide?.();
   nuxtApp.hooks.callHook("dashboard:search:toggle");
 }
 </script>
