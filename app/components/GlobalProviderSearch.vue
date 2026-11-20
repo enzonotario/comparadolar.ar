@@ -34,21 +34,21 @@ const SITE_PAGES = [
   {
     id: "inicio",
     label: "Inicio",
-    description: "home / comparar cotizaciones",
+    description: "home / usd / dolar / comparar cotizaciones",
     to: "/",
     icon: "i-heroicons-home",
   },
   {
     id: "graficos",
     label: "Gráficos",
-    description: "charts / histórico",
+    description: "charts / histórico / usd usdc usdt btc eth",
     to: "/graficos",
     icon: "i-heroicons-chart-bar",
   },
   {
     id: "terminal",
     label: "Terminal",
-    description: "vista densa / tabla",
+    description: "vista densa / tabla / usd usdc usdt btc eth",
     to: "/terminal",
     icon: "i-heroicons-computer-desktop",
   },
@@ -67,6 +67,28 @@ const SITE_PAGES = [
     icon: "i-heroicons-plus-circle",
   },
 ] as const;
+
+/** Landing de comparación por moneda (aparecen al buscar el ticker). */
+const CURRENCY_COMPARE_PAGES = validCurrencies.map((currency) => {
+  const cfg = currenciesConfig[currency];
+  return {
+    id: `compare-${currency}`,
+    label: `Comparar ${cfg.fullName}`,
+    suffix: cfg.label,
+    description: [
+      cfg.label,
+      cfg.fullName,
+      currency,
+      ...cfg.keywords,
+      "comparar",
+      "cotizaciones",
+      "página",
+    ].join(" / "),
+    to: cfg.route,
+    icon: cfg.icon,
+  };
+});
+
 
 const open = ref(false);
 const bootstrapping = ref(false);
@@ -103,6 +125,18 @@ const paletteGroups = computed(() => {
   };
 
   const groups: { id: string; label: string; items: Item[] }[] = [
+    {
+      id: "compare",
+      label: "Comparar",
+      items: CURRENCY_COMPARE_PAGES.map((page) => ({
+        id: `page-${page.id}`,
+        label: page.label,
+        suffix: page.suffix,
+        description: page.description,
+        to: page.to,
+        icon: page.icon,
+      })),
+    },
     {
       id: "pages",
       label: "Páginas",
