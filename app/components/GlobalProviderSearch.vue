@@ -23,6 +23,7 @@ const PROVIDER_SEARCH_ALIASES: Record<string, string> = {
   "fiwind-mep": "fiwind",
   "brubank-ultra": "brubank",
   letsbit: "Letsbit LB Finanzas",
+  "banco-columbia": "Columbia",
 };
 
 /** Páginas estáticas del sitio (mapa del sitio / navegación adicional). */
