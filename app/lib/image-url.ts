@@ -1,10 +1,22 @@
 const WSRV_ENDPOINT = "https://wsrv.nl/";
 
+/** True when the URL path ends in `.svg` (IPX/SVGO fails on these in our Nitro build). */
+export function isSvgImageUrl(src: string | null | undefined): boolean {
+  if (!src) return false;
+  try {
+    const pathname = new URL(src, "https://local.invalid").pathname;
+    return pathname.toLowerCase().endsWith(".svg");
+  } catch {
+    return /\.svg([?#]|$)/i.test(src);
+  }
+}
+
 /**
  * Resize remote images (provider logos, etc.) via wsrv.nl so we don't
  * download 3000px PNGs for 16–32px UI icons. Local/relative URLs pass through.
  */
 export function getResizedImageUrl(
+
   src: string | null | undefined,
   width: number,
   options: { quality?: number; format?: "webp" | "avif" | "png" } = {},

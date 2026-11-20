@@ -3,6 +3,7 @@ import { formatCurrency } from "@/lib/utils";
 import { RATE_LABELS } from "@/lib/rate-labels";
 import type { ExchangeRate } from "@/lib/types";
 import { getProviderConditions } from "@/lib/provider-conditions";
+import { getResizedImageUrl } from "@/lib/image-url";
 
 interface Props {
   currency: string;
@@ -36,7 +37,9 @@ const relatedProviders = computed(() => {
     .map((provider) => ({
       ...provider,
       displayName: provider.prettyName || provider.name,
-      logo: provider.logoUrl || provider.logo,
+      // wsrv rasterizes SVG; IPX/SVGO 500s on .svg (css-tree) in our Nitro build.
+      logo: getResizedImageUrl(provider.logoUrl || provider.logo, 44),
+
       conditionsLabel: getProviderConditions(provider),
     }))
     .sort((a, b) => {

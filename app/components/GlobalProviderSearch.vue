@@ -8,6 +8,8 @@ import {
   getProviderEntityPath,
   useProvidersCatalogRegistry,
 } from "~/composables/useProvidersCatalog";
+import { getResizedImageUrl, isSvgImageUrl } from "~/lib/image-url";
+
 
 const route = useRoute();
 
@@ -127,7 +129,15 @@ const paletteGroups = computed(() => {
           suffix: cfg.label,
           description: [p.slug, alias].filter(Boolean).join(" / "),
           to: getProviderEntityPath(c, p.slug),
-          avatar: p.logoUrl ? { src: p.logoUrl } : undefined,
+          // SVG via IPX 500 (css-tree); wsrv rasterizes them so UAvatar/NuxtImg works.
+          avatar: p.logoUrl
+            ? {
+                src: isSvgImageUrl(p.logoUrl)
+                  ? getResizedImageUrl(p.logoUrl, 32)
+                  : p.logoUrl,
+              }
+            : undefined,
+
         };
       }),
     });
