@@ -26,6 +26,7 @@ const PROVIDER_SEARCH_ALIASES: Record<string, string> = {
   "brubank-ultra": "brubank",
   letsbit: "Letsbit LB Finanzas",
   "banco-columbia": "Columbia",
+  "banco-santa-cruz": "BSC Santa Cruz",
 };
 
 /** Páginas estáticas del sitio (mapa del sitio / navegación adicional). */
