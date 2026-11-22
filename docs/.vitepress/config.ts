@@ -96,8 +96,5 @@ gtag('config', '${GOOGLE_ANALYTICS_ID}');`,
 
   vite: {
     plugins: [tailwindcss(), llmsDevServer(llms)],
-    ssr: {
-      noExternal: ["vitepress-openapi"],
-    },
   },
 });
