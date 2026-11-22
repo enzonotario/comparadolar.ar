@@ -1,6 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vitepress";
-import { useSidebar } from "vitepress-openapi";
+import { generateLlmsFiles, llmsDevServer, useSidebar } from "vitepress-openapi";
 import { GOOGLE_ANALYTICS_ID } from "./analytics";
 import spec from "../public/openapi.json" with { type: "json" };
 
@@ -9,6 +9,13 @@ const sidebar = useSidebar({
   // Optionally, you can specify a link prefix for all generated sidebar items.
   linkPrefix: "/operations/",
 });
+
+const llms = {
+  spec,
+  operationRoute: "operations/{operationId}",
+  introductionRoute: "introduction",
+  openapiUrl: "/docs/openapi.json",
+};
 
 // refer https://vitepress.dev/reference/site-config for details
 export default defineConfig({
@@ -83,7 +90,14 @@ gtag('config', '${GOOGLE_ANALYTICS_ID}');`,
     }
   },
 
+  async buildEnd(siteConfig) {
+    await generateLlmsFiles(siteConfig, llms);
+  },
+
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), llmsDevServer(llms)],
+    ssr: {
+      noExternal: ["vitepress-openapi"],
+    },
   },
 });
