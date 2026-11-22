@@ -70,7 +70,10 @@ const SITE_PAGES = [
     id: "api-docs",
     label: "API Docs",
     description: "api / openapi / documentación / developers",
-    to: "/docs/",
+    // VitePress estático: no es ruta Nuxt; abrir fuera del SPA.
+    to: "https://comparadolar.ar/docs/",
+    target: "_blank",
+    external: true,
     icon: "i-heroicons-book-open",
   },
 ] as const;
@@ -127,6 +130,8 @@ const paletteGroups = computed(() => {
     suffix?: string;
     description: string;
     to: string;
+    target?: string;
+    external?: boolean;
     icon?: string;
     avatar?: { src: string };
   };
@@ -154,6 +159,8 @@ const paletteGroups = computed(() => {
         description: page.description,
         to: page.to,
         icon: page.icon,
+        ...("target" in page ? { target: page.target } : {}),
+        ...("external" in page ? { external: page.external } : {}),
       })),
     },
   ];
