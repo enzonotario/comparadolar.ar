@@ -66,6 +66,13 @@ const SITE_PAGES = [
     to: "/sumarse",
     icon: "i-heroicons-plus-circle",
   },
+  {
+    id: "api-docs",
+    label: "API Docs",
+    description: "api / openapi / documentación / developers",
+    to: "/docs/",
+    icon: "i-heroicons-book-open",
+  },
 ] as const;
 
 /** Landing de comparación por moneda (aparecen al buscar el ticker). */
