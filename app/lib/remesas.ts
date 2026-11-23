@@ -55,6 +55,8 @@ const COMPANY_DISPLAY_NAMES: Record<string, string> = {
   global66: "Global66",
   belo: "Belo",
   ripio: "Ripio",
+  lbfinanzas: "LB Finanzas",
+  letsbit: "LB Finanzas",
 };
 
 /** Mapeo remesa → cotización ComparaDolar para la columna "Vendes a". */
@@ -69,6 +71,8 @@ export const REMESA_QUOTE_MAP: Record<string, RemesaQuoteMapping> = {
   lemon: { asset: "usdc", slug: "lemoncash" },
   belo: { asset: "usdc", slug: "belo" },
   ripio: { asset: "usdc", slug: "ripio" },
+  lbfinanzas: { asset: "usdc", slug: "letsbit" },
+  letsbit: { asset: "usdc", slug: "letsbit" },
 };
 
 const REMESA_INSTITUTIONS: Record<string, RemesaInstitutionMeta> = {
@@ -136,6 +140,16 @@ const REMESA_INSTITUTIONS: Record<string, RemesaInstitutionMeta> = {
     displayName: "Wise",
     logo: "https://api.argentinadatos.com/static/logos/wise.svg",
     url: "https://wise.com/?ref=comparadolar",
+  },
+  lbfinanzas: {
+    displayName: "LB Finanzas",
+    logo: "https://api.argentinadatos.com/static/logos/letsbit.png",
+    url: "https://lbfinanzas.com/?ref=comparadolar",
+  },
+  letsbit: {
+    displayName: "LB Finanzas",
+    logo: "https://api.argentinadatos.com/static/logos/letsbit.png",
+    url: "https://lbfinanzas.com/?ref=comparadolar",
   },
 };
 
