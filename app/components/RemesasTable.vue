@@ -8,7 +8,9 @@ import {
   formatArsAmount,
   hasPositiveNumericValue,
   isZeroLike,
+  METODOS_RECEPCION_OPCIONES,
   simulateRemesaPayout,
+  type RemesaMetodoRecepcion,
 } from "~/lib/remesas";
 import { withHeaderTooltip } from "~/lib/table-header-tooltip";
 import { getDetail, type RemesaRow } from "~/composables/useRemesasRows";
@@ -294,7 +296,34 @@ const searchQuery = useRouteQuery("q", "");
 const cuentaPropiaFilter = useRouteQuery("propia", "all");
 const inversionesFilter = useRouteQuery("inv", "all");
 const tarjetaFilter = useRouteQuery("tarjeta", "all");
+const metodosFilterQuery = useRouteQuery("metodos", "");
 const sortQuery = useRouteQuery("sort", '[{"id":"arsFinalSort","desc":true}]');
+
+const metodosFilter = computed({
+  get(): RemesaMetodoRecepcion[] {
+    const selected = new Set(
+      metodosFilterQuery.value
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean),
+    );
+    return METODOS_RECEPCION_OPCIONES.filter((metodo) => selected.has(metodo));
+  },
+  set(values: RemesaMetodoRecepcion[]) {
+    metodosFilterQuery.value = METODOS_RECEPCION_OPCIONES.filter((metodo) =>
+      values.includes(metodo),
+    ).join(",");
+  },
+});
+
+function toggleMetodoFilter(metodo: RemesaMetodoRecepcion) {
+  const next = new Set(metodosFilter.value);
+  if (next.has(metodo)) next.delete(metodo);
+  else next.add(metodo);
+  metodosFilter.value = METODOS_RECEPCION_OPCIONES.filter((item) =>
+    next.has(item),
+  );
+}
 
 type SortingState = Array<{ id: string; desc: boolean }>;
 
@@ -384,6 +413,12 @@ const filteredRows = computed(() => {
     if (!matchBooleanFilter(tarjetaFilter.value, row.tarjetaUsa)) {
       return false;
     }
+    if (metodosFilter.value.length > 0) {
+      const rowMetodos = row.metodosRecepcion ?? [];
+      if (!metodosFilter.value.every((metodo) => rowMetodos.includes(metodo))) {
+        return false;
+      }
+    }
     if (!query) return true;
 
     return [
@@ -394,6 +429,7 @@ const filteredRows = computed(() => {
       row.costoTarjeta,
       row.retiroArs,
       row.vendesALabel,
+      ...(row.metodosRecepcion ?? []),
       ...Object.values(row.detalles ?? {}),
     ]
       .map((value) => normalizeText(value))
@@ -505,6 +541,34 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
         row.original.tarjetaUsa,
         getDetail(row.original.detalles, "tarjetaUsa"),
       ),
+  },
+  {
+    accessorKey: "metodosRecepcion",
+    header: () =>
+      withHeaderTooltip(
+        h("span", { class: "text-xs font-semibold" }, "Recibe por"),
+        "Métodos de recepción: ACH, Wire, SWIFT",
+      ),
+    cell: ({ row }) => {
+      const metodos = row.original.metodosRecepcion;
+      const detail = getDetail(row.original.detalles, "metodosRecepcion");
+      if (!metodos?.length) {
+        return h("div", { class: "flex items-center gap-1" }, [
+          h("span", { class: "text-muted" }, "—"),
+          detail ? renderDetailPopover(detail) : null,
+        ]);
+      }
+      return h("div", { class: "flex flex-wrap items-center gap-1" }, [
+        ...metodos.map((metodo) =>
+          h(
+            UBadge,
+            { color: "neutral", variant: "soft", size: "sm", class: "font-medium" },
+            { default: () => metodo },
+          ),
+        ),
+        detail ? renderDetailPopover(detail) : null,
+      ]);
+    },
   },
   {
     accessorKey: "costoRecibirPagosSort",
@@ -671,6 +735,26 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
               </div>
             </div>
           </div>
+          <div class="space-y-2">
+            <p class="text-xs font-medium uppercase tracking-wide text-muted">
+              Recibe por
+              <span class="ml-1 font-normal normal-case tracking-normal opacity-70">
+                (todas las seleccionadas)
+              </span>
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <UButton
+                v-for="metodo in METODOS_RECEPCION_OPCIONES"
+                :key="`metodo-${metodo}`"
+                size="sm"
+                color="neutral"
+                :variant="metodosFilter.includes(metodo) ? 'soft' : 'outline'"
+                @click="toggleMetodoFilter(metodo)"
+              >
+                {{ metodo }}
+              </UButton>
+            </div>
+          </div>
           <p class="text-xs text-muted">
             <strong>{{ RATE_DISPLAY.bid.label }}</strong> es el precio de venta
             del dólar en vivo. Si hay aclaraciones, aparecen como
@@ -819,6 +903,26 @@ const columns = computed<TableColumn<SimulatedRemesaRow>[]>(() => [
                 >
                   {{ row.tarjetaUsaLabel }}
                 </UBadge>
+              </div>
+              <div
+                class="col-span-2 flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
+              >
+                <span class="text-muted">Recibe por</span>
+                <span class="ml-auto" />
+                <div class="flex flex-wrap justify-end gap-1">
+                  <template v-if="row.metodosRecepcion?.length">
+                    <UBadge
+                      v-for="metodo in row.metodosRecepcion"
+                      :key="metodo"
+                      color="neutral"
+                      variant="soft"
+                      size="sm"
+                    >
+                      {{ metodo }}
+                    </UBadge>
+                  </template>
+                  <span v-else class="text-muted">—</span>
+                </div>
               </div>
               <div
                 class="flex items-center rounded-lg bg-elevated px-2.5 py-1.5"
