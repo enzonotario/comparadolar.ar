@@ -148,6 +148,9 @@ export default defineNuxtConfig({
       siteDescription: currenciesConfig.usd.description,
       opinaUrl: process.env.NUXT_PUBLIC_OPINA_URL || 'https://opina.enzonotario.me',
       opinaKey: process.env.NUXT_PUBLIC_OPINA_KEY || 'pk_0iquuzgu7sf14tgw',
+      /** CSAT survey for visit-gated prompt + footer (page-feedback slot is separate). */
+      opinaCsatSurveyId:
+        process.env.NUXT_PUBLIC_OPINA_CSAT_SURVEY_ID || 'srv_2iwfa3izwvg10z1j',
     },
   },
 

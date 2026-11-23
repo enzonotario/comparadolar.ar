@@ -90,10 +90,12 @@ const socialLinks = [
   },
 ] as const;
 
+const opinaCsatId = String(useRuntimeConfig().public.opinaCsatSurveyId || '').trim() || undefined
+
 function openOpinaFeedback() {
   const w = window as Window & { Opina?: { show: (id?: string) => void } }
   if (w.Opina?.show) {
-    w.Opina.show()
+    w.Opina.show(opinaCsatId)
     return
   }
   // Widget still loading (deferred script) — retry briefly.
@@ -102,7 +104,7 @@ function openOpinaFeedback() {
     tries += 1
     if (w.Opina?.show) {
       window.clearInterval(timer)
-      w.Opina.show()
+      w.Opina.show(opinaCsatId)
     }
     else if (tries >= 20) {
       window.clearInterval(timer)
