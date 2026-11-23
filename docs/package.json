@@ -19,6 +19,6 @@
     "cheerio": "^1.2.0",
     "tailwindcss": "^4.2.2",
     "vitepress": "latest",
-    "vitepress-openapi": "^0.2.18"
+    "vitepress-openapi": "^0.2.19"
   }
 }
