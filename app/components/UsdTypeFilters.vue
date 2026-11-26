@@ -25,7 +25,7 @@ const tabColor = (category: UsdFilterCategory) => {
 <template>
   <div
     v-if="variant === 'subtabs'"
-    class="relative z-10 inline-flex flex-col items-start gap-y-2 rounded-lg border border-zinc-200/80 bg-white px-2 py-1 shadow-md md:flex-row md:flex-nowrap md:items-center md:gap-x-3 md:gap-y-0 md:shadow-sm dark:border-zinc-700/80 dark:bg-zinc-900"
+    class="inline-flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-lg border border-zinc-200/80 bg-white px-3 py-1.5 shadow-sm dark:border-zinc-700/80 dark:bg-zinc-900"
   >
     <UCheckbox
       v-for="category in categories"

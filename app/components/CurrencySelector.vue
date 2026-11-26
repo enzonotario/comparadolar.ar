@@ -37,18 +37,11 @@ const showUsdFilters = computed(
 </script>
 
 <template>
-  <div
-    class="relative flex flex-wrap items-center justify-center gap-2 overflow-visible"
-    :class="showUsdFilters ? 'pb-48 md:pb-10' : undefined"
-  >
-    <div
-      v-for="currency in currencies"
-      :key="currency.value"
-      :class="
-        currency.value === 'usd' ? 'relative overflow-visible' : undefined
-      "
-    >
+  <div class="flex flex-col items-center gap-2">
+    <div class="flex flex-wrap items-center justify-center gap-2">
       <UButton
+        v-for="currency in currencies"
+        :key="currency.value"
         :variant="isActive(currency.value) ? 'solid' : 'outline'"
         color="neutral"
         size="sm"
@@ -58,13 +51,8 @@ const showUsdFilters = computed(
         <UIcon :name="currency.icon" class="mr-2" />
         {{ currency.label }}
       </UButton>
-
-      <div
-        v-if="currency.value === 'usd' && showUsdFilters"
-        class="absolute left-0 top-full z-20 mt-1.5 md:whitespace-nowrap"
-      >
-        <UsdTypeFilters variant="subtabs" />
-      </div>
     </div>
+
+    <UsdTypeFilters v-if="showUsdFilters" variant="subtabs" />
   </div>
 </template>
