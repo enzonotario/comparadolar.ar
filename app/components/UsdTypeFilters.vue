@@ -16,6 +16,9 @@ const { getCurrentSection } = useNavigation();
 
 const showConditionsToggle = computed(() => getCurrentSection() === "compare");
 
+/** El label cubre todo el root: el gap entre check y texto también togglea. */
+const checkboxUi = { label: "cursor-pointer after:absolute after:inset-0" };
+
 const tabColor = (category: UsdFilterCategory) => {
   if (category === "CCL") return "info";
   return getUsdTypeBadgeColor(category);
@@ -33,6 +36,7 @@ const tabColor = (category: UsdFilterCategory) => {
       :model-value="enabledTypes[category]"
       :label="category"
       :color="tabColor(category)"
+      :ui="checkboxUi"
       @update:model-value="setTypeEnabled(category, $event === true)"
     />
     <UCheckbox
@@ -40,6 +44,7 @@ const tabColor = (category: UsdFilterCategory) => {
       v-model="includeConditions"
       label="Con condiciones"
       color="warning"
+      :ui="checkboxUi"
       class="md:border-l md:border-zinc-200 md:pl-3 dark:md:border-zinc-700"
     />
   </div>
@@ -62,6 +67,7 @@ const tabColor = (category: UsdFilterCategory) => {
       :model-value="enabledTypes[category]"
       :label="category"
       :color="tabColor(category)"
+      :ui="checkboxUi"
       @update:model-value="setTypeEnabled(category, $event === true)"
     />
   </div>
