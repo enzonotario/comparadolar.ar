@@ -22,6 +22,7 @@ import { scaleUtc } from "d3-scale";
 import type { ExchangeRate, CurrencyType } from "@/lib/types";
 import { API_ENDPOINTS, API_BASE_URL } from "@/lib/types";
 import { RATE_DISPLAY, RATE_LABELS } from "@/lib/rate-labels";
+import { withoutStaleQuotes } from "@/lib/quote-freshness";
 import { useZoomPlotHover, useZoomWindow } from "~/lib/charts/shared";
 
 interface Props {
@@ -47,7 +48,7 @@ const topProvidersForBuy = computed(() => {
     return [];
   }
 
-  return [...providersData.value]
+  return withoutStaleQuotes(providersData.value)
     .filter((p) => {
       if (!p.bid || p.bid <= 0 || p.slowChange) return false;
       if (showOnly24x7.value && !p.is24x7) return false;
@@ -68,7 +69,7 @@ const topProvidersForSell = computed(() => {
     return [];
   }
 
-  return [...providersData.value]
+  return withoutStaleQuotes(providersData.value)
     .filter((p) => {
       if (!p.ask || p.ask <= 0 || p.slowChange) return false;
       if (showOnly24x7.value && !p.is24x7) return false;
