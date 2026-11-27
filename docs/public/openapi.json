@@ -89,7 +89,7 @@
                         "name": "balanz",
                         "logoUrl": "https://api.argentinadatos.com/static/logos/balanz.png",
                         "is24x7": false,
-                        "url": "https://dolarbalanz.com/",
+                        "url": "https://dolarbalanz.com/?ref=comparadolar",
                         "prettyName": "Balanz",
                         "slowChange": false,
                         "isBank": false
